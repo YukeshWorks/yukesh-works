@@ -91,7 +91,7 @@
   }
 
   .nav-link {
-    @apply relative px-4 py-2 text-sm font-medium transition-all duration-300;
+    @apply relative text-sm font-medium transition-all duration-300;
   }
 
   .nav-link::after {
@@ -117,6 +117,10 @@
                 inset 0 0 30px hsl(var(--primary) / 0.1);
   }
 
+  .page-transition {
+    animation: pageEnter 0.5s ease-out forwards;
+  }
+
   .fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
   }
@@ -134,6 +138,34 @@
   .delay-300 { animation-delay: 0.3s; }
   .delay-400 { animation-delay: 0.4s; }
   .delay-500 { animation-delay: 0.5s; }
+
+  .breathing-animation {
+    animation: breathing 4s ease-in-out infinite;
+  }
+
+  .scale-animation {
+    animation: scaleIn 1s ease-out forwards;
+  }
+
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .smoke-particle {
+    background: radial-gradient(circle, hsl(var(--primary) / 0.1) 0%, transparent 70%);
+    animation: smokeRise 8s ease-in-out infinite;
+  }
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeInUp {
@@ -171,7 +203,40 @@
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes breathing {
+  0%, 100% { 
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% { 
+    transform: scale(1.02);
+    filter: brightness(1.05);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes smokeRise {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(-30px) scale(1.2);
+  }
 }
 
 @keyframes pulse-glow {
@@ -195,8 +260,9 @@
   100% { transform: translateY(0); opacity: 1; }
 }
 
-.float-animation {
-  animation: float 4s ease-in-out infinite;
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .pulse-glow-animation {
@@ -209,4 +275,19 @@
 
 .date-animation {
   animation: dateSlide 0.5s ease-out forwards;
+}
+
+.animate-scroll {
+  animation: scroll 2s linear infinite;
+}
+
+/* Hide default cursor on desktop */
+@media (min-width: 768px) {
+  .cursor-none {
+    cursor: none;
+  }
+  
+  .cursor-none * {
+    cursor: none;
+  }
 }
