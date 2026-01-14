@@ -185,10 +185,28 @@
   }
 }
 
+@keyframes timeFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes dateSlide {
+  0% { transform: translateY(5px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
 .float-animation {
   animation: float 4s ease-in-out infinite;
 }
 
 .pulse-glow-animation {
   animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.time-animation {
+  animation: timeFlicker 2s ease-in-out infinite;
+}
+
+.date-animation {
+  animation: dateSlide 0.5s ease-out forwards;
 }
