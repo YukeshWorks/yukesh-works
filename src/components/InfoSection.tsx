@@ -1,12 +1,3 @@
-import { Code, Palette, Zap, Heart } from "lucide-react";
-
-const skills = [
-  { icon: Code, title: "Development", desc: "React, TypeScript, Node.js" },
-  { icon: Palette, title: "Design", desc: "UI/UX, Figma, Animation" },
-  { icon: Zap, title: "Performance", desc: "Optimization & Speed" },
-  { icon: Heart, title: "Passion", desc: "Clean & Beautiful Code" },
-];
-
 const InfoSection = () => {
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
@@ -28,38 +19,13 @@ const InfoSection = () => {
             </div>
           </div>
           
-          <div className="fade-in-up opacity-0 delay-300 glass rounded-2xl p-8 md:p-12 glow-border mb-12">
+          <div className="fade-in-up opacity-0 delay-300 glass rounded-2xl p-8 md:p-12 glow-border">
             <p className="text-muted-foreground leading-relaxed text-lg text-center">
-              I'm a passionate developer with a keen eye for design. I specialize in creating 
-              modern web applications that not only function flawlessly but also deliver 
-              exceptional user experiences. My journey in tech started with curiosity and 
-              evolved into a deep love for crafting digital solutions.
+              I Mess Around With Whatever Catches My Attention (For As Long As I Remember It). 
+              Kinda Forgetful, A Little Off-Minded, Not The Most Responsible Guy—But Hey,
+              <br /><br />
+              <span className="text-primary font-medium">I'm Easy To Vibe With!</span>
             </p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {skills.map((skill, index) => (
-              <div 
-                key={skill.title}
-                className={`fade-in-up opacity-0 delay-${(index + 3) * 100} glass rounded-xl p-6 text-center hover:glow-border transition-all duration-300 group cursor-pointer`}
-                style={{ animationDelay: `${0.3 + index * 0.1}s` }}
-              >
-                <div className="w-12 h-12 mx-auto mb-4 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <skill.icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-display text-sm font-semibold mb-1 group-hover:text-primary transition-colors">
-                  {skill.title}
-                </h3>
-                <p className="text-muted-foreground text-xs">{skill.desc}</p>
-              </div>
-            ))}
-          </div>
-          
-          <div className="fade-in-up opacity-0 delay-500 mt-12 text-center">
-            <div className="inline-flex items-center gap-4 glass rounded-full px-6 py-3">
-              <span className="text-muted-foreground text-sm">Available for freelance work</span>
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            </div>
           </div>
         </div>
       </div>

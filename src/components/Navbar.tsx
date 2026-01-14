@@ -1,8 +1,6 @@
-import { useState } from "react";
-
 interface NavbarProps {
-  activeTab: "character" | "info";
-  onTabChange: (tab: "character" | "info") => void;
+  activeTab: "home" | "character" | "puzzle" | "info";
+  onTabChange: (tab: "home" | "character" | "puzzle" | "info") => void;
 }
 
 const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
@@ -11,15 +9,29 @@ const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="font-display text-xl font-bold gradient-text">
-            elow
+            42
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-sm">
+            <button
+              onClick={() => onTabChange("home")}
+              className={`nav-link ${activeTab === "home" ? "active text-primary" : "text-muted-foreground"}`}
+            >
+              Home
+            </button>
+            <span className="text-muted-foreground/30">|</span>
             <button
               onClick={() => onTabChange("character")}
               className={`nav-link ${activeTab === "character" ? "active text-primary" : "text-muted-foreground"}`}
             >
               Character
+            </button>
+            <span className="text-muted-foreground/30">|</span>
+            <button
+              onClick={() => onTabChange("puzzle")}
+              className={`nav-link ${activeTab === "puzzle" ? "active text-primary" : "text-muted-foreground"}`}
+            >
+              Puzzle
             </button>
             <span className="text-muted-foreground/30">|</span>
             <button
