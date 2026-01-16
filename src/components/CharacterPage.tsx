@@ -3,12 +3,35 @@ import profileImage from "@/assets/profile.jpg";
 
 const CharacterPage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [statsLoaded, setStatsLoaded] = useState(false);
+  const [statsVisible, setStatsVisible] = useState<boolean[]>([false, false, false, false, false]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Staggered stats animation
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setStatsLoaded(true);
+    }, 800);
+
+    // Stagger each stat line
+    const delays = [1200, 1500, 1800, 2100, 2400];
+    delays.forEach((delay, index) => {
+      setTimeout(() => {
+        setStatsVisible(prev => {
+          const newState = [...prev];
+          newState[index] = true;
+          return newState;
+        });
+      }, delay);
+    });
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const formatTime = (date: Date) => {
@@ -26,6 +49,14 @@ const CharacterPage = () => {
     });
   };
 
+  const stats = [
+    { label: "Class", value: "Wanderer", icon: "⚔️" },
+    { label: "Level", value: "Loading...", icon: "📊", isLoading: true },
+    { label: "HP", value: "∞ / ∞", icon: "❤️" },
+    { label: "Mood", value: "Chill", icon: "😌" },
+    { label: "Quest", value: "Exist", icon: "🎯" },
+  ];
+
   return (
     <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
       {/* Dark gradient background */}
@@ -34,34 +65,88 @@ const CharacterPage = () => {
         <div className="absolute inset-0 bg-gradient-to-l from-primary/5 via-transparent to-background" />
       </div>
       
-      {/* Profile image on right side with always-running animation */}
-      <div className="absolute right-0 top-0 bottom-0 w-1/2 md:w-3/5 overflow-hidden">
+      {/* Subtle film grain overlay */}
+      <div 
+        className="absolute inset-0 opacity-[0.015] pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+        }}
+      />
+      
+      {/* Profile image on right side - adjusted for mobile */}
+      <div className="absolute right-0 top-0 bottom-0 w-2/3 md:w-3/5 overflow-hidden">
         <img 
           src={profileImage} 
           alt="Yukesh Kumar" 
-          className="h-full w-full object-cover object-center opacity-80 breathing-animation"
+          className="h-full w-full object-cover object-[70%_center] md:object-center opacity-80 character-breathe"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+        {/* Additional mobile gradient for better text visibility */}
+        <div className="absolute inset-0 md:hidden bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
       
-      <div className="container mx-auto px-6 relative z-10 pt-20">
+      <div className="container mx-auto px-4 md:px-6 relative z-10 pt-20 pb-24">
         <div className="max-w-xl">
-          {/* Main title */}
-          <div className="fade-in-up opacity-0 delay-200">
-            <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 uppercase tracking-wider">
-              <span className="text-primary">Yukesh</span>
+          {/* Main title with cinematic reveal */}
+          <div className="character-name-reveal">
+            <h1 className="font-display text-3xl md:text-6xl lg:text-7xl font-bold mb-6 uppercase tracking-wider">
+              <span className="text-primary text-glow-subtle">Yukesh</span>
               <br />
               <span className="text-foreground">Kumar</span>
             </h1>
           </div>
-        </div>
-        
-        {/* Time/Date display - bottom right */}
-        <div className="absolute bottom-8 right-8 fade-in-up opacity-0 delay-500">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground/80">
-            <span className="time-animation font-mono">{formatTime(currentTime)}</span>
-            <span className="date-animation font-mono">{formatDate(currentTime)}</span>
+
+          {/* RPG Status Panel */}
+          <div 
+            className={`rpg-panel mt-8 transition-all duration-700 ease-out ${
+              statsLoaded ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"
+            }`}
+          >
+            <div className="rpg-panel-inner glass rounded-xl p-4 md:p-5 border border-primary/10 relative overflow-hidden">
+              {/* Panel ambient glow */}
+              <div className="absolute inset-0 rpg-ambient-glow" />
+              
+              {/* Accent line */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent rpg-accent-line" />
+              
+              {/* Stats content */}
+              <div className="relative z-10 space-y-2.5">
+                {stats.map((stat, index) => (
+                  <div 
+                    key={stat.label}
+                    className={`flex items-center gap-3 transition-all duration-700 ease-out ${
+                      statsVisible[index] 
+                        ? "opacity-100 translate-x-0" 
+                        : "opacity-0 -translate-x-2"
+                    }`}
+                    style={{ transitionDelay: `${index * 100}ms` }}
+                  >
+                    <span className="text-sm opacity-80">{stat.icon}</span>
+                    <span className="text-xs md:text-sm font-mono text-muted-foreground uppercase tracking-wider min-w-[60px]">
+                      {stat.label}:
+                    </span>
+                    <span className={`text-xs md:text-sm font-mono text-foreground ${
+                      stat.isLoading ? "rpg-loading-shimmer" : "text-glow-hover"
+                    }`}>
+                      {stat.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Bottom accent line */}
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+            </div>
           </div>
+        </div>
+      </div>
+      
+      {/* Time/Date display - absolute bottom */}
+      <div className="absolute bottom-4 md:bottom-6 right-4 md:right-6 z-20 character-time-reveal">
+        <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-muted-foreground/60 font-mono">
+          <span className="time-pulse">{formatTime(currentTime)}</span>
+          <span className="opacity-50">|</span>
+          <span className="date-fade">{formatDate(currentTime)}</span>
         </div>
       </div>
     </section>

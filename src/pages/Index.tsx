@@ -4,6 +4,7 @@ import HomePage from "@/components/HomePage";
 import CharacterPage from "@/components/CharacterPage";
 import PuzzlePage from "@/components/PuzzlePage";
 import InfoSection from "@/components/InfoSection";
+import PasswordLockPage from "@/components/PasswordLockPage";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"home" | "character" | "puzzle" | "info">("home");
@@ -11,6 +12,7 @@ const Index = () => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showPasswordLock, setShowPasswordLock] = useState(false);
   const cursorRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number>();
 
@@ -22,7 +24,7 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Smooth cursor animation
+  // Smooth cursor animation with improved easing
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       cursorRef.current = { x: e.clientX, y: e.clientY };
@@ -30,8 +32,8 @@ const Index = () => {
 
     const animateCursor = () => {
       setCursorPosition(prev => ({
-        x: prev.x + (cursorRef.current.x - prev.x) * 0.15,
-        y: prev.y + (cursorRef.current.y - prev.y) * 0.15,
+        x: prev.x + (cursorRef.current.x - prev.x) * 0.12,
+        y: prev.y + (cursorRef.current.y - prev.y) * 0.12,
       }));
       animationRef.current = requestAnimationFrame(animateCursor);
     };
@@ -60,16 +62,46 @@ const Index = () => {
 
   const handleTabChange = (tab: "home" | "character" | "puzzle" | "info") => {
     if (tab === activeTab) return;
+    setShowPasswordLock(false);
     setIsTransitioning(true);
     setTimeout(() => {
       setActiveTab(tab);
       setTimeout(() => {
         setIsTransitioning(false);
       }, 50);
+    }, 500);
+  };
+
+  const handleLockClick = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setShowPasswordLock(true);
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 50);
     }, 400);
   };
 
+  const handlePasswordBack = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setShowPasswordLock(false);
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 50);
+    }, 400);
+  };
+
+  const handlePasswordUnlock = () => {
+    // Secret unlock action - could navigate somewhere special
+    setShowPasswordLock(false);
+  };
+
   const renderPage = () => {
+    if (showPasswordLock) {
+      return <PasswordLockPage onBack={handlePasswordBack} onUnlock={handlePasswordUnlock} />;
+    }
+
     switch (activeTab) {
       case "home":
         return <HomePage />;
@@ -85,50 +117,54 @@ const Index = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-background cursor-none md:cursor-none transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-      {/* Custom cursor - desktop only */}
+    <div className={`min-h-screen bg-background cursor-none md:cursor-none transition-all duration-700 ease-out ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Custom cursor - desktop only with smoother animation */}
       <div 
-        className="fixed pointer-events-none z-[100] hidden md:block"
+        className="fixed pointer-events-none z-[100] hidden md:block mix-blend-difference"
         style={{
-          left: cursorPosition.x - 16,
-          top: cursorPosition.y - 16,
-          transition: 'transform 0.1s ease-out',
+          left: cursorPosition.x - 20,
+          top: cursorPosition.y - 20,
+          transition: 'transform 0.08s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
         <div 
-          className={`w-8 h-8 rounded-full border-2 border-primary transition-all duration-300 ease-out ${
-            isHovering ? "scale-150 bg-primary/20 border-primary/50" : "scale-100"
+          className={`w-10 h-10 rounded-full border border-white/80 transition-all duration-500 ease-out ${
+            isHovering ? "scale-[2] opacity-50" : "scale-100 opacity-100"
           }`}
-          style={{
-            boxShadow: isHovering 
-              ? '0 0 20px hsl(var(--primary) / 0.5), 0 0 40px hsl(var(--primary) / 0.3)' 
-              : '0 0 10px hsl(var(--primary) / 0.3)',
-          }}
         />
       </div>
       <div 
         className="fixed pointer-events-none z-[100] hidden md:block"
         style={{
-          left: cursorPosition.x - 4,
-          top: cursorPosition.y - 4,
+          left: cursorPosition.x - 3,
+          top: cursorPosition.y - 3,
         }}
       >
         <div 
-          className="w-2 h-2 rounded-full bg-primary transition-all duration-150"
+          className={`w-1.5 h-1.5 rounded-full bg-primary transition-all duration-300 ${
+            isHovering ? "scale-0" : "scale-100"
+          }`}
           style={{
-            boxShadow: '0 0 8px hsl(var(--primary)), 0 0 16px hsl(var(--primary) / 0.5)',
+            boxShadow: '0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary) / 0.5)',
           }}
         />
       </div>
 
-      <Navbar activeTab={activeTab} onTabChange={handleTabChange} />
+      <Navbar 
+        activeTab={activeTab} 
+        onTabChange={handleTabChange} 
+        onLockClick={handleLockClick}
+      />
       
       <div 
-        className={`transition-all duration-500 ease-out ${
+        className={`transition-all duration-600 ease-out ${
           isTransitioning 
-            ? "opacity-0 scale-95 blur-sm translate-y-4" 
+            ? "opacity-0 scale-[0.98] blur-md translate-y-2" 
             : "opacity-100 scale-100 blur-0 translate-y-0"
         }`}
+        style={{
+          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
       >
         {renderPage()}
       </div>
