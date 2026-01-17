@@ -4,7 +4,18 @@ import profileImage from "@/assets/profile.jpg";
 const CharacterPage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [statsLoaded, setStatsLoaded] = useState(false);
-  const [statsVisible, setStatsVisible] = useState<boolean[]>([false, false, false, false, false]);
+  const [statsVisible, setStatsVisible] = useState<boolean[]>([]);
+
+  const stats = [
+    { label: "Player", value: "Yukesh Kumar", icon: "🎮", section: "main" },
+    { label: "Role", value: "Main Character (Early Game)", icon: "⚔️", section: "main" },
+    { label: "Level", value: "Loading...", icon: "📊", isLoading: true, section: "main" },
+    { label: "XP", value: "Earned through mistakes", icon: "✨", section: "main" },
+    { label: "Gold", value: "Not enough (yet)", icon: "💰", section: "main" },
+    { label: "Weakness", value: "Consistency, Attention", icon: "💔", section: "main" },
+  ];
+
+  const allies = ["Curiosity", "Discipline (sometimes)", "Late-night focus"];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -20,7 +31,7 @@ const CharacterPage = () => {
     }, 800);
 
     // Stagger each stat line
-    const delays = [1200, 1500, 1800, 2100, 2400];
+    const delays = [1200, 1400, 1600, 1800, 2000, 2200, 2500, 2800];
     delays.forEach((delay, index) => {
       setTimeout(() => {
         setStatsVisible(prev => {
@@ -36,7 +47,7 @@ const CharacterPage = () => {
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
+      hour: "numeric",
       minute: "2-digit",
       hour12: true,
     });
@@ -49,16 +60,8 @@ const CharacterPage = () => {
     });
   };
 
-  const stats = [
-    { label: "Class", value: "Wanderer", icon: "⚔️" },
-    { label: "Level", value: "Loading...", icon: "📊", isLoading: true },
-    { label: "HP", value: "∞ / ∞", icon: "❤️" },
-    { label: "Mood", value: "Chill", icon: "😌" },
-    { label: "Quest", value: "Exist", icon: "🎯" },
-  ];
-
   return (
-    <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
+    <section className="min-h-screen flex items-end relative overflow-hidden page-transition">
       {/* Dark gradient background */}
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background to-transparent" />
       <div className="absolute top-0 right-0 w-3/5 h-full">
@@ -67,38 +70,38 @@ const CharacterPage = () => {
       
       {/* Subtle film grain overlay */}
       <div 
-        className="absolute inset-0 opacity-[0.015] pointer-events-none"
+        className="absolute inset-0 opacity-[0.02] pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
         }}
       />
       
-      {/* Profile image on right side - adjusted for mobile */}
+      {/* Profile image on right side - STATIC, NO BREATHING ANIMATION */}
       <div className="absolute right-0 top-0 bottom-0 w-2/3 md:w-3/5 overflow-hidden">
         <img 
           src={profileImage} 
           alt="Yukesh Kumar" 
-          className="h-full w-full object-cover object-[70%_center] md:object-center opacity-80 character-breathe"
+          className="h-full w-full object-cover object-[65%_top] md:object-[center_top] opacity-85"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
         {/* Additional mobile gradient for better text visibility */}
-        <div className="absolute inset-0 md:hidden bg-gradient-to-t from-background via-transparent to-transparent" />
+        <div className="absolute inset-0 md:hidden bg-gradient-to-t from-background via-background/30 to-transparent" />
       </div>
       
-      <div className="container mx-auto px-4 md:px-6 relative z-10 pt-20 pb-24">
-        <div className="max-w-xl">
+      <div className="container mx-auto px-4 md:px-6 relative z-10 pb-20 md:pb-24">
+        <div className="max-w-md">
           {/* Main title with cinematic reveal */}
-          <div className="character-name-reveal">
-            <h1 className="font-display text-3xl md:text-6xl lg:text-7xl font-bold mb-6 uppercase tracking-wider">
+          <div className="character-name-reveal mb-6">
+            <h1 className="font-display text-2xl md:text-5xl lg:text-6xl font-bold uppercase tracking-wider">
               <span className="text-primary text-glow-subtle">Yukesh</span>
               <br />
               <span className="text-foreground">Kumar</span>
             </h1>
           </div>
 
-          {/* RPG Status Panel */}
+          {/* RPG Status Panel - Minimalist Dark Cinematic Style */}
           <div 
-            className={`rpg-panel mt-8 transition-all duration-700 ease-out ${
+            className={`rpg-panel transition-all duration-700 ease-out ${
               statsLoaded ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-4 blur-sm"
             }`}
           >
@@ -106,32 +109,68 @@ const CharacterPage = () => {
               {/* Panel ambient glow */}
               <div className="absolute inset-0 rpg-ambient-glow" />
               
-              {/* Accent line */}
+              {/* Top accent line */}
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent rpg-accent-line" />
               
               {/* Stats content */}
-              <div className="relative z-10 space-y-2.5">
+              <div className="relative z-10 space-y-2">
                 {stats.map((stat, index) => (
                   <div 
                     key={stat.label}
-                    className={`flex items-center gap-3 transition-all duration-700 ease-out ${
+                    className={`flex items-start gap-2 transition-all duration-700 ease-out ${
                       statsVisible[index] 
                         ? "opacity-100 translate-x-0" 
-                        : "opacity-0 -translate-x-2"
+                        : "opacity-0 -translate-x-1"
                     }`}
-                    style={{ transitionDelay: `${index * 100}ms` }}
+                    style={{ transitionDelay: `${index * 80}ms` }}
                   >
-                    <span className="text-sm opacity-80">{stat.icon}</span>
-                    <span className="text-xs md:text-sm font-mono text-muted-foreground uppercase tracking-wider min-w-[60px]">
+                    <span className="text-sm opacity-70 flex-shrink-0">{stat.icon}</span>
+                    <span className="text-[10px] md:text-xs font-mono text-muted-foreground uppercase tracking-wider min-w-[55px] md:min-w-[65px] flex-shrink-0">
                       {stat.label}:
                     </span>
-                    <span className={`text-xs md:text-sm font-mono text-foreground ${
-                      stat.isLoading ? "rpg-loading-shimmer" : "text-glow-hover"
+                    <span className={`text-[10px] md:text-xs font-mono ${
+                      stat.isLoading ? "rpg-loading-shimmer" : "text-foreground/90 text-glow-hover"
                     }`}>
                       {stat.value}
                     </span>
                   </div>
                 ))}
+
+                {/* Allies Section */}
+                <div 
+                  className={`pt-2 mt-2 border-t border-primary/10 transition-all duration-700 ease-out ${
+                    statsVisible[6] ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-1"
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-sm opacity-70 flex-shrink-0">🤝</span>
+                    <span className="text-[10px] md:text-xs font-mono text-muted-foreground uppercase tracking-wider min-w-[55px] md:min-w-[65px] flex-shrink-0">
+                      Allies:
+                    </span>
+                    <span className="text-[10px] md:text-xs font-mono text-foreground/80">
+                      {allies.join(" • ")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Status Section */}
+                <div 
+                  className={`pt-2 mt-1 transition-all duration-700 ease-out ${
+                    statsVisible[7] ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-1"
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-sm opacity-70 flex-shrink-0">🟢</span>
+                    <span className="text-[10px] md:text-xs font-mono text-muted-foreground uppercase tracking-wider min-w-[55px] md:min-w-[65px] flex-shrink-0">
+                      Status:
+                    </span>
+                    <div className="text-[10px] md:text-xs font-mono">
+                      <span className="text-primary/80">Online at 2:46 AM</span>
+                      <br />
+                      <span className="text-foreground/60 italic">Ignoring sleep like a side quest</span>
+                    </div>
+                  </div>
+                </div>
               </div>
               
               {/* Bottom accent line */}
@@ -141,11 +180,11 @@ const CharacterPage = () => {
         </div>
       </div>
       
-      {/* Time/Date display - absolute bottom */}
-      <div className="absolute bottom-4 md:bottom-6 right-4 md:right-6 z-20 character-time-reveal">
-        <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-muted-foreground/60 font-mono">
+      {/* Time/Date display - absolute bottom of page */}
+      <div className="absolute bottom-3 md:bottom-4 right-3 md:right-4 z-20 character-time-reveal">
+        <div className="flex items-center gap-2 text-[9px] md:text-[10px] text-muted-foreground/50 font-mono">
           <span className="time-pulse">{formatTime(currentTime)}</span>
-          <span className="opacity-50">|</span>
+          <span className="opacity-40">|</span>
           <span className="date-fade">{formatDate(currentTime)}</span>
         </div>
       </div>

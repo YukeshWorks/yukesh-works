@@ -9,12 +9,15 @@ import PasswordLockPage from "@/components/PasswordLockPage";
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"home" | "character" | "puzzle" | "info">("home");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState<"next" | "prev">("next");
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showPasswordLock, setShowPasswordLock] = useState(false);
   const cursorRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number>();
+
+  const tabOrder = ["home", "character", "puzzle", "info"] as const;
 
   // Loading effect
   useEffect(() => {
@@ -62,6 +65,12 @@ const Index = () => {
 
   const handleTabChange = (tab: "home" | "character" | "puzzle" | "info") => {
     if (tab === activeTab) return;
+    
+    // Determine direction for page turn
+    const currentIndex = tabOrder.indexOf(activeTab);
+    const newIndex = tabOrder.indexOf(tab);
+    setTransitionDirection(newIndex > currentIndex ? "next" : "prev");
+    
     setShowPasswordLock(false);
     setIsTransitioning(true);
     setTimeout(() => {
@@ -69,27 +78,29 @@ const Index = () => {
       setTimeout(() => {
         setIsTransitioning(false);
       }, 50);
-    }, 500);
+    }, 600);
   };
 
   const handleLockClick = () => {
+    setTransitionDirection("next");
     setIsTransitioning(true);
     setTimeout(() => {
       setShowPasswordLock(true);
       setTimeout(() => {
         setIsTransitioning(false);
       }, 50);
-    }, 400);
+    }, 500);
   };
 
   const handlePasswordBack = () => {
+    setTransitionDirection("prev");
     setIsTransitioning(true);
     setTimeout(() => {
       setShowPasswordLock(false);
       setTimeout(() => {
         setIsTransitioning(false);
       }, 50);
-    }, 400);
+    }, 500);
   };
 
   const handlePasswordUnlock = () => {
@@ -114,6 +125,14 @@ const Index = () => {
       default:
         return <HomePage />;
     }
+  };
+
+  // Page turn animation classes
+  const getTransitionClasses = () => {
+    if (!isTransitioning) {
+      return "page-turn-enter";
+    }
+    return transitionDirection === "next" ? "page-turn-exit-next" : "page-turn-exit-prev";
   };
 
   return (
@@ -156,17 +175,14 @@ const Index = () => {
         onLockClick={handleLockClick}
       />
       
+      {/* Page container with 3D perspective for page turn effect */}
       <div 
-        className={`transition-all duration-600 ease-out ${
-          isTransitioning 
-            ? "opacity-0 scale-[0.98] blur-md translate-y-2" 
-            : "opacity-100 scale-100 blur-0 translate-y-0"
-        }`}
-        style={{
-          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
+        className="page-container"
+        style={{ perspective: '2000px', perspectiveOrigin: '50% 50%' }}
       >
-        {renderPage()}
+        <div className={getTransitionClasses()}>
+          {renderPage()}
+        </div>
       </div>
     </div>
   );
