@@ -28,12 +28,13 @@ const HomePage = () => {
 
   return (
     <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
-      {/* Full background image with smoke animation */}
+      {/* Full background image - NO SCALE ANIMATION, static 1x */}
       <div className="absolute inset-0">
         <img 
           src={homeBg} 
           alt="Background" 
-          className="h-full w-full object-cover object-center opacity-90 scale-animation"
+          className="h-full w-full object-cover object-center opacity-90"
+          style={{ transform: 'scale(1)' }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/30 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />

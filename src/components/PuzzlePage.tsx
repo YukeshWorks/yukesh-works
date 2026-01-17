@@ -2,54 +2,52 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 interface Obstacle {
   id: number;
-  x: number;
-  width: number;
-  height: number;
-  type: "cactus" | "banana" | "coffee" | "bug" | "skull" | "fire" | "poop";
+  lane: number;
+  z: number;
+  type: "barrier" | "car" | "cone" | "pizza" | "cactus" | "hole";
 }
 
 interface Collectible {
   id: number;
-  x: number;
-  y: number;
-  type: "coin" | "star" | "heart";
+  lane: number;
+  z: number;
+  type: "coin" | "boost" | "star";
   collected: boolean;
 }
 
+interface RoadSegment {
+  id: number;
+  z: number;
+}
+
 const funnyMessages = [
-  "Why did you hit that? It was clearly visible... from space! 🛸",
-  "My grandma jumps better than this! 👵",
-  "Have you tried turning yourself off and on again? 🔌",
-  "That obstacle had a family! 😭",
-  "Dino tried its best. Dino failed. Dino extinct again! 💀",
-  "Error 404: Gaming skills not found 🎮",
-  "That's not how extinction works... or is it? 🤔",
-  "Achievement unlocked: Professional Obstacle Hugger! 🏆",
-  "You call that jumping? My pet rock jumps higher! 🪨",
-  "Plot twist: The obstacle was the hero all along! 🦸",
-  "Breaking News: Local dino discovers gravity! 📺",
-  "Skill issue detected. Have you tried git gud? 💻",
+  "Your bike just became modern art! 🎨",
+  "That barrier had feelings, you know! 💔",
+  "Plot twist: The road was the enemy all along! 🛣️",
+  "Your helmet protected nothing... especially your dignity! 🪖",
+  "Achievement unlocked: Professional Crash Test Dummy! 🏆",
+  "Breaking News: Local rider discovers physics! 📺",
+  "That was NOT in the tutorial! 📖",
+  "Even the cone is disappointed in you! 🔶",
+  "Your insurance company just unfriended you! 📱",
+  "Skill issue? Nah, that's a skill crisis! 🚨",
 ];
 
 const weirdFacts = [
-  "Fun fact: Bananas are berries, but strawberries aren't! 🍌",
-  "A group of flamingos is called a 'flamboyance' 🦩",
-  "Honey never spoils. 3000-year-old honey is still edible! 🍯",
-  "Octopuses have 3 hearts and blue blood 🐙",
-  "Cows have best friends and get stressed when separated 🐄",
-  "The inventor of the Pringles can is buried in one ⚰️",
-  "A jiffy is an actual unit of time: 1/100th of a second ⏱️",
-  "Nintendo was founded in 1889 as a playing card company 🎴",
-  "NSFW: Not Safe For Wombats. They poop cubes. 💩",
-  "The first computer bug was an actual bug 🪲",
+  "Fun fact: The first motorcycle was steam-powered! 🏍️",
+  "A group of bikers is called a 'rumble' 🏍️🏍️🏍️",
+  "The longest bike ever was 31 meters! 📏",
+  "Motorcycles existed before cars were popular 🏎️",
+  "Some bikes can reach 400+ km/h! 💨",
+  "The word 'biker' wasn't used until 1960s 📚",
 ];
 
 const illegalTips = [
-  "Pro tip: You can't lose if you don't play! *taps forehead* 🧠",
-  "Cheat code: ↑↑↓↓←→←→BA... just kidding, jump! 🎮",
-  "Secret: The dino has trust issues from past extinctions 🦖",
-  "Easter egg: There are no easter eggs. Or are there? 🥚",
-  "Warning: This game may cause sudden urges to jump IRL 🦘",
+  "Pro tip: Obstacles can't hit you if you don't play! 🧠",
+  "Cheat code: Be born with reflexes! 🎮",
+  "Secret: The cones are sentient and hate you 🔶",
+  "Easter egg: There's no easter egg. Or IS there? 🥚",
+  "Warning: May cause sudden urges to buy a real bike 🏍️",
 ];
 
 const PuzzlePage = () => {
@@ -57,36 +55,30 @@ const PuzzlePage = () => {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
-  const [yPosition, setYPosition] = useState(0);
-  const [isJumping, setIsJumping] = useState(false);
+  const [playerLane, setPlayerLane] = useState(1); // 0=left, 1=center, 2=right
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [collectibles, setCollectibles] = useState<Collectible[]>([]);
+  const [roadSegments, setRoadSegments] = useState<RoadSegment[]>([]);
   const [funnyMessage, setFunnyMessage] = useState("");
   const [weirdFact, setWeirdFact] = useState(weirdFacts[0]);
   const [illegalTip, setIllegalTip] = useState(illegalTips[0]);
   const [audioEnabled, setAudioEnabled] = useState(true);
-  const [combo, setCombo] = useState(0);
-  const [showCombo, setShowCombo] = useState(false);
-  const [gameSpeed, setGameSpeed] = useState(8);
-  const [doubleJumpAvailable, setDoubleJumpAvailable] = useState(true);
-  const [isDucking, setIsDucking] = useState(false);
+  const [speed, setSpeed] = useState(3);
+  const [bikeAngle, setBikeAngle] = useState(0);
+  const [isMoving, setIsMoving] = useState(false);
   
   const gameRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
   const obstacleIdRef = useRef(0);
   const collectibleIdRef = useRef(0);
-  const velocityRef = useRef(0);
+  const roadIdRef = useRef(0);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const jumpCountRef = useRef(0);
+  const lastLaneChangeRef = useRef(0);
 
-  const GRAVITY = 1.0;
-  const JUMP_FORCE = -16;
-  const GROUND_Y = 0;
-  const DINO_SIZE = 40;
-  const OBSTACLE_GAP = 300;
+  const LANES = [-60, 0, 60]; // Lane X positions
 
   // Sound effects
-  const playSound = useCallback((type: "jump" | "hit" | "score" | "collect" | "combo") => {
+  const playSound = useCallback((type: "turn" | "crash" | "collect" | "boost") => {
     if (!audioEnabled) return;
     
     try {
@@ -101,167 +93,212 @@ const PuzzlePage = () => {
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
       
-      if (type === "jump") {
-        oscillator.frequency.setValueAtTime(300, ctx.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+      if (type === "turn") {
+        oscillator.frequency.setValueAtTime(200, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.05);
+        gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
         oscillator.start(ctx.currentTime);
-        oscillator.stop(ctx.currentTime + 0.1);
-      } else if (type === "hit") {
+        oscillator.stop(ctx.currentTime + 0.05);
+      } else if (type === "crash") {
         oscillator.type = "sawtooth";
         oscillator.frequency.setValueAtTime(200, ctx.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.4);
-        gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+        gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
         oscillator.start(ctx.currentTime);
         oscillator.stop(ctx.currentTime + 0.4);
-      } else if (type === "score") {
-        oscillator.frequency.setValueAtTime(500, ctx.currentTime);
-        oscillator.frequency.setValueAtTime(700, ctx.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(0.04, ctx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-        oscillator.start(ctx.currentTime);
-        oscillator.stop(ctx.currentTime + 0.15);
       } else if (type === "collect") {
         oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(800, ctx.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
+        oscillator.frequency.setValueAtTime(600, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
         gainNode.gain.setValueAtTime(0.06, ctx.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
         oscillator.start(ctx.currentTime);
         oscillator.stop(ctx.currentTime + 0.15);
-      } else if (type === "combo") {
+      } else if (type === "boost") {
         oscillator.type = "triangle";
-        oscillator.frequency.setValueAtTime(600, ctx.currentTime);
-        oscillator.frequency.setValueAtTime(900, ctx.currentTime + 0.05);
-        oscillator.frequency.setValueAtTime(1200, ctx.currentTime + 0.1);
+        oscillator.frequency.setValueAtTime(300, ctx.currentTime);
+        oscillator.frequency.setValueAtTime(600, ctx.currentTime + 0.1);
+        oscillator.frequency.setValueAtTime(900, ctx.currentTime + 0.2);
         gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
         oscillator.start(ctx.currentTime);
-        oscillator.stop(ctx.currentTime + 0.2);
+        oscillator.stop(ctx.currentTime + 0.25);
       }
     } catch (e) {
       console.log("Audio not available");
     }
   }, [audioEnabled]);
 
-  const jump = useCallback(() => {
-    if (!isPlaying || gameOver || isDucking) return;
+  const moveLeft = useCallback(() => {
+    if (!isPlaying || gameOver) return;
+    const now = Date.now();
+    if (now - lastLaneChangeRef.current < 150) return;
+    lastLaneChangeRef.current = now;
     
-    if (!isJumping) {
-      setIsJumping(true);
-      jumpCountRef.current = 1;
-      velocityRef.current = JUMP_FORCE;
-      setDoubleJumpAvailable(true);
-      playSound("jump");
-    } else if (doubleJumpAvailable && jumpCountRef.current < 2) {
-      // Double jump
-      jumpCountRef.current = 2;
-      velocityRef.current = JUMP_FORCE * 0.85;
-      setDoubleJumpAvailable(false);
-      playSound("jump");
-    }
-  }, [isJumping, isPlaying, gameOver, doubleJumpAvailable, isDucking, playSound]);
+    setPlayerLane(prev => {
+      if (prev > 0) {
+        setBikeAngle(-15);
+        setIsMoving(true);
+        setTimeout(() => {
+          setBikeAngle(0);
+          setIsMoving(false);
+        }, 200);
+        playSound("turn");
+        return prev - 1;
+      }
+      return prev;
+    });
+  }, [isPlaying, gameOver, playSound]);
+
+  const moveRight = useCallback(() => {
+    if (!isPlaying || gameOver) return;
+    const now = Date.now();
+    if (now - lastLaneChangeRef.current < 150) return;
+    lastLaneChangeRef.current = now;
+    
+    setPlayerLane(prev => {
+      if (prev < 2) {
+        setBikeAngle(15);
+        setIsMoving(true);
+        setTimeout(() => {
+          setBikeAngle(0);
+          setIsMoving(false);
+        }, 200);
+        playSound("turn");
+        return prev + 1;
+      }
+      return prev;
+    });
+  }, [isPlaying, gameOver, playSound]);
 
   const startGame = () => {
     setIsPlaying(true);
     setGameOver(false);
     setScore(0);
-    setYPosition(0);
-    setIsJumping(false);
+    setPlayerLane(1);
     setObstacles([]);
     setCollectibles([]);
-    setCombo(0);
-    setGameSpeed(8);
-    setDoubleJumpAvailable(true);
-    velocityRef.current = 0;
+    setSpeed(3);
+    setBikeAngle(0);
     obstacleIdRef.current = 0;
     collectibleIdRef.current = 0;
-    jumpCountRef.current = 0;
+    
+    // Initialize road segments
+    const initialRoad: RoadSegment[] = [];
+    for (let i = 0; i < 20; i++) {
+      initialRoad.push({ id: roadIdRef.current++, z: i * 50 });
+    }
+    setRoadSegments(initialRoad);
+    
     setWeirdFact(weirdFacts[Math.floor(Math.random() * weirdFacts.length)]);
     setIllegalTip(illegalTips[Math.floor(Math.random() * illegalTips.length)]);
   };
 
-  // Handle keyboard input
+  // Handle keyboard/touch input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space" || e.code === "ArrowUp") {
+      if (e.code === "ArrowLeft" || e.code === "KeyA") {
         e.preventDefault();
         if (!isPlaying && !gameOver) {
           startGame();
-        } else if (gameOver) {
-          startGame();
         } else {
-          jump();
+          moveLeft();
         }
       }
-      if (e.code === "ArrowDown" && isPlaying && !gameOver) {
-        setIsDucking(true);
+      if (e.code === "ArrowRight" || e.code === "KeyD") {
+        e.preventDefault();
+        if (!isPlaying && !gameOver) {
+          startGame();
+        } else {
+          moveRight();
+        }
       }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.code === "ArrowDown") {
-        setIsDucking(false);
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (!isPlaying || gameOver) {
+          startGame();
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [moveLeft, moveRight, isPlaying, gameOver]);
+
+  // Touch controls
+  const touchStartRef = useRef<number>(0);
+  
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartRef.current = e.touches[0].clientX;
     };
-  }, [jump, isPlaying, gameOver]);
+    
+    const handleTouchEnd = (e: TouchEvent) => {
+      const diff = e.changedTouches[0].clientX - touchStartRef.current;
+      if (Math.abs(diff) > 30) {
+        if (diff > 0) moveRight();
+        else moveLeft();
+      } else if (!isPlaying || gameOver) {
+        startGame();
+      }
+    };
+
+    const gameEl = gameRef.current;
+    if (gameEl) {
+      gameEl.addEventListener("touchstart", handleTouchStart, { passive: true });
+      gameEl.addEventListener("touchend", handleTouchEnd, { passive: true });
+    }
+    
+    return () => {
+      if (gameEl) {
+        gameEl.removeEventListener("touchstart", handleTouchStart);
+        gameEl.removeEventListener("touchend", handleTouchEnd);
+      }
+    };
+  }, [moveLeft, moveRight, isPlaying, gameOver]);
 
   // Game loop
   useEffect(() => {
     if (!isPlaying || gameOver) return;
 
-    let lastScoreSound = 0;
     let frameCount = 0;
 
     const gameLoop = () => {
       frameCount++;
       
       // Increase speed over time
-      if (frameCount % 500 === 0) {
-        setGameSpeed(prev => Math.min(prev + 0.5, 15));
+      if (frameCount % 300 === 0) {
+        setSpeed(prev => Math.min(prev + 0.3, 8));
       }
 
-      // Apply gravity (faster when ducking)
-      const gravityMultiplier = isDucking ? 2.5 : 1;
-      velocityRef.current += GRAVITY * gravityMultiplier;
-      
-      setYPosition(prev => {
-        const newY = prev + velocityRef.current;
-        if (newY >= GROUND_Y) {
-          velocityRef.current = 0;
-          setIsJumping(false);
-          jumpCountRef.current = 0;
-          setDoubleJumpAvailable(true);
-          return GROUND_Y;
+      // Move road segments
+      setRoadSegments(prev => {
+        let newSegments = prev.map(seg => ({ ...seg, z: seg.z - speed }));
+        newSegments = newSegments.filter(seg => seg.z > -100);
+        
+        const lastZ = newSegments.length > 0 ? Math.max(...newSegments.map(s => s.z)) : 0;
+        while (newSegments.length < 20) {
+          newSegments.push({ id: roadIdRef.current++, z: lastZ + 50 * (newSegments.length - prev.filter(s => s.z > -100).length + 1) });
         }
-        return newY;
+        
+        return newSegments;
       });
 
-      // Move obstacles and spawn new ones
+      // Move obstacles
       setObstacles(prev => {
         let newObstacles = prev
-          .map(obs => ({ ...obs, x: obs.x - gameSpeed }))
-          .filter(obs => obs.x > -100);
+          .map(obs => ({ ...obs, z: obs.z - speed }))
+          .filter(obs => obs.z > -50);
 
         // Spawn new obstacle
-        if (newObstacles.length === 0 || 
-            (newObstacles.length > 0 && newObstacles[newObstacles.length - 1].x < window.innerWidth - OBSTACLE_GAP)) {
-          const height = 30 + Math.random() * 30;
-          const types: Array<Obstacle["type"]> = ["cactus", "banana", "coffee", "bug", "skull", "fire", "poop"];
+        if (Math.random() < 0.02 && (newObstacles.length === 0 || Math.min(...newObstacles.map(o => o.z)) < 800)) {
+          const types: Obstacle["type"][] = ["barrier", "car", "cone", "pizza", "cactus", "hole"];
           newObstacles.push({
             id: obstacleIdRef.current++,
-            x: window.innerWidth + Math.random() * 100,
-            width: 25,
-            height,
+            lane: Math.floor(Math.random() * 3),
+            z: 1000 + Math.random() * 200,
             type: types[Math.floor(Math.random() * types.length)],
           });
         }
@@ -272,16 +309,16 @@ const PuzzlePage = () => {
       // Move collectibles
       setCollectibles(prev => {
         let newCollectibles = prev
-          .map(c => ({ ...c, x: c.x - gameSpeed }))
-          .filter(c => c.x > -50 && !c.collected);
+          .map(c => ({ ...c, z: c.z - speed }))
+          .filter(c => c.z > -50 && !c.collected);
 
-        // Spawn collectible occasionally
-        if (Math.random() < 0.01 && (newCollectibles.length === 0 || newCollectibles[newCollectibles.length - 1]?.x < window.innerWidth - 200)) {
-          const types: Array<Collectible["type"]> = ["coin", "star", "heart"];
+        // Spawn collectible
+        if (Math.random() < 0.015 && (newCollectibles.length === 0 || Math.min(...newCollectibles.map(c => c.z)) < 700)) {
+          const types: Collectible["type"][] = ["coin", "coin", "coin", "boost", "star"];
           newCollectibles.push({
             id: collectibleIdRef.current++,
-            x: window.innerWidth,
-            y: 60 + Math.random() * 80,
+            lane: Math.floor(Math.random() * 3),
+            z: 900 + Math.random() * 200,
             type: types[Math.floor(Math.random() * types.length)],
             collected: false,
           });
@@ -291,73 +328,39 @@ const PuzzlePage = () => {
       });
 
       // Check collisions
-      setYPosition(currentY => {
-        const dinoHeight = isDucking ? DINO_SIZE * 0.5 : DINO_SIZE;
-        const dinoBottom = 150 + currentY;
-        const dinoTop = dinoBottom - dinoHeight;
-        const dinoLeft = 60;
-        const dinoRight = dinoLeft + DINO_SIZE * 0.8;
-
-        // Check obstacle collision
-        setObstacles(currentObs => {
-          for (const obs of currentObs) {
-            const obsLeft = obs.x;
-            const obsRight = obs.x + obs.width;
-            const obsTop = 150 - obs.height;
-            
-            if (dinoRight > obsLeft && dinoLeft < obsRight && dinoBottom > obsTop) {
-              setGameOver(true);
-              setIsPlaying(false);
-              setHighScore(prev => Math.max(prev, score));
-              setFunnyMessage(funnyMessages[Math.floor(Math.random() * funnyMessages.length)]);
-              playSound("hit");
-              break;
-            }
+      setObstacles(currentObs => {
+        for (const obs of currentObs) {
+          if (obs.lane === playerLane && obs.z > 20 && obs.z < 80) {
+            setGameOver(true);
+            setIsPlaying(false);
+            setHighScore(prev => Math.max(prev, score));
+            setFunnyMessage(funnyMessages[Math.floor(Math.random() * funnyMessages.length)]);
+            playSound("crash");
+            break;
           }
-          return currentObs;
-        });
+        }
+        return currentObs;
+      });
 
-        // Check collectible collision
-        setCollectibles(currentColl => {
-          return currentColl.map(c => {
-            if (c.collected) return c;
-            
-            const collLeft = c.x;
-            const collRight = c.x + 25;
-            const collTop = 150 - c.y;
-            const collBottom = collTop + 25;
-            
-            if (dinoRight > collLeft && dinoLeft < collRight && 
-                dinoBottom > collTop && dinoTop < collBottom) {
-              playSound("collect");
-              setCombo(prev => {
-                const newCombo = prev + 1;
-                if (newCombo >= 3) {
-                  setShowCombo(true);
-                  playSound("combo");
-                  setTimeout(() => setShowCombo(false), 1000);
-                }
-                return newCombo;
-              });
-              setScore(prev => prev + (c.type === "star" ? 50 : c.type === "heart" ? 30 : 20));
-              return { ...c, collected: true };
+      // Check collectible collision
+      setCollectibles(currentColl => {
+        return currentColl.map(c => {
+          if (c.collected) return c;
+          
+          if (c.lane === playerLane && c.z > 20 && c.z < 80) {
+            playSound(c.type === "boost" ? "boost" : "collect");
+            if (c.type === "boost") {
+              setSpeed(prev => Math.min(prev + 1, 10));
             }
-            return c;
-          });
+            setScore(prev => prev + (c.type === "star" ? 50 : c.type === "boost" ? 30 : 10));
+            return { ...c, collected: true };
+          }
+          return c;
         });
-
-        return currentY;
       });
 
       // Update score
-      setScore(prev => {
-        const newScore = prev + 1;
-        if (Math.floor(newScore / 100) > lastScoreSound) {
-          lastScoreSound = Math.floor(newScore / 100);
-          playSound("score");
-        }
-        return newScore;
-      });
+      setScore(prev => prev + 1);
 
       animationRef.current = requestAnimationFrame(gameLoop);
     };
@@ -369,234 +372,291 @@ const PuzzlePage = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPlaying, gameOver, gameSpeed, isDucking, score, playSound]);
+  }, [isPlaying, gameOver, speed, playerLane, score, playSound]);
 
   const getObstacleEmoji = (type: Obstacle["type"]) => {
     switch (type) {
-      case "banana": return "🍌";
-      case "coffee": return "☕";
-      case "bug": return "🐛";
-      case "skull": return "💀";
-      case "fire": return "🔥";
-      case "poop": return "💩";
-      default: return "🌵";
+      case "car": return "🚗";
+      case "cone": return "🔶";
+      case "pizza": return "🍕";
+      case "cactus": return "🌵";
+      case "hole": return "🕳️";
+      default: return "🚧";
     }
   };
 
   const getCollectibleEmoji = (type: Collectible["type"]) => {
     switch (type) {
       case "star": return "⭐";
-      case "heart": return "❤️";
+      case "boost": return "🚀";
       default: return "🪙";
     }
   };
 
+  // Calculate 3D perspective position
+  const get3DPosition = (z: number, lane: number) => {
+    const perspective = 300;
+    const scale = perspective / (perspective + z);
+    const x = LANES[lane] * scale;
+    const y = 180 - (z * 0.15 * scale);
+    return { x, y, scale };
+  };
+
   return (
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 page-transition">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/20" />
+      {/* Retro sunset gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#ff6b35] via-[#f7931e] to-[#4a0e4e]" />
       
-      {/* Floating weird elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 left-10 text-4xl opacity-20 float-animation">🦕</div>
-        <div className="absolute top-40 right-20 text-3xl opacity-15 float-animation delay-200">🌋</div>
-        <div className="absolute bottom-40 left-20 text-2xl opacity-10 float-animation delay-400">🥚</div>
-        <div className="absolute top-60 left-1/3 text-2xl opacity-10 bounce-animation">☄️</div>
+      {/* Retro sun */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-32 h-32 md:w-48 md:h-48 rounded-full bg-gradient-to-b from-yellow-300 to-orange-500 blur-sm opacity-80" />
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-32 h-32 md:w-48 md:h-48">
+        {/* Sun lines */}
+        {[...Array(8)].map((_, i) => (
+          <div 
+            key={i}
+            className="absolute left-1/2 w-full h-1 bg-gradient-to-r from-transparent via-black/20 to-transparent"
+            style={{ 
+              top: `${20 + i * 10}%`,
+              transform: 'translateX(-50%)',
+            }}
+          />
+        ))}
+      </div>
+      
+      {/* Grid floor effect */}
+      <div className="absolute bottom-0 left-0 right-0 h-1/2 overflow-hidden">
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, transparent, #1a0a2e 40%)',
+            transform: 'perspective(400px) rotateX(60deg)',
+            transformOrigin: 'bottom',
+          }}
+        >
+          {/* Horizontal grid lines */}
+          {[...Array(20)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute left-0 right-0 h-px bg-primary/30"
+              style={{ bottom: `${i * 5}%` }}
+            />
+          ))}
+        </div>
       </div>
       
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4 md:px-6">
-        <div className="text-center mb-6 stagger-children">
-          <h2 className="font-display text-2xl md:text-4xl font-bold glow-text mb-2">
-            Dino-<span className="gradient-text">Runner</span> 🦖
+        <div className="text-center mb-4 stagger-children">
+          <h2 className="font-display text-2xl md:text-4xl font-bold text-white drop-shadow-lg mb-2">
+            Retro-<span className="text-yellow-300">Rider</span> 🏍️
           </h2>
-          <p className="text-muted-foreground text-xs md:text-sm">
-            SPACE/TAP = Jump • Double tap = Double jump • DOWN = Duck
+          <p className="text-white/80 text-xs md:text-sm">
+            ← → / Swipe = Steer • SPACE = Start
           </p>
-          {/* Weird fact ticker */}
-          <p className="text-primary/60 text-xs mt-2 italic glow-pulse">
+          <p className="text-yellow-200/60 text-xs mt-1 italic">
             {weirdFact}
           </p>
-          <p className="text-muted-foreground/50 text-xs mt-1">
+          <p className="text-white/40 text-xs mt-1">
             {illegalTip}
           </p>
         </div>
 
         {/* Score display */}
-        <div className="flex justify-between items-center mb-4 text-xs md:text-sm fade-in-up">
-          <div className="glass px-3 md:px-4 py-2 rounded-lg">
-            <span className="text-muted-foreground">Score: </span>
-            <span className="text-primary font-bold">{Math.floor(score / 10)}</span>
+        <div className="flex justify-between items-center mb-4 text-xs md:text-sm">
+          <div className="bg-black/50 backdrop-blur-sm px-3 md:px-4 py-2 rounded-lg border border-primary/30">
+            <span className="text-white/70">Score: </span>
+            <span className="text-yellow-300 font-bold">{Math.floor(score / 10)}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setAudioEnabled(!audioEnabled)}
-              className="glass px-3 py-2 rounded-lg text-muted-foreground hover:text-primary transition-colors hover:scale-110"
+              className="bg-black/50 backdrop-blur-sm px-3 py-2 rounded-lg text-white/70 hover:text-yellow-300 transition-colors border border-primary/30"
             >
               {audioEnabled ? "🔊" : "🔇"}
             </button>
-            {showCombo && (
-              <div className="glass px-3 py-2 rounded-lg text-primary font-bold animate-pulse">
-                🔥 COMBO x{combo}!
-              </div>
-            )}
+            <div className="bg-black/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-primary/30">
+              <span className="text-white/70">Speed: </span>
+              <span className="text-orange-400 font-bold">{speed.toFixed(1)}x</span>
+            </div>
           </div>
-          <div className="glass px-3 md:px-4 py-2 rounded-lg">
-            <span className="text-muted-foreground">Best: </span>
-            <span className="text-primary font-bold">{Math.floor(highScore / 10)}</span>
+          <div className="bg-black/50 backdrop-blur-sm px-3 md:px-4 py-2 rounded-lg border border-primary/30">
+            <span className="text-white/70">Best: </span>
+            <span className="text-yellow-300 font-bold">{Math.floor(highScore / 10)}</span>
           </div>
         </div>
 
-        {/* Game area */}
+        {/* Game area - 3D Road View */}
         <div
           ref={gameRef}
-          className="relative w-full h-56 md:h-64 glass rounded-2xl overflow-hidden cursor-pointer border border-primary/20 glow-border zoom-in"
+          className="relative w-full h-64 md:h-80 bg-gradient-to-b from-purple-900/50 to-black/80 rounded-2xl overflow-hidden cursor-pointer border-2 border-primary/40"
+          style={{ perspective: '500px' }}
           onClick={() => {
-            if (!isPlaying && !gameOver) {
-              startGame();
-            } else if (gameOver) {
-              startGame();
-            } else {
-              jump();
-            }
+            if (!isPlaying || gameOver) startGame();
           }}
         >
-          {/* Ground */}
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-primary/20 to-transparent border-t border-primary/30" />
-          
-          {/* Running ground animation */}
-          <div className="absolute bottom-2 left-0 right-0 flex overflow-hidden">
-            <div className="flex gap-4 animate-scroll" style={{ animationDuration: `${3 / (gameSpeed / 8)}s` }}>
-              {Array.from({ length: 60 }).map((_, i) => (
-                <div key={i} className="w-8 h-0.5 bg-primary/20 rounded-full flex-shrink-0" />
-              ))}
-            </div>
-          </div>
-
-          {/* Speed indicator */}
-          {isPlaying && !gameOver && (
-            <div className="absolute top-2 left-2 text-xs text-primary/40">
-              Speed: {gameSpeed.toFixed(1)}x
-            </div>
-          )}
-
-          {/* Dino Character */}
-          <div
-            className={`absolute transition-all duration-75 ${isJumping ? 'dino-jump' : isPlaying && !gameOver ? 'dino-run' : ''}`}
+          {/* Road with perspective */}
+          <div 
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[300%] h-full"
             style={{
-              left: 60,
-              bottom: 32 - yPosition,
-              transform: `scaleY(${isDucking ? 0.5 : 1})`,
+              background: `
+                linear-gradient(90deg, 
+                  transparent 0%, 
+                  transparent 35%,
+                  #2d2d2d 35%,
+                  #2d2d2d 65%,
+                  transparent 65%,
+                  transparent 100%
+                )
+              `,
+              transform: 'perspective(300px) rotateX(60deg)',
+              transformOrigin: 'bottom center',
             }}
           >
-            <div className="relative">
-              {/* Tiny Dino SVG */}
-              <svg
-                width={DINO_SIZE}
-                height={isDucking ? DINO_SIZE * 0.5 : DINO_SIZE}
-                viewBox="0 0 40 40"
-                className="drop-shadow-[0_0_10px_hsl(var(--primary))]"
+            {/* Lane dividers */}
+            <div className="absolute left-[41%] top-0 bottom-0 w-1 bg-gradient-to-b from-yellow-400/80 via-yellow-400/40 to-yellow-400/10" style={{ boxShadow: '0 0 10px yellow' }} />
+            <div className="absolute left-[59%] top-0 bottom-0 w-1 bg-gradient-to-b from-yellow-400/80 via-yellow-400/40 to-yellow-400/10" style={{ boxShadow: '0 0 10px yellow' }} />
+          </div>
+
+          {/* Road segments (dashed lines) */}
+          {roadSegments.filter(seg => seg.z > 0 && seg.z < 1000).map(seg => {
+            const pos = get3DPosition(seg.z, 1);
+            if (pos.scale < 0.1) return null;
+            return (
+              <div
+                key={seg.id}
+                className="absolute w-2 h-4 bg-white/60 rounded"
                 style={{
-                  filter: `drop-shadow(0 0 15px hsl(var(--primary)))`,
+                  left: `calc(50% + ${pos.x}px - 4px)`,
+                  bottom: `${pos.y}px`,
+                  transform: `scale(${pos.scale})`,
+                  opacity: Math.min(1, pos.scale * 2),
+                }}
+              />
+            );
+          })}
+
+          {/* Obstacles */}
+          {obstacles.filter(obs => obs.z > 0 && obs.z < 1000).map(obs => {
+            const pos = get3DPosition(obs.z, obs.lane);
+            if (pos.scale < 0.1) return null;
+            return (
+              <div
+                key={obs.id}
+                className="absolute text-2xl md:text-4xl transition-transform"
+                style={{
+                  left: `calc(50% + ${pos.x}px - 16px)`,
+                  bottom: `${pos.y}px`,
+                  transform: `scale(${pos.scale * 1.5})`,
+                  opacity: Math.min(1, pos.scale * 2),
+                  filter: `drop-shadow(0 0 5px rgba(0,0,0,0.5))`,
+                  zIndex: Math.floor(1000 - obs.z),
                 }}
               >
-                {/* Dino body */}
-                <ellipse cx="20" cy="25" rx="12" ry="10" fill="hsl(var(--primary))" />
-                {/* Dino head */}
-                <circle cx="28" cy="15" r="8" fill="hsl(var(--primary))" />
-                {/* Eye */}
-                <circle cx="31" cy="13" r="2" fill="hsl(var(--background))" />
-                <circle cx="32" cy="12" r="1" fill="hsl(var(--primary))" />
-                {/* Mouth */}
-                <path d="M 33 17 Q 36 18 33 20" stroke="hsl(var(--background))" strokeWidth="1" fill="none" />
-                {/* Legs */}
-                {!isDucking && (
+                {getObstacleEmoji(obs.type)}
+              </div>
+            );
+          })}
+
+          {/* Collectibles */}
+          {collectibles.filter(c => !c.collected && c.z > 0 && c.z < 1000).map(c => {
+            const pos = get3DPosition(c.z, c.lane);
+            if (pos.scale < 0.1) return null;
+            return (
+              <div
+                key={c.id}
+                className="absolute text-xl md:text-3xl animate-bounce"
+                style={{
+                  left: `calc(50% + ${pos.x}px - 12px)`,
+                  bottom: `${pos.y + 20}px`,
+                  transform: `scale(${pos.scale * 1.2})`,
+                  opacity: Math.min(1, pos.scale * 2),
+                  filter: `drop-shadow(0 0 8px gold)`,
+                  zIndex: Math.floor(1000 - c.z),
+                }}
+              >
+                {getCollectibleEmoji(c.type)}
+              </div>
+            );
+          })}
+
+          {/* Bike (Player) */}
+          <div
+            className="absolute transition-all duration-150 ease-out"
+            style={{
+              left: `calc(50% + ${LANES[playerLane] * 0.8}px - 20px)`,
+              bottom: '40px',
+              transform: `rotateY(${bikeAngle}deg) ${isMoving ? 'scale(0.95)' : 'scale(1)'}`,
+              zIndex: 100,
+            }}
+          >
+            {/* Low-poly bike representation */}
+            <div className="relative">
+              {/* Bike body */}
+              <div 
+                className="w-10 h-14 md:w-12 md:h-16 relative"
+                style={{
+                  filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.5))',
+                }}
+              >
+                {/* Main body */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-10 bg-gradient-to-t from-red-700 to-red-500 rounded-t-lg" 
+                  style={{ clipPath: 'polygon(20% 100%, 80% 100%, 100% 40%, 50% 0%, 0% 40%)' }}
+                />
+                {/* Handlebars */}
+                <div className="absolute top-0 left-0 right-0 h-2 bg-gray-700 rounded-full" />
+                {/* Front wheel */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 rounded-full border-2 border-gray-600">
+                  <div className="absolute inset-1 rounded-full border border-gray-500" />
+                </div>
+                {/* Headlight */}
+                <div 
+                  className="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-2 bg-yellow-300 rounded-full"
+                  style={{ boxShadow: '0 0 20px yellow, 0 0 40px yellow' }}
+                />
+                {/* Speed lines when moving */}
+                {isPlaying && !gameOver && (
                   <>
-                    <rect x="14" y="32" width="4" height="8" rx="2" fill="hsl(var(--primary))" className={isPlaying && !gameOver && !isJumping ? "animate-[wiggle_0.15s_ease-in-out_infinite]" : ""} />
-                    <rect x="22" y="32" width="4" height="8" rx="2" fill="hsl(var(--primary))" className={isPlaying && !gameOver && !isJumping ? "animate-[wiggle_0.15s_ease-in-out_infinite_0.075s]" : ""} />
+                    <div className="absolute -bottom-2 left-0 w-1 h-6 bg-gradient-to-t from-transparent to-white/30 rounded" />
+                    <div className="absolute -bottom-2 right-0 w-1 h-6 bg-gradient-to-t from-transparent to-white/30 rounded" />
                   </>
                 )}
-                {/* Tail */}
-                <path d="M 8 25 Q 2 20 5 28" stroke="hsl(var(--primary))" strokeWidth="4" fill="none" strokeLinecap="round" />
-                {/* Spikes */}
-                <path d="M 15 15 L 17 10 L 19 15 L 21 10 L 23 15" stroke="hsl(var(--primary))" strokeWidth="2" fill="none" />
-              </svg>
+              </div>
               
-              {/* Running particles */}
-              {isPlaying && !gameOver && !isJumping && (
-                <div className="absolute -bottom-1 -left-4">
-                  <div className="flex gap-1">
-                    <div className="w-1.5 h-2 bg-primary/50 rounded-full animate-ping" />
-                    <div className="w-1 h-3 bg-primary/40 rounded-full animate-ping" style={{ animationDelay: "50ms" }} />
-                    <div className="w-1 h-2 bg-primary/30 rounded-full animate-ping" style={{ animationDelay: "100ms" }} />
-                  </div>
-                </div>
-              )}
-              
-              {/* Double jump indicator */}
-              {doubleJumpAvailable && isJumping && jumpCountRef.current === 1 && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs text-primary animate-pulse">
-                  ⬆️
+              {/* Exhaust flames when boosting */}
+              {speed > 5 && isPlaying && (
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-xl animate-pulse">
+                  🔥
                 </div>
               )}
             </div>
           </div>
-
-          {/* Obstacles */}
-          {obstacles.map(obs => (
-            <div
-              key={obs.id}
-              className="absolute bottom-8 text-2xl md:text-3xl transition-transform wiggle-animation"
-              style={{
-                left: obs.x,
-                animationDuration: "0.3s",
-              }}
-            >
-              {getObstacleEmoji(obs.type)}
-            </div>
-          ))}
-
-          {/* Collectibles */}
-          {collectibles.filter(c => !c.collected).map(c => (
-            <div
-              key={c.id}
-              className="absolute text-xl md:text-2xl bounce-animation"
-              style={{
-                left: c.x,
-                bottom: c.y,
-              }}
-            >
-              {getCollectibleEmoji(c.type)}
-            </div>
-          ))}
 
           {/* Start / Game Over overlay */}
           {(!isPlaying || gameOver) && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-md">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-md">
               <div className="text-center px-4 zoom-in">
                 {gameOver ? (
                   <>
-                    <h3 className="font-display text-xl md:text-2xl font-bold text-destructive mb-2 wiggle-animation">
-                      💥 Extinction Event! 💥
+                    <h3 className="font-display text-xl md:text-2xl font-bold text-red-400 mb-2 wiggle-animation">
+                      💥 WIPEOUT! 💥
                     </h3>
-                    <p className="text-muted-foreground mb-2 text-sm">
-                      Score: <span className="text-primary font-bold">{Math.floor(score / 10)}</span>
-                      {combo > 0 && <span className="ml-2 text-primary/60">Combo: x{combo}</span>}
+                    <p className="text-white/80 mb-2 text-sm">
+                      Distance: <span className="text-yellow-300 font-bold">{Math.floor(score / 10)}m</span>
                     </p>
-                    <p className="text-xs text-muted-foreground italic mb-4 max-w-xs mx-auto">
+                    <p className="text-xs text-white/60 italic mb-4 max-w-xs mx-auto">
                       {funnyMessage}
                     </p>
                   </>
                 ) : (
                   <>
-                    <div className="text-6xl mb-4 bounce-animation">🦖</div>
-                    <h3 className="font-display text-xl md:text-2xl font-bold glow-text mb-2">Ready to Run?</h3>
-                    <p className="text-xs text-muted-foreground mb-2">Help the tiny dino avoid extinction... again!</p>
-                    <p className="text-xs text-primary/60 mb-2">🔥 Collect stars & coins for bonus points!</p>
-                    <p className="text-xs text-muted-foreground/60 mb-2">⬇️ Press DOWN to duck under flying obstacles!</p>
+                    <div className="text-6xl mb-4 bounce-animation">🏍️</div>
+                    <h3 className="font-display text-xl md:text-2xl font-bold text-white mb-2">Ready to Ride?</h3>
+                    <p className="text-xs text-white/70 mb-2">Dodge obstacles in this retro endless runner!</p>
+                    <p className="text-xs text-yellow-300/80 mb-2">🪙 Collect coins & boosts for speed!</p>
+                    <p className="text-xs text-white/50 mb-2">← → Keys or Swipe to steer!</p>
                   </>
                 )}
-                <p className="text-primary text-xs md:text-sm glow-pulse">
-                  {gameOver ? "Tap or SPACE to try again! 🔄" : "Tap or SPACE to start! 🚀"}
+                <p className="text-yellow-300 text-xs md:text-sm animate-pulse">
+                  {gameOver ? "Tap or SPACE to ride again! 🔄" : "Tap or SPACE to start! 🚀"}
                 </p>
               </div>
             </div>
@@ -604,20 +664,20 @@ const PuzzlePage = () => {
         </div>
 
         {/* Controls hint */}
-        <div className="text-center mt-4 text-muted-foreground text-xs stagger-children">
+        <div className="text-center mt-4 text-white/60 text-xs">
           <div className="flex justify-center gap-2 flex-wrap">
-            <span className="glass px-3 py-1 rounded-full hover:scale-105 transition-transform">SPACE</span>
-            <span className="text-muted-foreground/50">or</span>
-            <span className="glass px-3 py-1 rounded-full hover:scale-105 transition-transform">TAP</span>
-            <span className="text-muted-foreground/50">=</span>
-            <span className="text-primary">Jump</span>
-            <span className="mx-2 text-muted-foreground/30">|</span>
-            <span className="glass px-3 py-1 rounded-full hover:scale-105 transition-transform">↓</span>
-            <span className="text-muted-foreground/50">=</span>
-            <span className="text-primary">Duck</span>
+            <span className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">←</span>
+            <span className="text-white/40">/</span>
+            <span className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">→</span>
+            <span className="text-white/40">=</span>
+            <span className="text-yellow-300">Steer</span>
+            <span className="mx-2 text-white/20">|</span>
+            <span className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">SPACE</span>
+            <span className="text-white/40">=</span>
+            <span className="text-yellow-300">Start</span>
           </div>
-          <p className="mt-2 text-muted-foreground/40 text-xs italic">
-            Pro tip: Double tap for double jump! 🦘
+          <p className="mt-2 text-white/30 text-xs italic">
+            Pro tip: Watch for the pizza slices... they're extra slippery! 🍕
           </p>
         </div>
       </div>

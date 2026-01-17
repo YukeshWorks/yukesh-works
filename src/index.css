@@ -330,32 +330,46 @@
     text-shadow: 0 0 15px hsl(var(--primary) / 0.6);
   }
 
-  /* Character page specific */
-  .character-breathe {
-    animation: characterBreathe 6s ease-in-out infinite;
-  }
+/* Character page specific */
+.character-name-reveal {
+  animation: cinematicReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
-  .character-name-reveal {
-    animation: cinematicReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
+.character-time-reveal {
+  animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+  opacity: 0;
+}
 
-  .character-time-reveal {
-    animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
-    opacity: 0;
-  }
+.time-pulse {
+  animation: timePulse 3s ease-in-out infinite;
+}
 
-  .time-pulse {
-    animation: timePulse 3s ease-in-out infinite;
-  }
+.date-fade {
+  animation: dateFade 1s ease-out forwards;
+}
 
-  .date-fade {
-    animation: dateFade 1s ease-out forwards;
-  }
+/* Shake animation for password */
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
 
-  /* Shake animation for password */
-  .animate-shake {
-    animation: shake 0.5s ease-in-out;
-  }
+/* Page turn transitions */
+.page-container {
+  transform-style: preserve-3d;
+  min-height: 100vh;
+}
+
+.page-turn-enter {
+  animation: pageTurnEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.page-turn-exit-next {
+  animation: pageTurnExitNext 0.6s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+
+.page-turn-exit-prev {
+  animation: pageTurnExitPrev 0.6s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
 }
 
 /* Keyframes */
@@ -608,6 +622,40 @@
   40% { transform: translateX(10px); }
   60% { transform: translateX(-10px); }
   80% { transform: translateX(10px); }
+}
+
+/* Page turn animations */
+@keyframes pageTurnEnter {
+  from {
+    opacity: 0;
+    transform: rotateY(-15deg) translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(0) translateX(0);
+  }
+}
+
+@keyframes pageTurnExitNext {
+  from {
+    opacity: 1;
+    transform: rotateY(0) translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: rotateY(15deg) translateX(-50px);
+  }
+}
+
+@keyframes pageTurnExitPrev {
+  from {
+    opacity: 1;
+    transform: rotateY(0) translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: rotateY(-15deg) translateX(50px);
+  }
 }
 
 /* Utility animations */

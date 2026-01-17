@@ -1,4 +1,4 @@
-import { Instagram, Twitter, Facebook } from "lucide-react";
+import { Instagram, Facebook } from "lucide-react";
 
 const InfoSection = () => {
   return (
@@ -29,24 +29,28 @@ const InfoSection = () => {
       
       {/* Social icons at bottom */}
       <div className="relative z-10 pb-8 fade-in-up opacity-0 delay-500">
-        <div className="flex items-center justify-center gap-6">
+        <div className="flex items-center justify-center gap-8">
           <a 
-            href="#" 
-            className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_10px_hsl(var(--primary))]"
+            href="https://instagram.com/yuk3shh" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-300"
           >
-            <Instagram size={24} />
+            <div className="p-3 rounded-full glass hover:scale-110 transition-all duration-300 hover:shadow-[0_0_20px_hsl(var(--primary)/0.5)]">
+              <Instagram size={28} />
+            </div>
+            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Instagram</span>
           </a>
           <a 
-            href="#" 
-            className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_10px_hsl(var(--primary))]"
+            href="https://facebook.com/yukeshkumar" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-300"
           >
-            <Twitter size={24} />
-          </a>
-          <a 
-            href="#" 
-            className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_10px_hsl(var(--primary))]"
-          >
-            <Facebook size={24} />
+            <div className="p-3 rounded-full glass hover:scale-110 transition-all duration-300 hover:shadow-[0_0_20px_hsl(var(--primary)/0.5)]">
+              <Facebook size={28} />
+            </div>
+            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Facebook</span>
           </a>
         </div>
       </div>
