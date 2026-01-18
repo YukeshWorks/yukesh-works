@@ -748,3 +748,80 @@
   0%, 100% { filter: brightness(1); }
   50% { filter: brightness(1.02); }
 }
+
+/* Home page breathing background */
+.home-bg-breathe {
+  animation: homeBreathe 8s ease-in-out infinite;
+}
+
+@keyframes homeBreathe {
+  0%, 100% { 
+    transform: scale(1);
+    filter: brightness(0.9);
+  }
+  50% { 
+    transform: scale(1.02);
+    filter: brightness(0.95);
+  }
+}
+
+/* Breathing glow for text */
+.breathing-glow {
+  animation: breathingTextGlow 4s ease-in-out infinite;
+}
+
+@keyframes breathingTextGlow {
+  0%, 100% { 
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+  }
+  50% { 
+    text-shadow: 0 0 40px hsl(var(--primary) / 0.7), 0 0 60px hsl(var(--primary) / 0.4);
+  }
+}
+
+/* Ambient floating particles */
+.ambient-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: hsl(var(--primary) / 0.3);
+  pointer-events: none;
+}
+
+.ambient-particle.particle-1 {
+  top: 20%;
+  left: 30%;
+  animation: ambientFloat 12s ease-in-out infinite;
+}
+
+.ambient-particle.particle-2 {
+  top: 60%;
+  left: 70%;
+  animation: ambientFloat 15s ease-in-out infinite 3s;
+}
+
+.ambient-particle.particle-3 {
+  top: 80%;
+  left: 20%;
+  animation: ambientFloat 10s ease-in-out infinite 6s;
+}
+
+@keyframes ambientFloat {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translate(30px, -20px) scale(1.5);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: translate(-20px, -50px) scale(1);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(40px, -30px) scale(1.2);
+    opacity: 0.5;
+  }
+}
