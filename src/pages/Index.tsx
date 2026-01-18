@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import HomePage from "@/components/HomePage";
 import CharacterPage from "@/components/CharacterPage";
-import PuzzlePage from "@/components/PuzzlePage";
+import SnakeGame from "@/components/SnakeGame";
 import InfoSection from "@/components/InfoSection";
 import PasswordLockPage from "@/components/PasswordLockPage";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"home" | "character" | "puzzle" | "info">("home");
@@ -14,20 +15,41 @@ const Index = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showPasswordLock, setShowPasswordLock] = useState(false);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+  const [isIdle, setIsIdle] = useState(false);
+  
   const cursorRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number>();
+  const idleTimerRef = useRef<NodeJS.Timeout>();
 
   const tabOrder = ["home", "character", "puzzle", "info"] as const;
 
-  // Loading effect
+  // Reset idle timer on any interaction
+  const resetIdleTimer = () => {
+    setIsIdle(false);
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => setIsIdle(true), 3000);
+  };
+
+  // Idle detection
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 100);
-    return () => clearTimeout(timer);
+    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
+    events.forEach(event => window.addEventListener(event, resetIdleTimer));
+    resetIdleTimer();
+    
+    return () => {
+      events.forEach(event => window.removeEventListener(event, resetIdleTimer));
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
   }, []);
 
-  // Smooth cursor animation with improved easing
+  // Loading complete handler
+  const handleLoadComplete = () => {
+    setShowLoadingScreen(false);
+    setTimeout(() => setIsLoaded(true), 50);
+  };
+
+  // Smooth cursor animation - SMALLER cursor
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       cursorRef.current = { x: e.clientX, y: e.clientY };
@@ -35,8 +57,8 @@ const Index = () => {
 
     const animateCursor = () => {
       setCursorPosition(prev => ({
-        x: prev.x + (cursorRef.current.x - prev.x) * 0.12,
-        y: prev.y + (cursorRef.current.y - prev.y) * 0.12,
+        x: prev.x + (cursorRef.current.x - prev.x) * 0.2, // Faster follow
+        y: prev.y + (cursorRef.current.y - prev.y) * 0.2,
       }));
       animationRef.current = requestAnimationFrame(animateCursor);
     };
@@ -66,7 +88,6 @@ const Index = () => {
   const handleTabChange = (tab: "home" | "character" | "puzzle" | "info") => {
     if (tab === activeTab) return;
     
-    // Determine direction for page turn
     const currentIndex = tabOrder.indexOf(activeTab);
     const newIndex = tabOrder.indexOf(tab);
     setTransitionDirection(newIndex > currentIndex ? "next" : "prev");
@@ -75,10 +96,8 @@ const Index = () => {
     setIsTransitioning(true);
     setTimeout(() => {
       setActiveTab(tab);
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 50);
-    }, 600);
+      setTimeout(() => setIsTransitioning(false), 50);
+    }, 250); // Faster transition
   };
 
   const handleLockClick = () => {
@@ -86,10 +105,8 @@ const Index = () => {
     setIsTransitioning(true);
     setTimeout(() => {
       setShowPasswordLock(true);
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 50);
-    }, 500);
+      setTimeout(() => setIsTransitioning(false), 50);
+    }, 250);
   };
 
   const handlePasswordBack = () => {
@@ -97,14 +114,11 @@ const Index = () => {
     setIsTransitioning(true);
     setTimeout(() => {
       setShowPasswordLock(false);
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 50);
-    }, 500);
+      setTimeout(() => setIsTransitioning(false), 50);
+    }, 250);
   };
 
   const handlePasswordUnlock = () => {
-    // Secret unlock action - could navigate somewhere special
     setShowPasswordLock(false);
   };
 
@@ -119,7 +133,7 @@ const Index = () => {
       case "character":
         return <CharacterPage />;
       case "puzzle":
-        return <PuzzlePage />;
+        return <SnakeGame />;
       case "info":
         return <InfoSection />;
       default:
@@ -127,44 +141,45 @@ const Index = () => {
     }
   };
 
-  // Page turn animation classes
   const getTransitionClasses = () => {
-    if (!isTransitioning) {
-      return "page-turn-enter";
-    }
+    if (!isTransitioning) return "page-turn-enter";
     return transitionDirection === "next" ? "page-turn-exit-next" : "page-turn-exit-prev";
   };
 
+  // Show loading screen first
+  if (showLoadingScreen) {
+    return <LoadingScreen onLoadComplete={handleLoadComplete} />;
+  }
+
   return (
-    <div className={`min-h-screen bg-background cursor-none md:cursor-none transition-all duration-700 ease-out ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-      {/* Custom cursor - desktop only with smoother animation */}
+    <div className={`min-h-screen bg-background cursor-none md:cursor-none transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
+      {/* Custom cursor - SMALLER, faster */}
       <div 
         className="fixed pointer-events-none z-[100] hidden md:block mix-blend-difference"
         style={{
-          left: cursorPosition.x - 20,
-          top: cursorPosition.y - 20,
-          transition: 'transform 0.08s cubic-bezier(0.16, 1, 0.3, 1)',
+          left: cursorPosition.x - 8,
+          top: cursorPosition.y - 8,
         }}
       >
         <div 
-          className={`w-10 h-10 rounded-full border border-white/80 transition-all duration-500 ease-out ${
-            isHovering ? "scale-[2] opacity-50" : "scale-100 opacity-100"
+          className={`w-4 h-4 rounded-full border border-white/90 transition-transform duration-150 ${
+            isHovering ? "scale-[2.5] opacity-40" : "scale-100 opacity-80"
           }`}
         />
       </div>
       <div 
         className="fixed pointer-events-none z-[100] hidden md:block"
         style={{
-          left: cursorPosition.x - 3,
-          top: cursorPosition.y - 3,
+          left: cursorPosition.x - 2,
+          top: cursorPosition.y - 2,
         }}
       >
         <div 
-          className={`w-1.5 h-1.5 rounded-full bg-primary transition-all duration-300 ${
+          className={`w-1 h-1 rounded-full bg-primary transition-transform duration-150 ${
             isHovering ? "scale-0" : "scale-100"
           }`}
           style={{
-            boxShadow: '0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary) / 0.5)',
+            boxShadow: '0 0 6px hsl(var(--primary)), 0 0 12px hsl(var(--primary) / 0.5)',
           }}
         />
       </div>
@@ -175,11 +190,8 @@ const Index = () => {
         onLockClick={handleLockClick}
       />
       
-      {/* Page container with 3D perspective for page turn effect */}
-      <div 
-        className="page-container"
-        style={{ perspective: '2000px', perspectiveOrigin: '50% 50%' }}
-      >
+      {/* Page container */}
+      <div className="page-container" style={{ perspective: '1500px' }}>
         <div className={getTransitionClasses()}>
           {renderPage()}
         </div>
