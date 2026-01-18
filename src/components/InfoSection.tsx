@@ -1,4 +1,5 @@
 import { Instagram, Facebook } from "lucide-react";
+import ChibiAnimeGirl from "./ChibiAnimeGirl";
 
 const InfoSection = () => {
   return (
@@ -34,26 +35,29 @@ const InfoSection = () => {
             href="https://instagram.com/yuk3shh" 
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-300"
+            className="group flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-200"
           >
-            <div className="p-3 rounded-full glass hover:scale-110 transition-all duration-300 hover:shadow-[0_0_20px_hsl(var(--primary)/0.5)]">
+            <div className="p-3 rounded-full glass hover:scale-110 transition-transform duration-200 hover:shadow-[0_0_20px_hsl(var(--primary)/0.5)]">
               <Instagram size={28} />
             </div>
-            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Instagram</span>
+            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">Instagram</span>
           </a>
           <a 
             href="https://facebook.com/yukeshkumar" 
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-300"
+            className="group flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-200"
           >
-            <div className="p-3 rounded-full glass hover:scale-110 transition-all duration-300 hover:shadow-[0_0_20px_hsl(var(--primary)/0.5)]">
+            <div className="p-3 rounded-full glass hover:scale-110 transition-transform duration-200 hover:shadow-[0_0_20px_hsl(var(--primary)/0.5)]">
               <Facebook size={28} />
             </div>
-            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">Facebook</span>
+            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">Facebook</span>
           </a>
         </div>
       </div>
+
+      {/* Chibi anime girl running around */}
+      <ChibiAnimeGirl />
     </section>
   );
 };
