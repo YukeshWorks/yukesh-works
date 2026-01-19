@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { Github, Linkedin, Instagram, Mail, Sparkles, Zap, Triangle, Circle, Square } from "lucide-react";
 import homeBg from "@/assets/home-bg.jpg";
+import PortfolioModal from "./PortfolioModal";
+import ContactModal from "./ContactModal";
 
 const HomePage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isPortfolioOpen, setIsPortfolioOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -29,8 +33,8 @@ const HomePage = () => {
 
   return (
     <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
-      {/* Full background image with breathing effect */}
-      <div className="absolute inset-0 home-bg-breathe">
+      {/* Full background image with breathing effect - use will-change for GPU */}
+      <div className="absolute inset-0 home-bg-breathe will-change-transform">
         <img 
           src={homeBg} 
           alt="Background" 
@@ -40,24 +44,24 @@ const HomePage = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-background/30" />
       </div>
       
-      {/* Floating decorative icons */}
+      {/* Floating decorative icons - optimized with will-change */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[15%] left-[10%] floating-icon-1">
+        <div className="absolute top-[15%] left-[10%] floating-icon-1 will-change-transform">
           <Sparkles className="w-4 h-4 text-primary/20" />
         </div>
-        <div className="absolute top-[25%] right-[15%] floating-icon-2">
+        <div className="absolute top-[25%] right-[15%] floating-icon-2 will-change-transform">
           <Triangle className="w-3 h-3 text-primary/15 fill-primary/10" />
         </div>
-        <div className="absolute top-[60%] left-[5%] floating-icon-3">
+        <div className="absolute top-[60%] left-[5%] floating-icon-3 will-change-transform">
           <Circle className="w-5 h-5 text-primary/10" />
         </div>
-        <div className="absolute top-[45%] right-[8%] floating-icon-4">
+        <div className="absolute top-[45%] right-[8%] floating-icon-4 will-change-transform">
           <Square className="w-3 h-3 text-primary/15 rotate-45" />
         </div>
-        <div className="absolute top-[75%] right-[25%] floating-icon-5">
+        <div className="absolute top-[75%] right-[25%] floating-icon-5 will-change-transform">
           <Zap className="w-4 h-4 text-primary/15" />
         </div>
-        <div className="absolute top-[10%] right-[40%] floating-icon-6">
+        <div className="absolute top-[10%] right-[40%] floating-icon-6 will-change-transform">
           <Circle className="w-2 h-2 text-primary/20 fill-primary/20" />
         </div>
         
@@ -69,10 +73,10 @@ const HomePage = () => {
       
       <div className="container mx-auto px-6 relative z-10 pt-16">
         <div className="max-w-lg fade-in-up opacity-0 delay-200">
-          {/* Status badge */}
-          <div className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full glass text-[10px] text-muted-foreground font-medium tracking-wide uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            Available for projects
+          {/* Status badge - OFFLINE in red */}
+          <div className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full glass text-[10px] font-medium tracking-wide uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-red-400">Offline</span>
           </div>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-3 tracking-tight">
@@ -85,12 +89,18 @@ const HomePage = () => {
             Lost in thoughts, found in creativity.
           </p>
           
-          {/* CTA buttons */}
+          {/* CTA buttons - now functional */}
           <div className="flex flex-wrap gap-2.5 mt-6">
-            <button className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:scale-105 transition-transform duration-200 glow-border">
+            <button 
+              onClick={() => setIsPortfolioOpen(true)}
+              className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:scale-105 active:scale-95 transition-transform duration-200 glow-border"
+            >
               View Work
             </button>
-            <button className="px-4 py-2 rounded-full glass text-xs font-medium hover:bg-primary/10 transition-all duration-200">
+            <button 
+              onClick={() => setIsContactOpen(true)}
+              className="px-4 py-2 rounded-full glass text-xs font-medium hover:bg-primary/10 hover:scale-105 active:scale-95 transition-all duration-200"
+            >
               Contact Me
             </button>
           </div>
@@ -109,7 +119,7 @@ const HomePage = () => {
               <a href="#" className="w-7 h-7 rounded-full glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200">
                 <Instagram className="w-3.5 h-3.5" />
               </a>
-              <a href="#" className="w-7 h-7 rounded-full glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200">
+              <a href="mailto:mailtoyukesh33@gmail.com" className="w-7 h-7 rounded-full glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200">
                 <Mail className="w-3.5 h-3.5" />
               </a>
             </div>
@@ -125,6 +135,10 @@ const HomePage = () => {
           <span>{formatDate(currentTime)}</span>
         </div>
       </div>
+
+      {/* Modals */}
+      <PortfolioModal isOpen={isPortfolioOpen} onClose={() => setIsPortfolioOpen(false)} />
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </section>
   );
 };

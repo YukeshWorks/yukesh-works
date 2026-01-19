@@ -749,18 +749,21 @@
   50% { filter: brightness(1.02); }
 }
 
-/* Home page breathing background */
+/* Home page breathing background - GPU accelerated */
 .home-bg-breathe {
   animation: homeBreathe 8s ease-in-out infinite;
+  will-change: transform, filter;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 @keyframes homeBreathe {
   0%, 100% { 
-    transform: scale(1);
+    transform: scale(1) translateZ(0);
     filter: brightness(0.9);
   }
   50% { 
-    transform: scale(1.02);
+    transform: scale(1.02) translateZ(0);
     filter: brightness(0.95);
   }
 }
