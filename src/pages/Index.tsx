@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import HomePage from "@/components/HomePage";
-import CharacterPage from "@/components/CharacterPage";
 import SnakeGame from "@/components/SnakeGame";
 import InfoSection from "@/components/InfoSection";
 import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<"home" | "character" | "puzzle" | "info">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "puzzle" | "info">("home");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<"next" | "prev">("next");
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
@@ -22,7 +21,7 @@ const Index = () => {
   const animationRef = useRef<number>();
   const idleTimerRef = useRef<NodeJS.Timeout>();
 
-  const tabOrder = ["home", "character", "puzzle", "info"] as const;
+  const tabOrder = ["home", "puzzle", "info"] as const;
 
   // Reset idle timer on any interaction
   const resetIdleTimer = () => {
@@ -49,7 +48,7 @@ const Index = () => {
     setTimeout(() => setIsLoaded(true), 50);
   };
 
-  // Smooth cursor animation - SMALLER cursor
+  // Smooth cursor animation
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       cursorRef.current = { x: e.clientX, y: e.clientY };
@@ -57,7 +56,7 @@ const Index = () => {
 
     const animateCursor = () => {
       setCursorPosition(prev => ({
-        x: prev.x + (cursorRef.current.x - prev.x) * 0.2, // Faster follow
+        x: prev.x + (cursorRef.current.x - prev.x) * 0.2,
         y: prev.y + (cursorRef.current.y - prev.y) * 0.2,
       }));
       animationRef.current = requestAnimationFrame(animateCursor);
@@ -85,7 +84,7 @@ const Index = () => {
     };
   }, []);
 
-  const handleTabChange = (tab: "home" | "character" | "puzzle" | "info") => {
+  const handleTabChange = (tab: "home" | "puzzle" | "info") => {
     if (tab === activeTab) return;
     
     const currentIndex = tabOrder.indexOf(activeTab);
@@ -97,7 +96,7 @@ const Index = () => {
     setTimeout(() => {
       setActiveTab(tab);
       setTimeout(() => setIsTransitioning(false), 50);
-    }, 250); // Faster transition
+    }, 200);
   };
 
   const handleLockClick = () => {
@@ -106,7 +105,7 @@ const Index = () => {
     setTimeout(() => {
       setShowPasswordLock(true);
       setTimeout(() => setIsTransitioning(false), 50);
-    }, 250);
+    }, 200);
   };
 
   const handlePasswordBack = () => {
@@ -115,7 +114,7 @@ const Index = () => {
     setTimeout(() => {
       setShowPasswordLock(false);
       setTimeout(() => setIsTransitioning(false), 50);
-    }, 250);
+    }, 200);
   };
 
   const handlePasswordUnlock = () => {
@@ -130,8 +129,6 @@ const Index = () => {
     switch (activeTab) {
       case "home":
         return <HomePage />;
-      case "character":
-        return <CharacterPage />;
       case "puzzle":
         return <SnakeGame />;
       case "info":
@@ -153,7 +150,7 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen bg-background cursor-none md:cursor-none transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
-      {/* Custom cursor - SMALLER, faster */}
+      {/* Custom cursor */}
       <div 
         className="fixed pointer-events-none z-[100] hidden md:block mix-blend-difference"
         style={{

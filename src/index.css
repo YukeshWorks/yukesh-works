@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -121,12 +121,12 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     transition: background-color 0.6s ease, color 0.6s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
   }
 }
 
@@ -824,4 +824,41 @@
     transform: translate(40px, -30px) scale(1.2);
     opacity: 0.5;
   }
+}
+
+/* Floating decorative icons */
+.floating-icon-1 { animation: floatingIcon 8s ease-in-out infinite; }
+.floating-icon-2 { animation: floatingIcon 10s ease-in-out infinite 1s; }
+.floating-icon-3 { animation: floatingIcon 12s ease-in-out infinite 2s; }
+.floating-icon-4 { animation: floatingIcon 9s ease-in-out infinite 3s; }
+.floating-icon-5 { animation: floatingIcon 11s ease-in-out infinite 4s; }
+.floating-icon-6 { animation: floatingIcon 7s ease-in-out infinite 5s; }
+
+@keyframes floatingIcon {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.15;
+  }
+  25% {
+    transform: translateY(-15px) rotate(5deg);
+    opacity: 0.25;
+  }
+  50% { 
+    transform: translateY(-25px) rotate(-3deg);
+    opacity: 0.2;
+  }
+  75% {
+    transform: translateY(-10px) rotate(3deg);
+    opacity: 0.3;
+  }
+}
+
+/* Navbar floating icon */
+.floating-icon {
+  animation: navFloat 4s ease-in-out infinite;
+}
+
+@keyframes navFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+  50% { transform: translateY(-3px) rotate(10deg); opacity: 0.5; }
 }
