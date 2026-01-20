@@ -1,19 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Github, Linkedin, Instagram, Mail, Sparkles, Zap, Triangle, Circle, Square } from "lucide-react";
-import homeBg from "@/assets/home-bg.jpg";
 import PortfolioModal from "./PortfolioModal";
 import ContactModal from "./ContactModal";
+import VideoBackground from "./VideoBackground";
+import AudioController from "./AudioController";
 
 const HomePage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isPortfolioOpen, setIsPortfolioOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [beatIntensity, setBeatIntensity] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Handle beat from audio controller
+  const handleBeat = useCallback((intensity: number) => {
+    setBeatIntensity(intensity);
+    // Reset intensity after animation
+    setTimeout(() => setBeatIntensity(0), 150);
   }, []);
 
   const formatTime = (date: Date) => {
@@ -33,16 +42,11 @@ const HomePage = () => {
 
   return (
     <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
-      {/* Full background image with breathing effect - use will-change for GPU */}
-      <div className="absolute inset-0 home-bg-breathe will-change-transform">
-        <img 
-          src={homeBg} 
-          alt="Background" 
-          className="h-full w-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-background/30" />
-      </div>
+      {/* Cinematic video background */}
+      <VideoBackground beatIntensity={beatIntensity} />
+      
+      {/* Audio controller with beat detection */}
+      <AudioController onBeat={handleBeat} />
       
       {/* Floating decorative icons - optimized with will-change */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
