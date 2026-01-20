@@ -95,10 +95,10 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
         </p>
       </div>
       
-      {/* Fade out overlay */}
+      {/* Fade out overlay - this fades the loading screen out */}
       <div 
         className={`absolute inset-0 bg-background transition-opacity duration-500 pointer-events-none ${
-          imagesLoaded ? 'opacity-100' : 'opacity-0'
+          imagesLoaded ? 'opacity-0' : 'opacity-0'
         }`}
       />
     </div>
