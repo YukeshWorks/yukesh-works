@@ -7,41 +7,40 @@
 @layer base {
   :root,
   .theme-blue {
-    /* Dark cinematic theme with red accents */
-    --background: 0 0% 3%;
-    --foreground: 0 0% 95%;
+    --background: 220 20% 6%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 6%;
-    --card-foreground: 0 0% 95%;
+    --card: 220 20% 10%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 0 85% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 185 80% 50%;
+    --primary-foreground: 220 20% 6%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 220 20% 14%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 0 0% 12%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 185 80% 50%;
+    --accent-foreground: 220 20% 6%;
 
     --destructive: 0 62.8% 50%;
-    --destructive-foreground: 0 0% 95%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 0 85% 50%;
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 185 80% 50%;
 
     --radius: 0.75rem;
 
-    --glow-primary: 0 85% 50%;
-    --glow-secondary: 15 80% 55%;
-    --gradient-start: 0 85% 50%;
-    --gradient-end: 15 80% 55%;
+    --glow-primary: 185 80% 50%;
+    --glow-secondary: 200 80% 60%;
+    --gradient-start: 185 80% 50%;
+    --gradient-end: 200 80% 60%;
   }
 
   .theme-red {
