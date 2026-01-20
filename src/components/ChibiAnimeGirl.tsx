@@ -19,8 +19,19 @@ const ChibiAnimeGirl = () => {
   const [reaction, setReaction] = useState<"none" | "wave" | "angry" | "poof">("none");
   const [visible, setVisible] = useState(true);
   const [currentFace, setCurrentFace] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const animationRef = useRef<number>();
   const lastTimeRef = useRef(0);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Change face expression randomly
   useEffect(() => {
@@ -137,7 +148,8 @@ const ChibiAnimeGirl = () => {
     }
   }, []);
 
-  if (!visible) return null;
+  // Only show on mobile
+  if (!visible || !isMobile) return null;
 
   const face = kawaiFaces[currentFace];
 
