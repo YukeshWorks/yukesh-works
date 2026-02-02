@@ -856,14 +856,14 @@
   }
 }
 
-/* Navbar floating icon */
-.floating-icon {
-  animation: navFloat 4s ease-in-out infinite;
+/* Simple float animation - performant */
+.animate-float-slow {
+  animation: floatSlow 8s ease-in-out infinite;
 }
 
-@keyframes navFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
-  50% { transform: translateY(-3px) rotate(10deg); opacity: 0.5; }
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0); opacity: 0.15; }
+  50% { transform: translateY(-12px); opacity: 0.25; }
 }
 
 /* Fluid navbar animations */

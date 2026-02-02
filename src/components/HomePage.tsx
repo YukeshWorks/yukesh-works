@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Github, Linkedin, Instagram, Mail, Sparkles, Zap, Triangle, Circle, Square } from "lucide-react";
+import { Github, Linkedin, Instagram, Mail, Sparkles, Triangle, Circle } from "lucide-react";
 import PortfolioModal from "./PortfolioModal";
 import ContactModal from "./ContactModal";
 import VideoBackground from "./VideoBackground";
@@ -48,31 +48,17 @@ const HomePage = () => {
       {/* Audio controller with beat detection */}
       <AudioController onBeat={handleBeat} />
       
-      {/* Floating decorative icons - optimized with will-change */}
+      {/* Simplified floating icons - fewer, CSS-only animations */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[15%] left-[10%] floating-icon-1 will-change-transform">
-          <Sparkles className="w-4 h-4 text-primary/20" />
+        <div className="absolute top-[15%] left-[10%] animate-float-slow">
+          <Sparkles className="w-4 h-4 text-primary/15" />
         </div>
-        <div className="absolute top-[25%] right-[15%] floating-icon-2 will-change-transform">
-          <Triangle className="w-3 h-3 text-primary/15 fill-primary/10" />
+        <div className="absolute top-[60%] right-[12%] animate-float-slow" style={{ animationDelay: '2s' }}>
+          <Circle className="w-3 h-3 text-primary/10" />
         </div>
-        <div className="absolute top-[60%] left-[5%] floating-icon-3 will-change-transform">
-          <Circle className="w-5 h-5 text-primary/10" />
+        <div className="absolute top-[75%] left-[8%] animate-float-slow" style={{ animationDelay: '4s' }}>
+          <Triangle className="w-3 h-3 text-primary/10" />
         </div>
-        <div className="absolute top-[45%] right-[8%] floating-icon-4 will-change-transform">
-          <Square className="w-3 h-3 text-primary/15 rotate-45" />
-        </div>
-        <div className="absolute top-[75%] right-[25%] floating-icon-5 will-change-transform">
-          <Zap className="w-4 h-4 text-primary/15" />
-        </div>
-        <div className="absolute top-[10%] right-[40%] floating-icon-6 will-change-transform">
-          <Circle className="w-2 h-2 text-primary/20 fill-primary/20" />
-        </div>
-        
-        {/* Ambient particles */}
-        <div className="ambient-particle particle-1" />
-        <div className="ambient-particle particle-2" />
-        <div className="ambient-particle particle-3" />
       </div>
       
       <div className="container mx-auto px-6 relative z-10 pt-16">

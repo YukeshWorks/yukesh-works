@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import HomePage from "@/components/HomePage";
 import SnakeGame from "@/components/SnakeGame";
@@ -17,8 +17,6 @@ const Index = () => {
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [isIdle, setIsIdle] = useState(false);
   
-  const cursorRef = useRef({ x: 0, y: 0 });
-  const animationRef = useRef<number>();
   const idleTimerRef = useRef<NodeJS.Timeout>();
 
   const tabOrder = ["home", "puzzle", "info"] as const;
@@ -48,39 +46,28 @@ const Index = () => {
     setTimeout(() => setIsLoaded(true), 50);
   };
 
-  // Smooth cursor animation
+  // Simple CSS-based cursor tracking
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      cursorRef.current = { x: e.clientX, y: e.clientY };
-    };
-
-    const animateCursor = () => {
-      setCursorPosition(prev => ({
-        x: prev.x + (cursorRef.current.x - prev.x) * 0.2,
-        y: prev.y + (cursorRef.current.y - prev.y) * 0.2,
-      }));
-      animationRef.current = requestAnimationFrame(animateCursor);
+      setCursorPosition({ x: e.clientX, y: e.clientY });
     };
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.tagName === "BUTTON" || target.tagName === "A" || target.closest("button") || target.closest("a")) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
+      setIsHovering(
+        target.tagName === "BUTTON" || 
+        target.tagName === "A" || 
+        !!target.closest("button") || 
+        !!target.closest("a")
+      );
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseover", handleMouseOver);
-    animationRef.current = requestAnimationFrame(animateCursor);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mouseover", handleMouseOver, { passive: true });
     
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseover", handleMouseOver);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
     };
   }, []);
 
@@ -150,33 +137,33 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen bg-background cursor-none md:cursor-none transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
-      {/* Custom cursor */}
+      {/* Custom cursor - CSS transition based */}
       <div 
         className="fixed pointer-events-none z-[100] hidden md:block mix-blend-difference"
         style={{
-          left: cursorPosition.x - 8,
-          top: cursorPosition.y - 8,
+          transform: `translate(${cursorPosition.x - 8}px, ${cursorPosition.y - 8}px)`,
+          transition: 'transform 0.08s linear',
         }}
       >
         <div 
-          className={`w-4 h-4 rounded-full border border-white/90 transition-transform duration-150 ${
-            isHovering ? "scale-[2.5] opacity-40" : "scale-100 opacity-80"
+          className={`w-4 h-4 rounded-full border border-white/90 ${
+            isHovering ? "scale-[2] opacity-40" : "scale-100 opacity-80"
           }`}
+          style={{ transition: 'transform 0.15s ease-out, opacity 0.15s ease-out' }}
         />
       </div>
       <div 
         className="fixed pointer-events-none z-[100] hidden md:block"
         style={{
-          left: cursorPosition.x - 2,
-          top: cursorPosition.y - 2,
+          transform: `translate(${cursorPosition.x - 2}px, ${cursorPosition.y - 2}px)`,
+          transition: 'transform 0.05s linear',
         }}
       >
         <div 
-          className={`w-1 h-1 rounded-full bg-primary transition-transform duration-150 ${
-            isHovering ? "scale-0" : "scale-100"
-          }`}
-          style={{
-            boxShadow: '0 0 6px hsl(var(--primary)), 0 0 12px hsl(var(--primary) / 0.5)',
+          className={`w-1 h-1 rounded-full bg-primary ${isHovering ? "scale-0" : "scale-100"}`}
+          style={{ 
+            boxShadow: '0 0 6px hsl(var(--primary))',
+            transition: 'transform 0.1s ease-out',
           }}
         />
       </div>
