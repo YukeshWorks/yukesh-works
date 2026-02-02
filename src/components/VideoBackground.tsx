@@ -38,19 +38,13 @@ const VideoBackground = ({ beatIntensity = 0 }: VideoBackgroundProps) => {
     };
   }, []);
 
-  // Beat-synced scale effect
-  const beatScale = 1 + beatIntensity * 0.03;
-
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {/* Video background */}
+      {/* Video background - simplified, no beat transforms */}
       <video
         ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-150 will-change-transform"
-        style={{
-          transform: `scale(${beatScale})`,
-          filter: `brightness(${0.6 + beatIntensity * 0.15})`,
-        }}
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ filter: 'brightness(0.7)' }}
         muted
         loop
         playsInline
@@ -59,24 +53,25 @@ const VideoBackground = ({ beatIntensity = 0 }: VideoBackgroundProps) => {
         <source src={ambientVideo} type="video/mp4" />
       </video>
 
-      {/* Overlay gradients for readability */}
+      {/* Static overlay gradients */}
       <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/40" />
       
-      {/* Beat pulse overlay */}
+      {/* Subtle beat pulse - opacity only */}
+      {beatIntensity > 0 && (
+        <div 
+          className="absolute inset-0 bg-primary/5 pointer-events-none"
+          style={{ opacity: beatIntensity * 0.3, transition: 'opacity 0.1s ease-out' }}
+        />
+      )}
+
+      {/* Vignette */}
       <div 
-        className="absolute inset-0 bg-primary/5 pointer-events-none transition-opacity duration-150"
-        style={{ opacity: beatIntensity * 0.5 }}
+        className="absolute inset-0 pointer-events-none" 
+        style={{ background: 'radial-gradient(ellipse at center, transparent 40%, hsl(var(--background) / 0.7) 100%)' }} 
       />
 
-      {/* Vignette effect */}
-      <div className="absolute inset-0 bg-radial-gradient pointer-events-none" 
-           style={{ 
-             background: 'radial-gradient(ellipse at center, transparent 40%, hsl(var(--background) / 0.7) 100%)' 
-           }} 
-      />
-
-      {/* Loading placeholder */}
+      {/* Loading */}
       {!isLoaded && (
         <div className="absolute inset-0 bg-background flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
