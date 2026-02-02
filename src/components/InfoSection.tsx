@@ -1,63 +1,74 @@
 import { Instagram, Facebook } from "lucide-react";
-import ChibiAnimeGirl from "./ChibiAnimeGirl";
+import profileImg from "@/assets/profile.jpg";
 
 const InfoSection = () => {
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 page-transition">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 bg-gradient-to-tl from-background via-background to-primary/5" />
-      <div className="absolute top-1/3 -right-32 w-96 h-96 bg-primary/15 rounded-full blur-3xl float-animation" />
-      <div className="absolute bottom-1/3 -left-32 w-64 h-64 bg-primary/10 rounded-full blur-3xl float-animation delay-200" />
+    <section className="min-h-screen flex flex-col relative overflow-hidden page-transition">
+      {/* Profile photo background */}
+      <div className="absolute inset-0">
+        <img
+          src={profileImg}
+          alt="Profile"
+          className="absolute inset-0 w-full h-full object-cover object-top"
+        />
+        {/* Gradient overlays for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
+      </div>
       
-      <div className="container mx-auto px-6 relative z-10 flex-1 flex items-center">
-        <div className="max-w-4xl mx-auto w-full">
-          <div className="text-center mb-12">
-            <div className="fade-in-up opacity-0 delay-100">
-              <p className="text-primary text-sm uppercase tracking-widest mb-4">About Me</p>
+      {/* Floating content on left side */}
+      <div className="relative z-10 flex-1 flex items-center">
+        <div className="container mx-auto px-6 md:px-12">
+          <div className="max-w-md">
+            {/* About Me header */}
+            <div className="fade-in-up opacity-0 delay-100 mb-8">
+              <p className="text-primary text-xs uppercase tracking-[0.3em] mb-2">About</p>
+              <h1 className="text-4xl md:text-6xl font-bold text-foreground font-display">
+                Me
+              </h1>
             </div>
-          </div>
-          
-          <div className="fade-in-up opacity-0 delay-300 glass rounded-2xl p-6 md:p-10 glow-border">
-            <p className="text-muted-foreground leading-relaxed text-base md:text-lg text-center">
-              I Mess Around With Whatever Catches My Attention (For As Long As I Remember It). 
-              Kinda Forgetful, A Little Off-Minded, Not The Most Responsible Guy—But Hey,
-              <br /><br />
-              <span className="text-primary font-medium text-lg md:text-xl">I'm Easy To Vibe With!</span>
-            </p>
+            
+            {/* About text */}
+            <div className="fade-in-up opacity-0 delay-300">
+              <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
+                I Mess Around With Whatever Catches My Attention (For As Long As I Remember It). 
+                Kinda Forgetful, A Little Off-Minded, Not The Most Responsible Guy—But Hey,
+              </p>
+              <p className="text-primary font-medium text-lg md:text-xl mt-4">
+                I'm Easy To Vibe With!
+              </p>
+            </div>
+            
+            {/* Social icons */}
+            <div className="fade-in-up opacity-0 delay-500 mt-10">
+              <div className="flex items-center gap-6">
+                <a 
+                  href="https://instagram.com/yuk3shh" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors duration-200"
+                >
+                  <div className="p-3 rounded-full glass hover:scale-110 transition-transform duration-200">
+                    <Instagram size={20} />
+                  </div>
+                  <span className="text-xs hidden md:inline">@yuk3shh</span>
+                </a>
+                <a 
+                  href="https://facebook.com/yukeshkumar" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors duration-200"
+                >
+                  <div className="p-3 rounded-full glass hover:scale-110 transition-transform duration-200">
+                    <Facebook size={20} />
+                  </div>
+                  <span className="text-xs hidden md:inline">yukeshkumar</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      
-      {/* Social icons at bottom */}
-      <div className="relative z-10 pb-8 fade-in-up opacity-0 delay-500">
-        <div className="flex items-center justify-center gap-8">
-          <a 
-            href="https://instagram.com/yuk3shh" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-200"
-          >
-            <div className="p-3 rounded-full glass hover:scale-110 transition-transform duration-200 hover:shadow-[0_0_20px_hsl(var(--primary)/0.5)]">
-              <Instagram size={28} />
-            </div>
-            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">Instagram</span>
-          </a>
-          <a 
-            href="https://facebook.com/yukeshkumar" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-200"
-          >
-            <div className="p-3 rounded-full glass hover:scale-110 transition-transform duration-200 hover:shadow-[0_0_20px_hsl(var(--primary)/0.5)]">
-              <Facebook size={28} />
-            </div>
-            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">Facebook</span>
-          </a>
-        </div>
-      </div>
-
-      {/* Chibi anime girl running around */}
-      <ChibiAnimeGirl />
     </section>
   );
 };
