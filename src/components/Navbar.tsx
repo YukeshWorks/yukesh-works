@@ -41,15 +41,25 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
           </div>
         )}
 
-        {/* Nav items with simple blob indicator */}
+        {/* Nav items with fluid drop indicator */}
         <div className="relative flex items-center z-10">
-          {/* Blob background - CSS only transitions */}
+          {/* Fluid drop blob */}
           <div 
-            className="absolute h-5 rounded-full bg-primary/15 border border-primary/20"
+            className="absolute h-6 bg-primary/20 border border-primary/30 shadow-[0_0_12px_hsl(var(--primary)/0.3)]"
             style={{
-              width: '44px',
-              transform: `translateX(${blobPosition * 48 + 2}px)`,
-              transition: 'transform 0.3s ease-out',
+              width: '42px',
+              borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+              transform: `translateX(${blobPosition * 48 + 3}px)`,
+              transition: 'transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+            }}
+          />
+          {/* Drop tail effect */}
+          <div 
+            className="absolute h-2 w-2 bg-primary/15 rounded-full"
+            style={{
+              top: '-4px',
+              transform: `translateX(${blobPosition * 48 + 20}px)`,
+              transition: 'transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
             }}
           />
           
@@ -59,14 +69,14 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
               onClick={() => onTabChange(tab.id)}
               onMouseEnter={() => setHoveredTab(index)}
               onMouseLeave={() => setHoveredTab(null)}
-              className={`relative z-10 px-3 py-0.5 text-[9px] font-medium tracking-wide uppercase transition-colors duration-150 ${
+              className={`relative z-10 px-3 py-0.5 text-[9px] font-medium tracking-wide uppercase transition-all duration-200 ${
                 activeTab === tab.id 
-                  ? "text-primary" 
+                  ? "text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]" 
                   : "text-muted-foreground hover:text-foreground"
               }`}
               style={{
-                transform: hoveredTab === index ? 'scale(1.05)' : 'scale(1)',
-                transition: 'transform 0.15s ease-out, color 0.15s ease',
+                transform: hoveredTab === index ? 'scale(1.08) translateY(-1px)' : 'scale(1)',
+                transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease',
               }}
             >
               {tab.label}
