@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import HomePage from "@/components/HomePage";
 import SnakeGame from "@/components/SnakeGame";
@@ -6,6 +6,7 @@ import InfoSection from "@/components/InfoSection";
 import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import FloatingArtGallery from "@/components/FloatingArtGallery";
+import GlitchOverlay from "@/components/GlitchOverlay";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"home" | "puzzle" | "info">("home");
@@ -138,6 +139,9 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen bg-background cursor-none md:cursor-none transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
+      {/* Glitch transition overlay */}
+      <GlitchOverlay isActive={isTransitioning} />
+      
       {/* Custom cursor - CSS transition based */}
       <div 
         className="fixed pointer-events-none z-[100] hidden md:block mix-blend-difference"
@@ -175,7 +179,7 @@ const Index = () => {
         onLockClick={handleLockClick}
       />
       
-      {/* Floating art gallery */}
+      {/* Floating art ticker at bottom */}
       <FloatingArtGallery />
       
       {/* Page container */}

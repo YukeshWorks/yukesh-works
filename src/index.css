@@ -353,22 +353,48 @@
   animation: shake 0.5s ease-in-out;
 }
 
-/* Page turn transitions */
+/* Page turn transitions with glitch */
 .page-container {
   transform-style: preserve-3d;
   min-height: 100vh;
 }
 
 .page-turn-enter {
-  animation: pageTurnEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: glitchEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .page-turn-exit-next {
-  animation: pageTurnExitNext 0.6s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+  animation: glitchExitNext 0.5s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
 }
 
 .page-turn-exit-prev {
-  animation: pageTurnExitPrev 0.6s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+  animation: glitchExitPrev 0.5s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+
+/* Glitch overlay effect */
+.glitch-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: transparent;
+}
+
+.glitch-overlay.active {
+  animation: glitchFlash 0.4s steps(1) forwards;
+}
+
+.glitch-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: hsl(var(--primary) / 0.8);
+  opacity: 0;
+}
+
+.glitch-line.active {
+  animation: glitchLine 0.4s linear forwards;
 }
 }
 
@@ -624,38 +650,112 @@
   80% { transform: translateX(10px); }
 }
 
-/* Page turn animations */
-@keyframes pageTurnEnter {
-  from {
+/* Glitch page transitions */
+@keyframes glitchEnter {
+  0% {
     opacity: 0;
-    transform: rotateY(-15deg) translateX(30px);
+    transform: translateX(10px) skewX(5deg);
+    filter: blur(4px) hue-rotate(90deg);
+    clip-path: polygon(0 0, 100% 0, 100% 5%, 0 5%);
   }
-  to {
+  20% {
+    clip-path: polygon(0 15%, 100% 15%, 100% 40%, 0 40%);
+    transform: translateX(-5px) skewX(-2deg);
+  }
+  40% {
+    clip-path: polygon(0 35%, 100% 35%, 100% 70%, 0 70%);
+    transform: translateX(3px) skewX(1deg);
+    filter: blur(2px) hue-rotate(45deg);
+  }
+  60% {
+    clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+    transform: translateX(-2px) skewX(0deg);
+  }
+  80% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    filter: blur(1px) hue-rotate(0deg);
+    opacity: 0.8;
+  }
+  100% {
     opacity: 1;
-    transform: rotateY(0) translateX(0);
+    transform: translateX(0) skewX(0deg);
+    filter: blur(0) hue-rotate(0deg);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
 }
 
-@keyframes pageTurnExitNext {
-  from {
+@keyframes glitchExitNext {
+  0% {
     opacity: 1;
-    transform: rotateY(0) translateX(0);
+    transform: translateX(0);
+    filter: blur(0);
   }
-  to {
+  20% {
+    transform: translateX(-10px) skewX(-3deg);
+    filter: blur(1px) saturate(2);
+  }
+  40% {
+    transform: translateX(8px) skewX(4deg);
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 60%);
+  }
+  60% {
+    opacity: 0.5;
+    filter: blur(3px) hue-rotate(-45deg);
+    clip-path: polygon(0 20%, 100% 10%, 100% 80%, 0 90%);
+  }
+  100% {
     opacity: 0;
-    transform: rotateY(15deg) translateX(-50px);
+    transform: translateX(-30px) skewX(-8deg);
+    filter: blur(8px) hue-rotate(-90deg);
+    clip-path: polygon(0 40%, 100% 30%, 100% 60%, 0 70%);
   }
 }
 
-@keyframes pageTurnExitPrev {
-  from {
+@keyframes glitchExitPrev {
+  0% {
     opacity: 1;
-    transform: rotateY(0) translateX(0);
+    transform: translateX(0);
+    filter: blur(0);
   }
-  to {
+  20% {
+    transform: translateX(10px) skewX(3deg);
+    filter: blur(1px) saturate(2);
+  }
+  40% {
+    transform: translateX(-8px) skewX(-4deg);
+    clip-path: polygon(0 10%, 100% 0, 100% 60%, 0 50%);
+  }
+  60% {
+    opacity: 0.5;
+    filter: blur(3px) hue-rotate(45deg);
+    clip-path: polygon(0 10%, 100% 20%, 100% 90%, 0 80%);
+  }
+  100% {
     opacity: 0;
-    transform: rotateY(-15deg) translateX(50px);
+    transform: translateX(30px) skewX(8deg);
+    filter: blur(8px) hue-rotate(90deg);
+    clip-path: polygon(0 30%, 100% 40%, 100% 70%, 0 60%);
   }
+}
+
+@keyframes glitchFlash {
+  0%, 100% { background: transparent; }
+  5% { background: hsl(var(--primary) / 0.1); }
+  10% { background: transparent; }
+  15% { background: hsl(var(--primary) / 0.05); }
+  20%, 100% { background: transparent; }
+}
+
+@keyframes glitchLine {
+  0% { opacity: 0; top: 0; }
+  10% { opacity: 1; top: 10%; }
+  20% { opacity: 0; top: 20%; }
+  30% { opacity: 1; top: 35%; }
+  40% { opacity: 0; top: 50%; }
+  50% { opacity: 1; top: 65%; }
+  60% { opacity: 0; top: 75%; }
+  70% { opacity: 1; top: 85%; }
+  80%, 100% { opacity: 0; top: 100%; }
 }
 
 /* Utility animations */
