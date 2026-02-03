@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Lock, KeyRound } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
@@ -9,8 +9,8 @@ interface NavbarProps {
 }
 
 const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
-  const [blobPosition, setBlobPosition] = useState(0);
-  const [hoveredTab, setHoveredTab] = useState<number | null>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   
   const tabs = [
     { id: "home" as const, label: "Home" },
@@ -19,65 +19,57 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
   ];
 
   useEffect(() => {
-    const index = tabs.findIndex(t => t.id === activeTab);
-    setBlobPosition(index);
+    const activeIndex = tabs.findIndex(t => t.id === activeTab);
+    const activeRef = tabRefs.current[activeIndex];
+    if (activeRef) {
+      setIndicatorStyle({
+        left: activeRef.offsetLeft,
+        width: activeRef.offsetWidth,
+      });
+    }
   }, [activeTab]);
 
   return (
-    <nav className="fixed top-3 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-full glass backdrop-blur-xl border border-white/10 shadow-lg relative">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
+      <div className="flex items-center gap-3 px-2 py-1.5 rounded-2xl bg-background/60 backdrop-blur-2xl border border-border/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         {/* Logo */}
         {activeTab === "puzzle" ? (
           <button 
             onClick={onLockClick}
-            className="relative w-6 h-6 rounded-full glass flex items-center justify-center hover:scale-110 transition-transform duration-200 group z-10"
+            className="relative w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors duration-300 group"
           >
-            <KeyRound className="w-3 h-3 text-primary" />
-            <Lock className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 text-muted-foreground" />
+            <KeyRound className="w-4 h-4 text-primary" />
+            <Lock className="absolute -bottom-0.5 -right-0.5 w-2 h-2 text-muted-foreground" />
           </button>
         ) : (
-          <div className="w-6 h-6 rounded-full glass flex items-center justify-center z-10">
-            <span className="text-[10px] font-bold gradient-text font-mono">42</span>
+          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+            <span className="text-xs font-bold gradient-text font-mono">42</span>
           </div>
         )}
 
-        {/* Nav items with fluid drop indicator */}
-        <div className="relative flex items-center z-10">
-          {/* Fluid drop blob */}
+        {/* Nav items with sliding underline */}
+        <div className="relative flex items-center">
+          {/* Sliding indicator */}
           <div 
-            className="absolute h-6 bg-primary/20 border border-primary/30 shadow-[0_0_12px_hsl(var(--primary)/0.3)]"
+            className="absolute bottom-0 h-0.5 bg-gradient-to-r from-primary via-primary to-primary/50 rounded-full"
             style={{
-              width: '42px',
-              borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-              transform: `translateX(${blobPosition * 48 + 3}px)`,
-              transition: 'transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-            }}
-          />
-          {/* Drop tail effect */}
-          <div 
-            className="absolute h-2 w-2 bg-primary/15 rounded-full"
-            style={{
-              top: '-4px',
-              transform: `translateX(${blobPosition * 48 + 20}px)`,
-              transition: 'transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+              left: indicatorStyle.left,
+              width: indicatorStyle.width,
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: '0 0 8px hsl(var(--primary) / 0.6)',
             }}
           />
           
           {tabs.map((tab, index) => (
             <button
               key={tab.id}
+              ref={(el) => (tabRefs.current[index] = el)}
               onClick={() => onTabChange(tab.id)}
-              onMouseEnter={() => setHoveredTab(index)}
-              onMouseLeave={() => setHoveredTab(null)}
-              className={`relative z-10 px-3 py-0.5 text-[9px] font-medium tracking-wide uppercase transition-all duration-200 ${
+              className={`relative px-4 py-2 text-[11px] font-medium tracking-wider uppercase transition-all duration-300 ${
                 activeTab === tab.id 
-                  ? "text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]" 
+                  ? "text-primary" 
                   : "text-muted-foreground hover:text-foreground"
               }`}
-              style={{
-                transform: hoveredTab === index ? 'scale(1.08) translateY(-1px)' : 'scale(1)',
-                transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease',
-              }}
             >
               {tab.label}
             </button>
