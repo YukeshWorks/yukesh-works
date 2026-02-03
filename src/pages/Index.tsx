@@ -5,6 +5,7 @@ import SnakeGame from "@/components/SnakeGame";
 import InfoSection from "@/components/InfoSection";
 import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import FloatingArtGallery from "@/components/FloatingArtGallery";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"home" | "puzzle" | "info">("home");
@@ -173,6 +174,9 @@ const Index = () => {
         onTabChange={handleTabChange} 
         onLockClick={handleLockClick}
       />
+      
+      {/* Floating art gallery */}
+      <FloatingArtGallery />
       
       {/* Page container */}
       <div className="page-container" style={{ perspective: '1500px' }}>
