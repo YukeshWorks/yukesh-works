@@ -5,8 +5,8 @@ import SnakeGame from "@/components/SnakeGame";
 import InfoSection from "@/components/InfoSection";
 import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
-import FloatingArtGallery from "@/components/FloatingArtGallery";
 import GlitchOverlay from "@/components/GlitchOverlay";
+import VHSNoiseOverlay from "@/components/VHSNoiseOverlay";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"home" | "puzzle" | "info">("home");
@@ -142,6 +142,9 @@ const Index = () => {
       {/* Glitch transition overlay */}
       <GlitchOverlay isActive={isTransitioning} />
       
+      {/* VHS noise overlay for retro vibes */}
+      <VHSNoiseOverlay />
+      
       {/* Custom cursor - CSS transition based */}
       <div 
         className="fixed pointer-events-none z-[100] hidden md:block mix-blend-difference"
@@ -178,9 +181,6 @@ const Index = () => {
         onTabChange={handleTabChange} 
         onLockClick={handleLockClick}
       />
-      
-      {/* Floating art ticker at bottom */}
-      <FloatingArtGallery />
       
       {/* Page container */}
       <div className="page-container" style={{ perspective: '1500px' }}>
