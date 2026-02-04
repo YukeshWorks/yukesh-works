@@ -1,101 +1,106 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 interface GlitchOverlayProps {
   isActive: boolean;
 }
 
 const GlitchOverlay = ({ isActive }: GlitchOverlayProps) => {
-  const [lines, setLines] = useState<number[]>([]);
+  const [visible, setVisible] = useState(false);
+
+  // Memoize line positions for consistent rendering
+  const lines = useMemo(() => 
+    Array.from({ length: 6 }, (_, i) => ({
+      top: 10 + i * 15 + Math.random() * 5,
+      delay: i * 0.02,
+    })), [isActive]
+  );
 
   useEffect(() => {
     if (isActive) {
-      // Generate random line positions
-      setLines(Array.from({ length: 8 }, () => Math.random() * 100));
-      
-      // Clear after animation
-      const timer = setTimeout(() => setLines([]), 500);
+      setVisible(true);
+      const timer = setTimeout(() => setVisible(false), 350);
       return () => clearTimeout(timer);
     }
   }, [isActive]);
 
-  if (!isActive && lines.length === 0) return null;
+  if (!isActive && !visible) return null;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden">
-      {/* Glitch flash overlay */}
+    <div 
+      className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden"
+      style={{ transform: 'translateZ(0)' }}
+    >
+      {/* Smooth flash overlay - GPU accelerated */}
       <div 
-        className={`absolute inset-0 ${isActive ? 'animate-glitch-flash' : ''}`}
-        style={{ mixBlendMode: 'screen' }}
+        className="absolute inset-0 will-change-opacity"
+        style={{
+          background: 'hsl(var(--primary) / 0.06)',
+          opacity: visible ? 1 : 0,
+          transition: 'opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+          transform: 'translateZ(0)',
+        }}
       />
       
-      {/* Horizontal glitch lines */}
-      {lines.map((pos, i) => (
+      {/* Smooth horizontal scan lines - GPU accelerated */}
+      {lines.map((line, i) => (
         <div
           key={i}
-          className="absolute left-0 right-0 h-[2px] bg-primary/60"
+          className="absolute left-0 right-0 h-[2px] will-change-transform"
           style={{
-            top: `${pos}%`,
-            animation: `glitchScan 0.3s ease-out ${i * 0.03}s forwards`,
-            boxShadow: '0 0 10px hsl(var(--primary))',
+            top: `${line.top}%`,
+            background: `linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), transparent)`,
+            transform: visible ? 'scaleX(1) translateZ(0)' : 'scaleX(0) translateZ(0)',
+            opacity: visible ? 0.8 : 0,
+            transition: `transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) ${line.delay}s, opacity 0.15s ease-out ${line.delay}s`,
+            boxShadow: '0 0 8px hsl(var(--primary) / 0.4)',
           }}
         />
       ))}
       
-      {/* RGB split effect bars */}
-      {isActive && (
+      {/* Subtle RGB chromatic aberration - GPU optimized */}
+      {visible && (
         <>
           <div 
-            className="absolute inset-0 opacity-30"
+            className="absolute inset-0 will-change-opacity"
             style={{
-              background: 'linear-gradient(transparent 50%, hsl(var(--primary) / 0.03) 50%)',
-              backgroundSize: '100% 4px',
-              animation: 'scanlines 0.1s linear infinite',
+              background: 'linear-gradient(transparent 50%, hsl(var(--primary) / 0.02) 50%)',
+              backgroundSize: '100% 3px',
+              opacity: 0.4,
+              transform: 'translateZ(0)',
             }}
           />
           <div 
-            className="absolute top-1/3 left-0 right-0 h-8 opacity-20"
+            className="absolute top-1/4 left-0 right-0 h-12 will-change-transform"
             style={{
-              background: 'linear-gradient(90deg, transparent, hsl(0 80% 50% / 0.3), transparent)',
-              animation: 'glitchBar 0.2s ease-out forwards',
+              background: 'linear-gradient(90deg, transparent 10%, hsl(0 70% 50% / 0.15) 50%, transparent 90%)',
+              transform: 'translateX(0) translateZ(0)',
+              animation: 'smoothGlitchBar 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards',
             }}
           />
           <div 
-            className="absolute top-2/3 left-0 right-0 h-4 opacity-20"
+            className="absolute top-3/4 left-0 right-0 h-8 will-change-transform"
             style={{
-              background: 'linear-gradient(90deg, transparent, hsl(180 80% 50% / 0.3), transparent)',
-              animation: 'glitchBar 0.25s ease-out 0.05s forwards',
+              background: 'linear-gradient(90deg, transparent 10%, hsl(180 70% 50% / 0.12) 50%, transparent 90%)',
+              transform: 'translateX(0) translateZ(0)',
+              animation: 'smoothGlitchBar 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.05s forwards',
             }}
           />
         </>
       )}
 
       <style>{`
-        @keyframes glitchScan {
-          0% { opacity: 1; transform: scaleX(0); }
-          50% { opacity: 1; transform: scaleX(1); }
-          100% { opacity: 0; transform: scaleX(1); }
-        }
-        
-        @keyframes scanlines {
-          0% { background-position: 0 0; }
-          100% { background-position: 0 4px; }
-        }
-        
-        @keyframes glitchBar {
-          0% { transform: translateX(-100%); opacity: 0.5; }
-          100% { transform: translateX(100%); opacity: 0; }
-        }
-        
-        .animate-glitch-flash {
-          animation: glitchFlashBg 0.3s steps(1) forwards;
-        }
-        
-        @keyframes glitchFlashBg {
-          0% { background: transparent; }
-          10% { background: hsl(var(--primary) / 0.08); }
-          20% { background: transparent; }
-          30% { background: hsl(var(--primary) / 0.04); }
-          40%, 100% { background: transparent; }
+        @keyframes smoothGlitchBar {
+          0% { 
+            transform: translateX(-100%) translateZ(0); 
+            opacity: 0; 
+          }
+          30% { 
+            opacity: 1; 
+          }
+          100% { 
+            transform: translateX(100%) translateZ(0); 
+            opacity: 0; 
+          }
         }
       `}</style>
     </div>
