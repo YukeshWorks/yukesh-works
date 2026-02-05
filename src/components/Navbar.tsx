@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Lock, KeyRound } from "lucide-react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { Home, Puzzle, Info, Lock, KeyRound } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
 interface NavbarProps {
@@ -8,15 +8,24 @@ interface NavbarProps {
   onLockClick?: () => void;
 }
 
+interface Tab {
+  id: "home" | "puzzle" | "info";
+  label: string;
+  icon: typeof Home;
+}
+
 const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  
-  const tabs = [
-    { id: "home" as const, label: "Home" },
-    { id: "puzzle" as const, label: "Puzzle" },
-    { id: "info" as const, label: "Info" },
-  ];
+
+  const tabs: Tab[] = useMemo(
+    () => [
+      { id: "home", label: "Home", icon: Home },
+      { id: "puzzle", label: "Puzzle", icon: Puzzle },
+      { id: "info", label: "Info", icon: Info },
+    ],
+    []
+  );
 
   useEffect(() => {
     const activeIndex = tabs.findIndex(t => t.id === activeTab);
@@ -27,50 +36,57 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
         width: activeRef.offsetWidth,
       });
     }
-  }, [activeTab]);
+  }, [activeTab, tabs]);
 
   return (
     <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center gap-3 px-2 py-1.5 rounded-2xl bg-background/60 backdrop-blur-2xl border border-border/50 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-        {/* Logo */}
+      <div className="flex items-center gap-2 px-1.5 py-1.5 rounded-full bg-background/80 backdrop-blur-xl border border-border/30 shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
+        {/* Lock/Logo button */}
         {activeTab === "puzzle" ? (
-          <button 
+          <button
             onClick={onLockClick}
-            className="relative w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors duration-300 group"
+            className="relative w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-all duration-300 group ml-0.5"
           >
-            <KeyRound className="w-4 h-4 text-primary" />
-            <Lock className="absolute -bottom-0.5 -right-0.5 w-2 h-2 text-muted-foreground" />
+            <KeyRound className="w-4 h-4 text-primary transition-transform duration-200 group-hover:scale-110" />
+            <Lock className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 text-muted-foreground" />
           </button>
         ) : (
-          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center ml-0.5">
             <span className="text-xs font-bold gradient-text font-mono">42</span>
           </div>
         )}
 
-        {/* Nav items with sliding underline */}
+        {/* Segmented pill navigation */}
         <div className="relative flex items-center">
-          {/* Sliding indicator */}
-          <div 
-            className="absolute bottom-0 h-0.5 bg-gradient-to-r from-primary via-primary to-primary/50 rounded-full"
+          {/* Floating active indicator pill */}
+          <div
+            className="absolute h-[calc(100%-6px)] top-[3px] rounded-full bg-primary/15 border border-primary/20"
             style={{
-              left: indicatorStyle.left,
-              width: indicatorStyle.width,
-              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: '0 0 8px hsl(var(--primary) / 0.6)',
+              left: indicatorStyle.left + 2,
+              width: indicatorStyle.width - 4,
+              transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              boxShadow: "0 0 12px hsl(var(--primary) / 0.3)",
             }}
           />
-          
+
           {tabs.map((tab, index) => (
             <button
               key={tab.id}
               ref={(el) => (tabRefs.current[index] = el)}
               onClick={() => onTabChange(tab.id)}
-              className={`relative px-4 py-2 text-[11px] font-medium tracking-wider uppercase transition-all duration-300 ${
-                activeTab === tab.id 
-                  ? "text-primary" 
+              className={`relative flex items-center gap-1.5 px-3.5 py-2 text-[11px] font-medium tracking-wider uppercase transition-all duration-300 rounded-full ${
+                activeTab === tab.id
+                  ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
+              <tab.icon
+                className={`w-3.5 h-3.5 transition-all duration-300 ${
+                  activeTab === tab.id
+                    ? "scale-110 drop-shadow-[0_0_6px_hsl(var(--primary)/0.8)]"
+                    : "scale-100"
+                }`}
+              />
               {tab.label}
             </button>
           ))}
