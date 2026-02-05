@@ -17,14 +17,20 @@ interface LoadingScreenProps {
 const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [fadeOut, setFadeOut] = useState(false);
 
   // Preload ALL critical assets with progress tracking
   useEffect(() => {
-    const images = [
-      homeBg,
-      mobileBg,
+    // Detect if mobile to prioritize correct background
+    const isMobile = window.innerWidth < 768;
+    
+    // Priority order: mobile bg first on mobile, desktop bg first on desktop
+    const priorityImages = isMobile 
+      ? [mobileBg, homeBg] 
+      : [homeBg, mobileBg];
+    
+    const otherImages = [
       profileImg,
-      loadingSpy,
       offlineCloud,
       loadingCar,
       artFlame,
@@ -33,12 +39,13 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       artSpy,
     ];
     
+    const allImages = [...priorityImages, ...otherImages];
     let loaded = 0;
     const startTime = Date.now();
-    const totalAssets = images.length;
+    const totalAssets = allImages.length;
 
-    const preloadImage = (src: string) => {
-      return new Promise<void>((resolve) => {
+    const preloadImage = (src: string): Promise<void> => {
+      return new Promise((resolve) => {
         const img = new Image();
         img.src = src;
         img.onload = () => {
@@ -61,15 +68,29 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       }
     };
 
-    Promise.all([...images.map(preloadImage), preloadFonts()]).then(() => {
+    // Load images sequentially for priority, then rest in parallel
+    const loadAllAssets = async () => {
+      // Load priority background first
+      await preloadImage(priorityImages[0]);
+      
+      // Load rest in parallel
+      await Promise.all([
+        preloadImage(priorityImages[1]),
+        ...otherImages.map(preloadImage),
+        preloadFonts()
+      ]);
+      
       const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, 2000 - elapsed); // Ensure 2 seconds minimum
+      const remaining = Math.max(0, 1500 - elapsed); // 1.5s minimum
 
       setTimeout(() => {
         setImagesLoaded(true);
-        setTimeout(onLoadComplete, 250);
+        setFadeOut(true);
+        setTimeout(onLoadComplete, 400);
       }, remaining);
-    });
+    };
+
+    loadAllAssets();
   }, [onLoadComplete]);
 
   return (
@@ -141,12 +162,12 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
 
       {/* Fade out overlay */}
       <div
-        className={`absolute inset-0 pointer-events-none ${
-          imagesLoaded ? "opacity-100" : "opacity-0"
-        }`}
+        className="absolute inset-0 pointer-events-none"
         style={{
           backgroundColor: "#f5a442",
-          transition: "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+          opacity: fadeOut ? 1 : 0,
+          transition: "opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+          transform: 'translateZ(0)',
         }}
       />
 
