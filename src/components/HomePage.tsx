@@ -12,6 +12,13 @@ const HomePage = () => {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [beatIntensity, setBeatIntensity] = useState(0);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [contentVisible, setContentVisible] = useState(false);
+
+  // Trigger staggered content entrance after mount
+  useEffect(() => {
+    const timer = setTimeout(() => setContentVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -37,7 +44,6 @@ const HomePage = () => {
   // Handle beat from audio controller
   const handleBeat = useCallback((intensity: number) => {
     setBeatIntensity(intensity);
-    // Reset intensity after animation
     setTimeout(() => setBeatIntensity(0), 150);
   }, []);
 
@@ -78,9 +84,16 @@ const HomePage = () => {
       </div>
       
       <div className="container mx-auto px-6 relative z-10 pt-16">
-        <div className="max-w-lg fade-in-up opacity-0 delay-200">
-          {/* Status badge with offline cloud GIF */}
-          <div className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-2xl glass text-[10px] font-black tracking-wide uppercase border-2 border-foreground/20">
+        <div className="max-w-lg">
+          {/* Status badge - slides from left */}
+          <div 
+            className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-2xl glass text-[10px] font-black tracking-wide uppercase border-2 border-foreground/20 transition-all duration-500 ease-out"
+            style={{ 
+              opacity: contentVisible ? 1 : 0,
+              transform: contentVisible ? 'translateX(0)' : 'translateX(-30px)',
+              transitionDelay: '200ms',
+            }}
+          >
             {!isOnline ? (
               <>
                 <img src={offlineCloud} alt="Offline" className="w-5 h-5" />
@@ -94,18 +107,42 @@ const HomePage = () => {
             )}
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-3 tracking-tight cartoon-text">
+          {/* Name - fades in */}
+          <h1 
+            className="text-3xl md:text-5xl lg:text-6xl font-black mb-3 tracking-tight cartoon-text transition-all duration-600 ease-out"
+            style={{ 
+              opacity: contentVisible ? 1 : 0,
+              transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
+              transitionDelay: '350ms',
+            }}
+          >
             <span className="text-foreground/90 font-medium" style={{ textShadow: '2px 2px 0px hsl(var(--primary) / 0.3)' }}>Hi, I'm</span>
             <br />
             <span className="gradient-text breathing-glow font-black" style={{ textShadow: '3px 3px 0px rgba(0,0,0,0.2)' }}>Yukesh Kumar</span>
           </h1>
           
-          <p className="text-muted-foreground text-sm md:text-base mt-4 max-w-sm leading-relaxed font-medium" style={{ textShadow: '1px 1px 0px rgba(0,0,0,0.1)' }}>
+          {/* Tagline - slides from left */}
+          <p 
+            className="text-muted-foreground text-sm md:text-base mt-4 max-w-sm leading-relaxed font-medium transition-all duration-500 ease-out"
+            style={{ 
+              textShadow: '1px 1px 0px rgba(0,0,0,0.1)',
+              opacity: contentVisible ? 1 : 0,
+              transform: contentVisible ? 'translateX(0)' : 'translateX(-20px)',
+              transitionDelay: '500ms',
+            }}
+          >
             Lost in thoughts, found in creativity.
           </p>
           
-          {/* CTA buttons - cartoon style */}
-          <div className="flex flex-wrap gap-3 mt-6">
+          {/* CTA buttons - slide from right */}
+          <div 
+            className="flex flex-wrap gap-3 mt-6 transition-all duration-500 ease-out"
+            style={{ 
+              opacity: contentVisible ? 1 : 0,
+              transform: contentVisible ? 'translateX(0)' : 'translateX(30px)',
+              transitionDelay: '650ms',
+            }}
+          >
             <button 
               onClick={() => setIsPortfolioOpen(true)}
               className="px-5 py-2.5 rounded-2xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-wide hover:scale-105 active:scale-95 transition-transform duration-200 border-3 border-black"
@@ -122,8 +159,15 @@ const HomePage = () => {
             </button>
           </div>
           
-          {/* Social icons - cartoon style */}
-          <div className="flex items-center gap-3 mt-8 text-muted-foreground">
+          {/* Social icons - slide from left */}
+          <div 
+            className="flex items-center gap-3 mt-8 text-muted-foreground transition-all duration-500 ease-out"
+            style={{ 
+              opacity: contentVisible ? 1 : 0,
+              transform: contentVisible ? 'translateX(0)' : 'translateX(-25px)',
+              transitionDelay: '800ms',
+            }}
+          >
             <span className="text-[10px] font-black tracking-wider uppercase opacity-70">Connect</span>
             <div className="w-8 h-0.5 bg-foreground/30 rounded-full" />
             <div className="flex gap-2">
