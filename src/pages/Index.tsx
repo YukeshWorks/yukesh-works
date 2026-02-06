@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import HomePage from "@/components/HomePage";
-import SnakeGame from "@/components/SnakeGame";
+import PuzzleIllustration from "@/components/PuzzleIllustration";
 import InfoSection from "@/components/InfoSection";
 import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -142,7 +142,7 @@ const Index = () => {
       case "home":
         return <HomePage />;
       case "puzzle":
-        return <SnakeGame />;
+        return <PuzzleIllustration />;
       case "info":
         return <InfoSection />;
       default:
