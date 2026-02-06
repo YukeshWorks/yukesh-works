@@ -7,6 +7,7 @@ import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import GlitchOverlay from "@/components/GlitchOverlay";
 import VHSNoiseOverlay from "@/components/VHSNoiseOverlay";
+import OfflinePage from "@/components/OfflinePage";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"home" | "puzzle" | "info">("home");
@@ -18,8 +19,30 @@ const Index = () => {
   const [showPasswordLock, setShowPasswordLock] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [isIdle, setIsIdle] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [showOfflinePage, setShowOfflinePage] = useState(!navigator.onLine);
   
   const idleTimerRef = useRef<NodeJS.Timeout>();
+
+  // Online/offline detection
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Don't auto-close offline page, let user decide
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setShowOfflinePage(true);
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const tabOrder = ["home", "puzzle", "info"] as const;
 
@@ -135,6 +158,11 @@ const Index = () => {
   // Show loading screen first
   if (showLoadingScreen) {
     return <LoadingScreen onLoadComplete={handleLoadComplete} />;
+  }
+
+  // Show offline page when offline and not dismissed
+  if (showOfflinePage && !isOnline) {
+    return <OfflinePage onClose={() => setShowOfflinePage(false)} />;
   }
 
   return (
