@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, WifiOff } from "lucide-react";
+import { X, WifiOff, CloudOff } from "lucide-react";
 import offlineCloud from "@/assets/offline-cloud.gif";
 
 interface OfflinePageProps {
@@ -8,12 +8,29 @@ interface OfflinePageProps {
 
 const OfflinePage = ({ onClose }: OfflinePageProps) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     // Trigger entrance animation
     const timer = setTimeout(() => setIsVisible(true), 50);
     return () => clearTimeout(timer);
   }, []);
+
+  // Try to load image from cache
+  useEffect(() => {
+    const img = new Image();
+    img.src = offlineCloud;
+    img.onload = () => setImageLoaded(true);
+    img.onerror = () => setImageFailed(true);
+    
+    // Set timeout - if image doesn't load in 500ms, show fallback
+    const timeout = setTimeout(() => {
+      if (!imageLoaded) setImageFailed(true);
+    }, 500);
+    
+    return () => clearTimeout(timeout);
+  }, [imageLoaded]);
 
   const handleClose = () => {
     setIsVisible(false);
@@ -22,9 +39,8 @@ const OfflinePage = ({ onClose }: OfflinePageProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center"
+      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#1a1a1a]"
       style={{
-        backgroundColor: "#1a1a1a",
         opacity: isVisible ? 1 : 0,
         transition: "opacity 0.3s ease-out",
         transform: "translateZ(0)",
@@ -62,17 +78,29 @@ const OfflinePage = ({ onClose }: OfflinePageProps) => {
           transitionDelay: "100ms",
         }}
       >
-        {/* Animated offline cloud GIF */}
+        {/* Offline icon - show GIF if cached, fallback to icon */}
         <div className="relative">
-          <img
-            src={offlineCloud}
-            alt="Offline"
-            className="w-32 h-32 md:w-40 md:h-40 rounded-2xl"
-            style={{
-              filter: "drop-shadow(4px 4px 0px rgba(0,0,0,0.5))",
-              border: "3px solid rgba(255,255,255,0.2)",
-            }}
-          />
+          {imageLoaded && !imageFailed ? (
+            <img
+              src={offlineCloud}
+              alt="Offline"
+              className="w-32 h-32 md:w-40 md:h-40 rounded-2xl"
+              style={{
+                filter: "drop-shadow(4px 4px 0px rgba(0,0,0,0.5))",
+                border: "3px solid rgba(255,255,255,0.2)",
+              }}
+            />
+          ) : (
+            <div 
+              className="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-white/5 flex items-center justify-center"
+              style={{
+                border: "3px solid rgba(255,255,255,0.2)",
+                boxShadow: "4px 4px 0px rgba(0,0,0,0.5)",
+              }}
+            >
+              <CloudOff className="w-16 h-16 md:w-20 md:h-20 text-white/40" />
+            </div>
+          )}
           {/* Wifi off icon overlay */}
           <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-destructive flex items-center justify-center border-2 border-white/30">
             <WifiOff className="w-5 h-5 text-destructive-foreground" />
