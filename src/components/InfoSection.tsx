@@ -9,11 +9,14 @@ const InfoSection = () => {
         <img
           src={profileImg}
           alt="Profile"
-          className="absolute inset-0 w-full h-full object-cover object-top"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ 
+            objectPosition: 'center 20%',
+          }}
         />
-        {/* Gradient overlays for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
+        {/* Gradient overlays for text readability - lighter on mobile for face visibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 md:via-background/80 to-transparent md:to-background/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-background/40" />
       </div>
       
       {/* Floating content on left side */}
