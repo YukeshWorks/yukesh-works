@@ -19,12 +19,12 @@ const PuzzleIllustration = () => {
       />
 
       <div className="relative z-10 flex flex-col items-center justify-center w-full h-full">
-        {/* Illustration */}
+        {/* Illustration with climbing animation */}
         <div className="relative w-full max-w-md md:max-w-lg aspect-square">
           <img
             src={puzzleClimb}
             alt="Stick figure climbing rope"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain animate-climb"
           />
         </div>
         
@@ -33,6 +33,27 @@ const PuzzleIllustration = () => {
           Keep climbing
         </p>
       </div>
+
+      {/* Climbing animation keyframes */}
+      <style>{`
+        @keyframes climb {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          25% {
+            transform: translateY(-8px);
+          }
+          50% {
+            transform: translateY(-4px);
+          }
+          75% {
+            transform: translateY(-12px);
+          }
+        }
+        .animate-climb {
+          animation: climb 2s ease-in-out infinite;
+        }
+      `}</style>
     </section>
   );
 };
