@@ -4,7 +4,7 @@ const PuzzleIllustration = () => {
   return (
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 page-transition">
       {/* Teal background matching the illustration */}
-      <div className="absolute inset-0 bg-[#5fd3c5]" />
+      <div className="absolute inset-0 bg-[#b8ada3]" />
       
       {/* Subtle grid pattern */}
       <div 
