@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import homeBg from "@/assets/home-bg.jpg";
 import mobileBg from "@/assets/mobile-bg.jpg";
 import profileImg from "@/assets/profile.jpg";
-import skullLoading from "@/assets/skull-loading.gif";
+import loadingSpy from "@/assets/loading-spy.gif";
 import offlineCloud from "@/assets/offline-cloud.gif";
 import loadingCar from "@/assets/loading-car.gif";
 import artFlame from "@/assets/art-flame.gif";
@@ -95,34 +95,39 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[200] flex items-center justify-center transition-opacity duration-400 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
-      style={{ backgroundColor: "#b8ada3" }}
+      className="fixed inset-0 z-[200] flex items-center justify-center"
+      style={{ backgroundColor: "#f5a442" }}
     >
       {/* Corner brackets frame - cartoon style */}
       <div className="absolute inset-6 md:inset-12 pointer-events-none">
-        <div className="absolute top-0 left-0 w-6 h-6 border-l-4 border-t-4 border-black/30 rounded-tl-lg" />
-        <div className="absolute top-0 right-0 w-6 h-6 border-r-4 border-t-4 border-black/30 rounded-tr-lg" />
-        <div className="absolute bottom-0 left-0 w-6 h-6 border-l-4 border-b-4 border-black/30 rounded-bl-lg" />
-        <div className="absolute bottom-0 right-0 w-6 h-6 border-r-4 border-b-4 border-black/30 rounded-br-lg" />
+        {/* Top-left */}
+        <div className="absolute top-0 left-0 w-6 h-6 border-l-4 border-t-4 border-black rounded-tl-lg" />
+        {/* Top-right */}
+        <div className="absolute top-0 right-0 w-6 h-6 border-r-4 border-t-4 border-black rounded-tr-lg" />
+        {/* Bottom-left */}
+        <div className="absolute bottom-0 left-0 w-6 h-6 border-l-4 border-b-4 border-black rounded-bl-lg" />
+        {/* Bottom-right */}
+        <div className="absolute bottom-0 right-0 w-6 h-6 border-r-4 border-b-4 border-black rounded-br-lg" />
       </div>
 
       <div className="relative z-10 flex flex-col items-center gap-4">
         {/* Animated spy GIF - smaller */}
         <div className="relative">
           <img
-            src={skullLoading}
+            src={loadingSpy}
             alt="Loading"
-            className="w-28 h-28 md:w-36 md:h-36 rounded-2xl"
+            className="w-24 h-24 md:w-32 md:h-32 rounded-2xl"
             style={{
-              filter: "drop-shadow(4px 4px 0px rgba(0,0,0,0.15))",
+              filter: "drop-shadow(4px 4px 0px rgba(0,0,0,0.3))",
+              border: "3px solid black",
             }}
           />
         </div>
 
         {/* Progress bar */}
-        <div className="w-32 md:w-40 h-2 bg-black/10 rounded-full overflow-hidden border-2 border-black/20">
+        <div className="w-32 md:w-40 h-2 bg-black/20 rounded-full overflow-hidden border-2 border-black">
           <div
-            className="h-full bg-black/40 rounded-full transition-all duration-200 ease-out"
+            className="h-full bg-black rounded-full transition-all duration-200 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -133,9 +138,9 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-3 h-3 rounded-full border-2 border-black/20"
+                className="w-3 h-3 rounded-full border-2 border-black"
                 style={{
-                    backgroundColor: "rgba(0,0,0,0.3)",
+                    backgroundColor: "#1a1a1a",
                     animation: "cartoonBounce 0.8s ease-in-out infinite",
                   animationDelay: `${i * 0.1}s`,
                 }}
@@ -145,8 +150,8 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
           <p
             className="text-sm font-black tracking-wider uppercase"
             style={{
-              color: "#4a4340",
-              textShadow: "1px 1px 0px rgba(255,255,255,0.2)",
+              color: "#1a1a1a",
+              textShadow: "2px 2px 0px rgba(255,255,255,0.3)",
               fontFamily: "system-ui, -apple-system, sans-serif",
             }}
           >
@@ -155,6 +160,16 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
         </div>
       </div>
 
+      {/* Fade out overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundColor: "#f5a442",
+          opacity: fadeOut ? 1 : 0,
+          transition: "opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+          transform: 'translateZ(0)',
+        }}
+      />
 
       <style>{`
         @keyframes cartoonBounce {
