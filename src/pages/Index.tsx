@@ -5,8 +5,6 @@ import SnakeGame from "@/components/SnakeGame";
 import InfoSection from "@/components/InfoSection";
 import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
-import GlitchOverlay from "@/components/GlitchOverlay";
-import VHSNoiseOverlay from "@/components/VHSNoiseOverlay";
 import OfflinePage from "@/components/OfflinePage";
 
 const Index = () => {
@@ -151,8 +149,8 @@ const Index = () => {
   };
 
   const getTransitionClasses = () => {
-    if (!isTransitioning) return "page-turn-enter";
-    return transitionDirection === "next" ? "page-turn-exit-next" : "page-turn-exit-prev";
+    if (!isTransitioning) return "page-fade-enter";
+    return "page-fade-exit";
   };
 
   // Show loading screen first
@@ -167,11 +165,6 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
-      {/* Glitch transition overlay */}
-      <GlitchOverlay isActive={isTransitioning} />
-      
-      {/* VHS noise overlay for retro vibes */}
-      <VHSNoiseOverlay />
       
 
       <Navbar 
