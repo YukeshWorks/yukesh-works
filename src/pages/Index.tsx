@@ -166,43 +166,13 @@ const Index = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-background cursor-none md:cursor-none transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
+    <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
       {/* Glitch transition overlay */}
       <GlitchOverlay isActive={isTransitioning} />
       
       {/* VHS noise overlay for retro vibes */}
       <VHSNoiseOverlay />
       
-      {/* Custom cursor - CSS transition based */}
-      <div 
-        className="fixed pointer-events-none z-[100] hidden md:block mix-blend-difference"
-        style={{
-          transform: `translate(${cursorPosition.x - 8}px, ${cursorPosition.y - 8}px)`,
-          transition: 'transform 0.08s linear',
-        }}
-      >
-        <div 
-          className={`w-4 h-4 rounded-full border border-white/90 ${
-            isHovering ? "scale-[2] opacity-40" : "scale-100 opacity-80"
-          }`}
-          style={{ transition: 'transform 0.15s ease-out, opacity 0.15s ease-out' }}
-        />
-      </div>
-      <div 
-        className="fixed pointer-events-none z-[100] hidden md:block"
-        style={{
-          transform: `translate(${cursorPosition.x - 2}px, ${cursorPosition.y - 2}px)`,
-          transition: 'transform 0.05s linear',
-        }}
-      >
-        <div 
-          className={`w-1 h-1 rounded-full bg-primary ${isHovering ? "scale-0" : "scale-100"}`}
-          style={{ 
-            boxShadow: '0 0 6px hsl(var(--primary))',
-            transition: 'transform 0.1s ease-out',
-          }}
-        />
-      </div>
 
       <Navbar 
         activeTab={activeTab} 
