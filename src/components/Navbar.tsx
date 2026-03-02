@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Home, Puzzle, Info, Lock, KeyRound } from "lucide-react";
+import { Lock, KeyRound } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
 interface NavbarProps {
@@ -10,19 +10,19 @@ interface NavbarProps {
 
 interface Tab {
   id: "home" | "puzzle" | "info";
-  label: string;
-  icon: typeof Home;
+  emoji: string;
 }
 
 const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [clickedTab, setClickedTab] = useState<string | null>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const tabs: Tab[] = useMemo(
     () => [
-      { id: "home", label: "Home", icon: Home },
-      { id: "puzzle", label: "Puzzle", icon: Puzzle },
-      { id: "info", label: "Info", icon: Info },
+      { id: "home", emoji: "🏠" },
+      { id: "puzzle", emoji: "🧩" },
+      { id: "info", emoji: "🙋‍♂️" },
     ],
     []
   );
@@ -38,9 +38,15 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
     }
   }, [activeTab, tabs]);
 
+  const handleTabClick = (tab: "home" | "puzzle" | "info") => {
+    setClickedTab(tab);
+    setTimeout(() => setClickedTab(null), 400);
+    onTabChange(tab);
+  };
+
   return (
     <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center gap-2 px-1.5 py-1.5 rounded-full bg-background/80 backdrop-blur-xl border border-border/30 shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
+      <div className="flex items-center gap-1.5 px-1.5 py-1.5 rounded-full bg-background/80 backdrop-blur-xl border border-border/30 shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
         {/* Lock/Logo button */}
         {activeTab === "puzzle" ? (
           <button
@@ -56,16 +62,16 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
           </div>
         )}
 
-        {/* Segmented pill navigation */}
+        {/* Emoji navigation */}
         <div className="relative flex items-center">
-          {/* Floating active indicator pill */}
+          {/* Floating active indicator */}
           <div
             className="absolute h-[calc(100%-6px)] top-[3px] rounded-full bg-primary/15 border border-primary/20"
             style={{
               left: indicatorStyle.left + 2,
               width: indicatorStyle.width - 4,
-              transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-              boxShadow: "0 0 12px hsl(var(--primary) / 0.3)",
+              transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              boxShadow: "0 0 16px hsl(var(--primary) / 0.25)",
             }}
           />
 
@@ -73,21 +79,19 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
             <button
               key={tab.id}
               ref={(el) => (tabRefs.current[index] = el)}
-              onClick={() => onTabChange(tab.id)}
-              className={`relative flex items-center gap-1.5 px-3.5 py-2 text-[11px] font-medium tracking-wider uppercase transition-all duration-300 rounded-full ${
-                activeTab === tab.id
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              onClick={() => handleTabClick(tab.id)}
+              className="relative flex items-center justify-center w-11 h-9 rounded-full transition-all duration-300"
             >
-              <tab.icon
-                className={`w-3.5 h-3.5 transition-all duration-300 ${
+              <span
+                className={`text-lg transition-all duration-300 select-none ${
                   activeTab === tab.id
-                    ? "scale-110 drop-shadow-[0_0_6px_hsl(var(--primary)/0.8)]"
-                    : "scale-100"
-                }`}
-              />
-              {tab.label}
+                    ? "scale-125 drop-shadow-[0_0_8px_hsl(var(--primary)/0.6)]"
+                    : "scale-100 opacity-60 hover:opacity-90 hover:scale-110"
+                } ${clickedTab === tab.id ? "animate-[bounce_0.4s_ease-out]" : ""}`}
+                style={{ filter: activeTab === tab.id ? 'none' : 'grayscale(0.3)' }}
+              >
+                {tab.emoji}
+              </span>
             </button>
           ))}
         </div>
