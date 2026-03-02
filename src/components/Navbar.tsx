@@ -20,9 +20,9 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
 
   const tabs: Tab[] = useMemo(
     () => [
-      { id: "home", emoji: "🏠" },
-      { id: "puzzle", emoji: "🧩" },
-      { id: "info", emoji: "🙋‍♂️" },
+      { id: "home", emoji: "⌂" },
+      { id: "puzzle", emoji: "✦" },
+      { id: "info", emoji: "☉" },
     ],
     []
   );
