@@ -13,9 +13,9 @@ const InfoSection = () => {
           style={{ minHeight: '100vh' }}
         />
         {/* Gradient overlays for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background/70" />
       </div>
 
       {/* Content overlay */}
