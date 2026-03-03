@@ -58,7 +58,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
           </button>
         ) : (
           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center ml-0.5">
-            <span className="text-xs font-bold gradient-text font-mono">42</span>
+            <span className="text-xs font-bold gradient-text font-mono tracking-widest">42</span>
           </div>
         )}
 

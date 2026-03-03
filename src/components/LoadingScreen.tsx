@@ -148,11 +148,11 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
             ))}
           </div>
           <p
-            className="text-sm font-black tracking-wider uppercase"
+            className="text-sm tracking-[0.3em] uppercase"
             style={{
               color: "#1a1a1a",
               textShadow: "2px 2px 0px rgba(255,255,255,0.3)",
-              fontFamily: "system-ui, -apple-system, sans-serif",
+              fontFamily: "'Permanent Marker', cursive",
             }}
           >
             {imagesLoaded ? "READY!" : `${progress}%`}

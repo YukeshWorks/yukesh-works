@@ -14,8 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        display: ['Orbitron', 'sans-serif'],
+        sans: ['Chakra Petch', 'sans-serif'],
+        display: ['Permanent Marker', 'cursive'],
+        heading: ['Bebas Neue', 'sans-serif'],
+        mono: ['VT323', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
