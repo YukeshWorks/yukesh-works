@@ -4,9 +4,10 @@ import mobileBg from "@/assets/mobile-bg.jpg";
 
 interface VideoBackgroundProps {
   beatIntensity?: number;
+  onLoaded?: () => void;
 }
 
-const VideoBackground = ({ beatIntensity = 0 }: VideoBackgroundProps) => {
+const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [bgLoaded, setBgLoaded] = useState(false);
 
@@ -37,7 +38,7 @@ const VideoBackground = ({ beatIntensity = 0 }: VideoBackgroundProps) => {
             filter: 'brightness(0.65)',
             transform: 'translateZ(0)',
           }}
-          onLoad={() => setBgLoaded(true)}
+          onLoad={() => { setBgLoaded(true); onLoaded?.(); }}
           loading="eager"
         />
       </div>

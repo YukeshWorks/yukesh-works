@@ -13,11 +13,12 @@ const HomePage = () => {
   const [beatIntensity, setBeatIntensity] = useState(0);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [contentVisible, setContentVisible] = useState(false);
+  const [bgReady, setBgReady] = useState(false);
 
-  // Trigger staggered content entrance after mount
-  useEffect(() => {
-    const timer = setTimeout(() => setContentVisible(true), 100);
-    return () => clearTimeout(timer);
+  // Show content only after background image has loaded
+  const handleBgLoaded = useCallback(() => {
+    setBgReady(true);
+    setTimeout(() => setContentVisible(true), 150);
   }, []);
 
   useEffect(() => {
@@ -65,7 +66,7 @@ const HomePage = () => {
   return (
     <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
       {/* Cinematic video background */}
-      <VideoBackground beatIntensity={beatIntensity} />
+      <VideoBackground beatIntensity={beatIntensity} onLoaded={handleBgLoaded} />
       
       {/* Audio controller with beat detection */}
       <AudioController onBeat={handleBeat} />
