@@ -88,7 +88,7 @@ const HomePage = () => {
         <div className="max-w-lg">
           {/* Status badge - slides from left */}
           <div 
-            className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-2xl glass text-[10px] font-black tracking-wide uppercase border-2 border-foreground/20 transition-all duration-500 ease-out"
+            className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-2xl glass text-[10px] font-heading tracking-[0.2em] uppercase border-2 border-foreground/20 transition-all duration-500 ease-out"
             style={{ 
               opacity: contentVisible ? 1 : 0,
               transform: contentVisible ? 'translateX(0)' : 'translateX(-30px)',
@@ -110,26 +110,27 @@ const HomePage = () => {
           
           {/* Name - fades in */}
           <h1 
-            className="text-3xl md:text-5xl lg:text-6xl font-black mb-3 tracking-tight cartoon-text transition-all duration-600 ease-out"
+            className="text-3xl md:text-5xl lg:text-6xl mb-3 tracking-tight transition-all duration-600 ease-out"
             style={{ 
               opacity: contentVisible ? 1 : 0,
               transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
               transitionDelay: '350ms',
             }}
           >
-            <span className="text-foreground/90 font-medium" style={{ textShadow: '2px 2px 0px hsl(var(--primary) / 0.3)' }}>Hi, I'm</span>
+            <span className="text-foreground/90 font-heading text-2xl md:text-3xl lg:text-4xl tracking-[0.15em] uppercase" style={{ textShadow: '2px 2px 0px hsl(var(--primary) / 0.3)' }}>Hi, I'm</span>
             <br />
-            <span className="gradient-text breathing-glow font-black" style={{ textShadow: '3px 3px 0px rgba(0,0,0,0.2)' }}>Yukesh Kumar</span>
+            <span className="gradient-text breathing-glow font-display" style={{ textShadow: '4px 4px 0px rgba(0,0,0,0.3)', fontSize: '110%' }}>Yukesh Kumar</span>
           </h1>
           
           {/* Tagline - slides from left */}
           <p 
-            className="text-muted-foreground text-sm md:text-base mt-4 max-w-sm leading-relaxed font-medium transition-all duration-500 ease-out"
+            className="text-muted-foreground text-sm md:text-base mt-4 max-w-sm leading-relaxed font-medium transition-all duration-500 ease-out font-mono text-base md:text-lg"
             style={{ 
               textShadow: '1px 1px 0px rgba(0,0,0,0.1)',
               opacity: contentVisible ? 1 : 0,
               transform: contentVisible ? 'translateX(0)' : 'translateX(-20px)',
               transitionDelay: '500ms',
+              letterSpacing: '0.05em',
             }}
           >
             Lost in thoughts, found in creativity.
@@ -146,14 +147,14 @@ const HomePage = () => {
           >
             <button 
               onClick={() => setIsPortfolioOpen(true)}
-              className="px-5 py-2.5 rounded-2xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-wide hover:scale-105 active:scale-95 transition-transform duration-200 border-3 border-black"
+              className="px-5 py-2.5 rounded-2xl bg-primary text-primary-foreground text-xs font-heading uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-transform duration-200 border-3 border-black"
               style={{ boxShadow: '3px 3px 0px rgba(0,0,0,0.3)' }}
             >
               View Work
             </button>
             <button 
               onClick={() => setIsContactOpen(true)}
-              className="px-5 py-2.5 rounded-2xl glass text-xs font-black uppercase tracking-wide hover:bg-primary/10 hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-foreground/30"
+              className="px-5 py-2.5 rounded-2xl glass text-xs font-heading uppercase tracking-[0.2em] hover:bg-primary/10 hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-foreground/30"
               style={{ boxShadow: '3px 3px 0px rgba(0,0,0,0.1)' }}
             >
               Contact Me
@@ -169,7 +170,7 @@ const HomePage = () => {
               transitionDelay: '800ms',
             }}
           >
-            <span className="text-[10px] font-black tracking-wider uppercase opacity-70">Connect</span>
+            <span className="text-[10px] font-heading tracking-[0.3em] uppercase opacity-70">Connect</span>
             <div className="w-8 h-0.5 bg-foreground/30 rounded-full" />
             <div className="flex gap-2">
               <a href="#" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
@@ -191,7 +192,7 @@ const HomePage = () => {
       
       {/* Time/Date display - BOTTOM of page */}
       <div className="absolute bottom-3 right-3 z-20 fade-in-up opacity-0 delay-500">
-        <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/50 font-mono">
+        <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/50 font-mono tracking-wider">
           <span className="time-pulse">{formatTime(currentTime)}</span>
           <span className="opacity-30">•</span>
           <span>{formatDate(currentTime)}</span>
