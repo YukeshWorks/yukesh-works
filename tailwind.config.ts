@@ -14,10 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Chakra Petch', 'sans-serif'],
-        display: ['Permanent Marker', 'cursive'],
-        heading: ['Bebas Neue', 'sans-serif'],
-        mono: ['VT323', 'monospace'],
+        sans: ['Outfit', 'sans-serif'],
+        display: ['Syne', 'sans-serif'],
+        heading: ['Space Grotesk', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
