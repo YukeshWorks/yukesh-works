@@ -14,10 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Rajdhani', 'sans-serif'],
-        display: ['Bebas Neue', 'sans-serif'],
-        heading: ['Teko', 'sans-serif'],
-        mono: ['Share Tech Mono', 'monospace'],
+        sans: ['Chakra Petch', 'sans-serif'],
+        display: ['Archivo Black', 'sans-serif'],
+        heading: ['Orbitron', 'sans-serif'],
+        mono: ['Fira Code', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
