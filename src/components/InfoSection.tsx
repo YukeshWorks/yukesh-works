@@ -9,15 +9,15 @@ const InfoSection = () => {
   return (
     <section className="min-h-screen flex flex-col relative overflow-hidden page-transition bg-background">
       {/* Full-screen photo background */}
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center md:justify-end">
         <img
           src={profileHero}
           alt="Yukesh"
-          className="h-full w-auto max-w-none object-contain object-center opacity-75 md:opacity-85"
+          className="h-full w-auto max-w-none object-contain object-center md:object-right opacity-75 md:opacity-85"
           style={{ minHeight: '100vh' }}
         />
         {/* Gradient overlays for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-background/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/40" />
       </div>
