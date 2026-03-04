@@ -13,13 +13,21 @@ const InfoSection = () => {
         <img
           src={profileHero}
           alt="Yukesh"
-          className="h-full w-auto max-w-none object-contain object-center md:object-right opacity-75 md:opacity-85"
+          className="h-full w-auto max-w-none object-contain object-center md:object-right opacity-90"
           style={{ minHeight: '100vh' }}
         />
-        {/* Gradient overlays for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/40" />
+        {/* Corner vignette fade - keeps face area clear */}
+        <div className="absolute inset-0" style={{
+          background: `
+            radial-gradient(ellipse at center, transparent 30%, hsl(var(--background) / 0.3) 60%, hsl(var(--background) / 0.85) 100%)
+          `
+        }} />
+        {/* Left edge fade for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/30 to-transparent w-1/2" />
+        {/* Bottom subtle fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background/60 to-transparent" />
+        {/* Top subtle fade */}
+        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background/60 to-transparent" />
       </div>
 
       {/* Floating "About Me" button - shown when content is hidden */}
