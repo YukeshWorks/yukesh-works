@@ -16,21 +16,21 @@ const InfoSection = () => {
           className="h-full w-auto max-w-none object-contain object-center md:object-right opacity-90"
           style={{ minHeight: '100vh' }}
         />
-        {/* Corner vignette fade - keeps face area clear */}
+        {/* Radial vignette — strong corner fade, clear center */}
         <div className="absolute inset-0" style={{
           background: `
-            radial-gradient(ellipse at center, transparent 30%, hsl(var(--background) / 0.3) 60%, hsl(var(--background) / 0.85) 100%)
+            radial-gradient(ellipse 60% 50% at 50% 45%, transparent 0%, transparent 25%, hsl(var(--background) / 0.4) 50%, hsl(var(--background) / 0.75) 70%, hsl(var(--background) / 0.95) 100%)
           `
         }} />
         {/* Left edge fade for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/30 to-transparent w-1/2" />
-        {/* Bottom subtle fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background/60 to-transparent" />
-        {/* Top subtle fade */}
-        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent w-1/2" />
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background/80 to-transparent" />
+        {/* Top fade */}
+        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-background/60 to-transparent" />
       </div>
 
-      {/* Floating "About Me" button - shown when content is hidden */}
+      {/* Floating "About Me" button */}
       {!showContent && (
         <div className="absolute inset-0 z-20 flex items-center justify-center">
           <button
@@ -42,27 +42,23 @@ const InfoSection = () => {
                 About Me
               </span>
             </div>
-            {/* Pulse ring */}
             <div className="absolute inset-0 rounded-2xl border border-primary/20 animate-ping" />
           </button>
         </div>
       )}
 
-      {/* Content overlay - shown after clicking About Me */}
+      {/* Content overlay */}
       {showContent && (
         <div className="relative z-10 flex-1 flex items-end md:items-center pb-16 md:pb-0 fade-in-up">
           <div className="container mx-auto px-6 md:px-12">
             <div className="max-w-md">
-              {/* Title with vertical accent line */}
               <div className="fade-in-up opacity-0 delay-200 relative pl-5 border-l-2 border-primary/40">
                 <h1 className="text-3xl md:text-5xl text-foreground font-display leading-tight">
-                  The Guy You'll
-                  <br />
+                  The Guy You'll<br />
                   <span className="gradient-text">Vibe With</span>
                 </h1>
               </div>
 
-              {/* Description */}
               <div className="fade-in-up opacity-0 delay-400 mt-6">
                 <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
                   I Mess Around With Whatever Catches My Attention (For As Long As I Remember It). 
@@ -75,12 +71,10 @@ const InfoSection = () => {
                 </div>
               </div>
 
-              {/* Pixel Eyes GIF */}
-              <div className="fade-in-up opacity-0 delay-500 mt-6 flex items-center gap-3">
+              <div className="fade-in-up opacity-0 delay-500 mt-6">
                 <img src={pixelEyes} alt="Pixel eyes" className="w-12 h-12 rounded-lg" />
               </div>
 
-              {/* Social */}
               <div className="fade-in-up opacity-0 delay-600 mt-6">
                 <div className="flex items-center gap-1 mb-3">
                   <div className="w-8 h-[1px] bg-primary/40" />
@@ -88,21 +82,13 @@ const InfoSection = () => {
                   <div className="flex-1 h-[1px] bg-border/50" />
                 </div>
                 <div className="flex items-center gap-5">
-                  <a 
-                    href="https://instagram.com/yuk3shh" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-all duration-300"
-                  >
+                  <a href="https://instagram.com/yuk3shh" target="_blank" rel="noopener noreferrer"
+                    className="group flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-all duration-300">
                     <Instagram size={16} className="group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-xs font-medium">@yuk3shh</span>
                   </a>
-                  <a 
-                    href="https://facebook.com/yukeshkumar" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-all duration-300"
-                  >
+                  <a href="https://facebook.com/yukeshkumar" target="_blank" rel="noopener noreferrer"
+                    className="group flex items-center gap-2.5 text-muted-foreground hover:text-primary transition-all duration-300">
                     <Facebook size={16} className="group-hover:scale-110 transition-transform duration-300" />
                     <span className="text-xs font-medium">yukeshkumar</span>
                   </a>
@@ -113,22 +99,17 @@ const InfoSection = () => {
         </div>
       )}
 
-      {/* Floating "That's Me" label pointing at photo */}
+      {/* "That's Me" label */}
       {showContent && (
         <div className="absolute right-6 md:right-16 top-1/3 z-10 fade-in-up opacity-0 delay-500 hidden md:flex items-center gap-0">
           <div className="px-3 py-1.5 rounded-l-full glass border border-primary/20 border-r-0">
-            <span className="text-[9px] font-heading uppercase tracking-[0.3em] text-primary whitespace-nowrap">
-              That's Me
-            </span>
+            <span className="text-[9px] font-heading uppercase tracking-[0.3em] text-primary whitespace-nowrap">That's Me</span>
           </div>
-          <div 
-            className="w-0 h-0"
-            style={{
-              borderTop: '6px solid transparent',
-              borderBottom: '6px solid transparent',
-              borderLeft: '8px solid hsl(var(--primary) / 0.3)',
-            }}
-          />
+          <div className="w-0 h-0" style={{
+            borderTop: '6px solid transparent',
+            borderBottom: '6px solid transparent',
+            borderLeft: '8px solid hsl(var(--primary) / 0.3)',
+          }} />
         </div>
       )}
     </section>
