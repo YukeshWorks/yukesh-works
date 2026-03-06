@@ -16,11 +16,13 @@ const InfoSection = () => {
           className="h-full w-auto max-w-none object-contain object-center md:object-right opacity-90"
           style={{ minHeight: '100vh' }}
         />
-        {/* Desktop only: edge fades (hidden on mobile) */}
-        <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent w-1/2" />
-        <div className="hidden md:block absolute inset-0 bg-gradient-to-l from-background/70 via-transparent to-transparent w-1/3 right-0 left-auto" />
-        <div className="hidden md:block absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background/60 to-transparent" />
-        <div className="hidden md:block absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-background/40 to-transparent" />
+        {/* Edge fades — both sides blend into background */}
+        <div className="absolute inset-0" style={{
+          background: `
+            linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 15%, transparent 40%, transparent 60%, hsl(var(--background) / 0.85) 85%, hsl(var(--background)) 100%),
+            linear-gradient(to bottom, hsl(var(--background) / 0.5) 0%, transparent 15%, transparent 85%, hsl(var(--background) / 0.7) 100%)
+          `
+        }} />
       </div>
 
       {/* Floating "About Me" button */}
