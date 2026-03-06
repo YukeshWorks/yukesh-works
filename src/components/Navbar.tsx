@@ -22,9 +22,9 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
 
   const tabs: Tab[] = useMemo(
     () => [
-      { id: "home", label: "BASE", icon: <Crosshair className="w-3.5 h-3.5" /> },
+      { id: "home", label: "", icon: <Crosshair className="w-3.5 h-3.5" /> },
       { id: "puzzle", label: "VAULT", icon: <Fingerprint className="w-3.5 h-3.5" /> },
-      { id: "info", label: "INTEL", icon: <Eye className="w-3.5 h-3.5" /> },
+      { id: "info", label: "", icon: <Eye className="w-3.5 h-3.5" /> },
     ],
     []
   );
