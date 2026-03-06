@@ -16,18 +16,11 @@ const InfoSection = () => {
           className="h-full w-auto max-w-none object-contain object-center md:object-right opacity-90"
           style={{ minHeight: '100vh' }}
         />
-        {/* Radial vignette — strong corner fade, clear center */}
-        <div className="absolute inset-0" style={{
-          background: `
-            radial-gradient(ellipse 60% 50% at 50% 45%, transparent 0%, transparent 25%, hsl(var(--background) / 0.4) 50%, hsl(var(--background) / 0.75) 70%, hsl(var(--background) / 0.95) 100%)
-          `
-        }} />
-        {/* Left edge fade for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent w-1/2" />
-        {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background/80 to-transparent" />
-        {/* Top fade */}
-        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-background/60 to-transparent" />
+        {/* Desktop only: edge fades (hidden on mobile) */}
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent w-1/2" />
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-l from-background/70 via-transparent to-transparent w-1/3 right-0 left-auto" />
+        <div className="hidden md:block absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background/60 to-transparent" />
+        <div className="hidden md:block absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-background/40 to-transparent" />
       </div>
 
       {/* Floating "About Me" button */}
