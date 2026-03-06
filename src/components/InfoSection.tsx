@@ -17,7 +17,8 @@ const InfoSection = () => {
           style={{ minHeight: '100vh' }}
         />
         {/* Edge fades — both sides blend into background */}
-        <div className="absolute inset-0" style={{
+        {/* Edge fades — desktop only */}
+        <div className="hidden md:block absolute inset-0" style={{
           background: `
             linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 15%, transparent 40%, transparent 60%, hsl(var(--background) / 0.85) 85%, hsl(var(--background)) 100%),
             linear-gradient(to bottom, hsl(var(--background) / 0.5) 0%, transparent 15%, transparent 85%, hsl(var(--background) / 0.7) 100%)
