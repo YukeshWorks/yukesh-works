@@ -28,14 +28,18 @@ const InfoSection = () => {
         <div className="absolute inset-0 z-20 flex items-center justify-center">
           <button
             onClick={() => setShowContent(true)}
-            className="group relative animate-[float_3s_ease-in-out_infinite] cursor-pointer"
+            className="group relative animate-[float_3s_ease-in-out_infinite] cursor-pointer flex flex-col items-center gap-2"
           >
-            <div className="px-8 py-4 rounded-2xl glass border border-primary/30 hover:border-primary/60 transition-all duration-500 hover:scale-110">
-              <span className="text-lg md:text-2xl font-bold font-display gradient-text tracking-wider">
+            <div className="px-5 py-2.5 rounded-xl glass border border-primary/30 hover:border-primary/60 transition-all duration-500 hover:scale-110">
+              <span className="text-xs md:text-sm font-bold font-display gradient-text tracking-[0.2em] uppercase">
                 About Me
               </span>
             </div>
-            <div className="absolute inset-0 rounded-2xl border border-primary/20 animate-ping" />
+            <div className="w-0 h-0 animate-bounce" style={{
+              borderLeft: '5px solid transparent',
+              borderRight: '5px solid transparent',
+              borderTop: '6px solid hsl(var(--primary) / 0.6)',
+            }} />
           </button>
         </div>
       )}
