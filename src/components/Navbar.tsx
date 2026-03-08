@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { Lock, KeyRound, Crosshair, Fingerprint, Eye, Zap } from "lucide-react";
+import { KeyRound, Flame, Skull, Crown, Diamond, Zap } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
 interface NavbarProps {
@@ -19,9 +19,9 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const tabs = useMemo(() => [
-    { id: "home" as const, label: "HOME", icon: <Crosshair className="w-4 h-4" /> },
-    { id: "puzzle" as const, label: "VAULT", icon: <Fingerprint className="w-4 h-4" /> },
-    { id: "info" as const, label: "INTEL", icon: <Eye className="w-4 h-4" /> },
+    { id: "home" as const, label: "HOME", icon: <Flame className="w-4 h-4" /> },
+    { id: "puzzle" as const, label: "VAULT", icon: <Diamond className="w-4 h-4" /> },
+    { id: "info" as const, label: "INTEL", icon: <Skull className="w-4 h-4" /> },
   ], []);
 
   // Dramatic staggered entrance
