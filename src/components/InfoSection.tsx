@@ -179,6 +179,14 @@ const InfoSection = () => {
           0% { transform: translateX(-100%); }
           50%, 100% { transform: translateX(100%); }
         }
+        @keyframes thatsMeBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes thatsMeArrow {
+          0%, 100% { transform: translateX(0); opacity: 0.6; }
+          50% { transform: translateX(5px); opacity: 1; }
+        }
       `}</style>
     </section>
   );
