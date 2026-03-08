@@ -186,6 +186,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [shake, setShake] = useState(false);
   const [successPhase, setSuccessPhase] = useState(0);
   const [showErrorVideo, setShowErrorVideo] = useState(false);
+  const errorVideoRef = useRef<HTMLVideoElement>(null);
 
   // Auto-dismiss intro after 2.5s + play intro sound
   useEffect(() => {
@@ -195,6 +196,21 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     const t2 = setTimeout(() => setShowIntro(false), 2500);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [showIntro]);
+
+  // Play error video with sound when triggered
+  useEffect(() => {
+    if (showErrorVideo && errorVideoRef.current) {
+      const vid = errorVideoRef.current;
+      vid.muted = false;
+      vid.volume = 1;
+      vid.currentTime = 0;
+      vid.play().catch(() => {
+        // Fallback: try muted first then unmute
+        vid.muted = true;
+        vid.play().then(() => { vid.muted = false; }).catch(() => {});
+      });
+    }
+  }, [showErrorVideo]);
 
   const handleDigit = useCallback((digit: string) => {
     if (status === "success") return;
@@ -276,8 +292,8 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
       <div className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center"
         style={{ animation: 'pageFadeIn 0.4s ease-out' }}>
         <video
+          ref={errorVideoRef}
           src={wrongPasscodeVideo}
-          autoPlay
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.8 }}
