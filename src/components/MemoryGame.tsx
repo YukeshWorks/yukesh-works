@@ -2,6 +2,30 @@ import { useState, useEffect, useCallback } from "react";
 
 const CARD_EMOJIS = ["🌈", "🔥", "💎", "👑", "⚡", "🎭", "🌊", "🦋"];
 
+const SAVAGE_WIN_MSGS = [
+  "Took you long enough... my WiFi loaded faster 🐌",
+  "Congrats! You have the memory of a... wait, what was I saying? 🧠",
+  "You won but at what cost? {moves} moves of pure suffering 😩",
+  "Even a goldfish would've done it in fewer moves 🐠",
+  "Victory! Your brain cell (singular) is celebrating 🎉",
+  "GG... but also, {moves} moves? Really? 💀",
+  "You matched emojis. Your parents must be SO proud 👏",
+  "Winner winner... but that move count is a sin 📊",
+];
+
+const SAVAGE_MISMATCH_MSGS = [
+  "Were you even looking? 👀",
+  "That wasn't it, chief 🚫",
+  "Your memory is giving amnesia 🧠💨",
+  "Bro just guessing at this point 🎲",
+  "Those two don't even look alike 😭",
+  "Wrong. Again. Shocking. 🤯",
+  "The cards are SCREAMING at you rn 🗣️",
+  "Even a random click would be better 🎰",
+  "Did you close your eyes? Be honest 😴",
+  "Pain. Agony, even. 💀",
+];
+
 interface Card {
   id: number;
   emoji: string;
@@ -17,6 +41,9 @@ const MemoryGame = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [bestScore, setBestScore] = useState(0);
+  const [mismatchMsg, setMismatchMsg] = useState("");
+  const [showMismatchMsg, setShowMismatchMsg] = useState(false);
+  const [consecutiveFails, setConsecutiveFails] = useState(0);
 
   const initGame = useCallback(() => {
     const pairs = [...CARD_EMOJIS, ...CARD_EMOJIS];
@@ -57,6 +84,8 @@ const MemoryGame = () => {
           ));
           setFlippedIds([]);
           setIsLocked(false);
+          setConsecutiveFails(0);
+          setShowMismatchMsg(false);
           setMatches(m => {
             const newM = m + 1;
             if (newM === CARD_EMOJIS.length) {
@@ -67,6 +96,11 @@ const MemoryGame = () => {
           });
         }, 500);
       } else {
+        setConsecutiveFails(prev => prev + 1);
+        const msg = SAVAGE_MISMATCH_MSGS[Math.floor(Math.random() * SAVAGE_MISMATCH_MSGS.length)];
+        setMismatchMsg(msg);
+        setShowMismatchMsg(true);
+        setTimeout(() => setShowMismatchMsg(false), 1500);
         setTimeout(() => {
           setCards(prev => prev.map(c =>
             c.id === first.id || c.id === second.id ? { ...c, isFlipped: false } : c
@@ -142,15 +176,30 @@ const MemoryGame = () => {
           ))}
         </div>
 
+        {/* Savage mismatch popup */}
+        {showMismatchMsg && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 glass rounded-xl px-4 py-2 text-center animate-fade-in pointer-events-none">
+            <p className="text-destructive text-xs font-bold">{mismatchMsg}</p>
+            {consecutiveFails >= 3 && (
+              <p className="text-muted-foreground text-[10px] mt-1">
+                {consecutiveFails} misses in a row... impressive (not) 💀
+              </p>
+            )}
+          </div>
+        )}
+
         {gameWon && (
           <div className="glass rounded-2xl p-6 text-center glow-border fade-in-up">
-            <p className="font-display text-xl font-bold text-primary mb-2">🎉 You Won!</p>
+            <p className="font-display text-xl font-bold text-primary mb-1">🎉 You Won!</p>
+            <p className="text-muted-foreground text-xs mb-2 italic max-w-[260px]">
+              {SAVAGE_WIN_MSGS[Math.floor(Math.random() * SAVAGE_WIN_MSGS.length)].replace("{moves}", String(moves))}
+            </p>
             <p className="text-muted-foreground text-sm mb-3">Completed in {moves} moves</p>
             <button
               onClick={initGame}
               className="glass px-4 py-2 rounded-lg text-sm text-primary hover:bg-primary/10 transition-colors btn-glow"
             >
-              Play Again
+              Try Again (you'll need it) 🔄
             </button>
           </div>
         )}
