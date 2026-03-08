@@ -146,6 +146,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "del", "0", ""];
 
+  return (
     <>
     {showIntro && (
       <section className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
