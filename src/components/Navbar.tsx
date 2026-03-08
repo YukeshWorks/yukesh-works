@@ -102,15 +102,12 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
         <div
           className="relative flex items-center"
           style={{
-            background: "rgba(0, 0, 0, 0.85)",
-            backdropFilter: "blur(30px)",
-            borderRadius: "16px",
-            padding: "6px 8px",
-            border: "1px solid rgba(255,255,255,0.05)",
-            boxShadow: `
-              0 1px 0 rgba(255,255,255,0.04) inset,
-              0 20px 50px rgba(0,0,0,0.6)
-            `,
+            background: "rgba(0, 0, 0, 0.6)",
+            backdropFilter: "blur(20px)",
+            borderRadius: "50px",
+            padding: "4px 6px",
+            border: "1px solid rgba(255,255,255,0.06)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
           }}
         >
           {/* Logo button */}
