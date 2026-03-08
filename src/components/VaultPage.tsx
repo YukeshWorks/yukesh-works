@@ -79,13 +79,8 @@ const VaultPage = () => {
   if (activeSection === "folder") {
     return (
       <section className={`min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background" />
-        <img
-          src={vaultLamp}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{ imageRendering: 'auto' }}
-        />
+        <div className="absolute inset-0 bg-background" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.06)_0%,transparent_70%)]" />
 
         {backButton}
 
