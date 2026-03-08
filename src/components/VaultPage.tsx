@@ -139,15 +139,20 @@ const VaultPage = () => {
       <div className="relative z-10 flex flex-col items-center mt-[50vh] ml-56 fade-in-up delay-300" style={{ opacity: 0 }}>
         <button
           onClick={() => navigateTo("games-menu")}
-          className="group relative bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-xl px-8 py-3 flex items-center gap-3
-                     hover:bg-white/[0.1] hover:border-white/20 hover:scale-[1.05] active:scale-[0.95]
-                     transition-all duration-500 cursor-pointer
-                     hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]
-                     animate-[breatheGlow_3s_ease-in-out_infinite]"
+          className="group relative flex flex-col items-center gap-2
+                     hover:scale-[1.08] active:scale-[0.95]
+                     transition-all duration-500 cursor-pointer"
         >
-          <Joystick className="text-white/60 group-hover:text-white transition-colors duration-300" size={18} />
-          <span className="font-display text-sm font-bold text-white/80 group-hover:text-white transition-colors duration-300 tracking-widest uppercase">
-            Games
+          {/* Folder icon */}
+          <div className="relative w-16 h-14">
+            {/* Folder tab */}
+            <div className="absolute top-0 left-0 w-7 h-3 bg-[#3B9EFF] rounded-t-md" />
+            {/* Folder body */}
+            <div className="absolute top-2 left-0 w-16 h-12 bg-gradient-to-b from-[#4AABFF] to-[#2B8AE6] rounded-md shadow-[0_4px_20px_rgba(59,158,255,0.3)]
+                            group-hover:shadow-[0_4px_30px_rgba(59,158,255,0.5)] transition-shadow duration-500" />
+          </div>
+          <span className="font-display text-[11px] font-bold text-white/70 group-hover:text-white transition-colors duration-300 tracking-wider">
+            games
           </span>
         </button>
       </div>
