@@ -197,6 +197,21 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [showIntro]);
 
+  // Play error video with sound when triggered
+  useEffect(() => {
+    if (showErrorVideo && errorVideoRef.current) {
+      const vid = errorVideoRef.current;
+      vid.muted = false;
+      vid.volume = 1;
+      vid.currentTime = 0;
+      vid.play().catch(() => {
+        // Fallback: try muted first then unmute
+        vid.muted = true;
+        vid.play().then(() => { vid.muted = false; }).catch(() => {});
+      });
+    }
+  }, [showErrorVideo]);
+
   const handleDigit = useCallback((digit: string) => {
     if (status === "success") return;
     if (activeIndex >= 4) return;
