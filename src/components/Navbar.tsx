@@ -139,33 +139,6 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
 
           {/* Tab section */}
           <div ref={containerRef} className="relative flex items-center">
-            {/* Morph blob indicator */}
-            <div
-              className="absolute top-0 h-full rounded-full pointer-events-none z-0"
-              style={{
-                left: morphX,
-                width: morphW,
-                background: `linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--primary) / 0.04))`,
-                border: "1px solid hsl(var(--primary) / 0.18)",
-                boxShadow: `
-                  0 0 24px hsl(var(--primary) / 0.08),
-                  inset 0 1px 0 hsl(var(--primary) / 0.1)
-                `,
-                transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              }}
-            />
-
-            {/* Glow trail under indicator */}
-            <div
-              className="absolute -bottom-2 h-4 rounded-full pointer-events-none z-0"
-              style={{
-                left: morphX + morphW * 0.2,
-                width: morphW * 0.6,
-                background: "hsl(var(--primary) / 0.12)",
-                filter: "blur(10px)",
-                transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              }}
-            />
 
             {tabs.map((tab, i) => {
               const isActive = activeTab === tab.id;
