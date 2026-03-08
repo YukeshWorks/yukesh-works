@@ -7,6 +7,8 @@ import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import OfflinePage from "@/components/OfflinePage";
 import WelcomePage from "@/components/WelcomePage";
+import ParticleBackground from "@/components/ParticleBackground";
+import CursorLight from "@/components/CursorLight";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -120,6 +122,8 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
+      <ParticleBackground />
+      <CursorLight />
       <Navbar activeTab={activeTab} onTabChange={handleTabChange} onLockClick={handleLockClick} />
       <div className="page-container" style={{ perspective: '1500px' }}>
         <div className={getTransitionClasses()}>
