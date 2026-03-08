@@ -85,7 +85,7 @@ const VaultPage = () => {
   // Games submenu
   if (activeSection === "games-menu") {
     return (
-      <section className={`min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : 'page-transition'}`}>
+      <section className={`h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : 'page-transition'}`}>
         <div className="absolute inset-0 bg-black" />
         <img
           src={vaultLamp}
@@ -143,7 +143,7 @@ const VaultPage = () => {
 
   // Main vault entrance
   return (
-    <section className={`min-h-screen flex flex-col items-center relative overflow-hidden page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
+    <section className={`h-screen flex flex-col items-center relative overflow-hidden page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
       <div className="absolute inset-0 bg-black" />
       <img
         src={vaultLamp}

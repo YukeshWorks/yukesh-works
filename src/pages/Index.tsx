@@ -226,7 +226,7 @@ const Index = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
+    <div className={`h-screen overflow-hidden bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
       <ParticleBackground />
       <CursorLight />
       <Navbar activeTab={activeTab} onTabChange={handleTabChange} onLockClick={handleLockClick} on42Click={handle42Click} />
