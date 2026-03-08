@@ -555,6 +555,16 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
           0%, 100% { transform: translateY(0) scale(1); }
           50% { transform: translateY(-15px) scale(1.03); }
         }
+        @keyframes skullFlashIn {
+          0% { opacity: 0; background: rgba(220,38,38,0.15); }
+          20% { opacity: 1; background: rgba(220,38,38,0.1); }
+          80% { opacity: 1; background: rgba(0,0,0,0.3); }
+          100% { opacity: 0.8; background: rgba(0,0,0,0.2); }
+        }
+        @keyframes skullPulse {
+          0% { transform: scale(1); opacity: 0.9; }
+          100% { transform: scale(1.05); opacity: 1; }
+        }
       `}</style>
     </section>
     </>
