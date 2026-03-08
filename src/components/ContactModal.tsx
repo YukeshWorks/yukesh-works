@@ -136,7 +136,7 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
             Email: <a href="mailto:mailtoyukesh33@gmail.com" className="text-primary hover:underline">mailtoyukesh33@gmail.com</a>
           </p>
           <p className="text-[10px] text-muted-foreground">
-            Phone: <a href="tel:9080861733" className="text-primary hover:underline">9080861733</a>
+            WhatsApp: <a href="https://wa.me/919080861733" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">9080861733</a>
           </p>
         </div>
       </div>
