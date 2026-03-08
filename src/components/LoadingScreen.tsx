@@ -79,8 +79,8 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
                 style={{ backgroundColor: "#1a1a1a", animation: "cartoonBounce 0.8s ease-in-out infinite", animationDelay: `${i * 0.1}s` }} />
             ))}
           </div>
-          <p className="text-sm tracking-[0.3em] uppercase"
-            style={{ color: "#1a1a1a", textShadow: "2px 2px 0px rgba(255,255,255,0.3)", fontFamily: "'Permanent Marker', cursive" }}>
+          <p className="text-lg tracking-[0.3em] uppercase font-loading"
+            style={{ color: "#1a1a1a", textShadow: "2px 2px 0px rgba(255,255,255,0.3)" }}>
             {ready ? "READY!" : `${progress}%`}
           </p>
         </div>

@@ -14,10 +14,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Chakra Petch', 'sans-serif'],
-        display: ['Archivo Black', 'sans-serif'],
-        heading: ['Orbitron', 'sans-serif'],
+        sans: ['Urbanist', 'sans-serif'],
+        display: ['Montserrat', 'sans-serif'],
+        heading: ['Montserrat', 'sans-serif'],
         mono: ['Fira Code', 'monospace'],
+        loading: ['Bebas Neue', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
