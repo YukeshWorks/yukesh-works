@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft, Joystick } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
@@ -18,6 +18,13 @@ const VAULT_ITEMS: { id: VaultSection; icon: typeof Gamepad2; title: string; sub
 const VaultPage = () => {
   const [activeSection, setActiveSection] = useState<VaultSection>("main");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false);
+
+  const handleImgLoad = useCallback(() => {
+    setImgLoaded(true);
+    setTimeout(() => setContentVisible(true), 400);
+  }, []);
 
   const navigateTo = (section: VaultSection) => {
     setIsTransitioning(true);
