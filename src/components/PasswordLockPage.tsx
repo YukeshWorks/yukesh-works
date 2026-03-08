@@ -326,6 +326,11 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
           100% { width: 4rem; opacity: 0.5; }
         }
         .animate-successLine { animation: successLine 0.8s ease-out forwards; animation-delay: 0.4s; width: 0; }
+
+        @keyframes skeletonFloat {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-15px) scale(1.03); }
+        }
       `}</style>
     </section>
   );
