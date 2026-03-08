@@ -119,9 +119,10 @@ const Index = () => {
       root.classList.remove("theme-blue", "theme-red", "theme-dark");
       root.classList.add(activeTab === "info" ? "theme-red" : "theme-dark");
     } else if (prevThemeRef.current) {
-      // Restore previous theme when back to home
+      // Restore user's saved theme (or default blue) when back to home
+      const savedTheme = localStorage.getItem("portfolio-theme") || "blue";
       root.classList.remove("theme-blue", "theme-red", "theme-dark");
-      root.classList.add(prevThemeRef.current);
+      root.classList.add(`theme-${savedTheme}`);
       prevThemeRef.current = null;
     }
   }, [activeTab]);

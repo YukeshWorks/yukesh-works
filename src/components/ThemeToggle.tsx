@@ -13,10 +13,22 @@ const ThemeToggle = ({ onThemeChange }: { onThemeChange?: (t: Theme) => void }) 
   const [current, setCurrent] = useState<Theme>("blue");
   const [anim, setAnim] = useState(false);
 
+  // Read initial theme from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("portfolio-theme") as Theme;
     if (saved && themes.find(t => t.id === saved)) { setCurrent(saved); apply(saved); }
   }, []);
+
+  // Sync icon with external theme changes (auto-switch on tab change)
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const r = document.documentElement;
+      const active = themes.find(t => r.classList.contains(`theme-${t.id}`));
+      if (active && active.id !== current) setCurrent(active.id);
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, [current]);
 
   const apply = (t: Theme) => {
     const r = document.documentElement;
