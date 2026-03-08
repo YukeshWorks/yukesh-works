@@ -145,7 +145,7 @@ const IslandCreator = () => {
   };
 
   return (
-    <section className="min-h-[90vh] flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
+    <section className="h-screen flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background" />
 
       <div className="relative z-10 flex flex-col items-center gap-3 w-full max-w-2xl px-4">

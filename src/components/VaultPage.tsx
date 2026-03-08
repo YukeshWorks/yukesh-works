@@ -58,7 +58,7 @@ const VaultPage = () => {
       <div className={transClass}>
         {backButton("games-menu")}
         <GameAuthButton />
-        <section className="min-h-[90vh] flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
+        <section className="h-screen flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
           <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
           <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-float-slow" />
           <div className="relative z-10 flex flex-col items-center gap-4">
