@@ -212,6 +212,10 @@
 }
 @keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pageFadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes breatheGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(255,255,255,0.05); }
+  50% { box-shadow: 0 0 25px rgba(255,255,255,0.12), 0 0 50px rgba(255,255,255,0.05); }
+}
 
 /* Float animation */
 .animate-float-slow { animation: floatSlow 8s ease-in-out infinite; }
