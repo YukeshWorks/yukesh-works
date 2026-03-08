@@ -140,7 +140,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
             />
           ) : (
             <div className="relative z-10 flex items-center justify-center">
-              <Zap
+              <Crosshair
                 className="w-4 h-4 text-primary"
                 style={{
                   filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.5))",
