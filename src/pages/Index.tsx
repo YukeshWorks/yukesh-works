@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import HomePage from "@/components/HomePage";
-import SnakeGame from "@/components/SnakeGame";
+import VaultPage from "@/components/VaultPage";
 import InfoSection from "@/components/InfoSection";
 import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -104,7 +104,7 @@ const Index = () => {
     }
     switch (activeTab) {
       case "home": return <HomePage />;
-      case "puzzle": return <SnakeGame />;
+      case "puzzle": return <VaultPage />;
       case "info": return <InfoSection />;
       default: return <HomePage />;
     }
