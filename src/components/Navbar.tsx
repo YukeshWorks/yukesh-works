@@ -177,7 +177,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
                   key={tab.id}
                   ref={el => (tabRefs.current[i] = el)}
                   onClick={() => handleClick(tab.id, i)}
-                  className="relative z-10 flex items-center gap-2 px-4 py-2.5 rounded-xl"
+                  className="relative z-10 flex items-center gap-1.5 px-3 py-2 rounded-full"
                   style={{
                     transform: isPressed
                       ? "scale(0.85) translateY(1px)"
