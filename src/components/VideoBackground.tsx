@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import desktopBg from "@/assets/home-bg.jpg";
-import mobileBg from "@/assets/mobile-bg.jpg";
+import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
 
 interface VideoBackgroundProps {
   beatIntensity?: number;
@@ -9,28 +9,48 @@ interface VideoBackgroundProps {
 
 const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) => {
   const [isMobile] = useState(() => window.innerWidth < 768);
-  const [imgReady, setImgReady] = useState(false);
+  const [ready, setReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const handleImgLoad = () => {
-    setImgReady(true);
+  const handleReady = () => {
+    setReady(true);
     onLoaded?.();
   };
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <img
-        src={isMobile ? mobileBg : desktopBg}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{
-          filter: 'brightness(0.65)',
-          transform: 'translateZ(0)',
-          opacity: imgReady ? 1 : 0,
-          transition: 'opacity 0.8s ease-out',
-        }}
-        loading="eager"
-        onLoad={handleImgLoad}
-      />
+      {isMobile ? (
+        <video
+          ref={videoRef}
+          src={mobileBgVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            filter: 'brightness(0.65)',
+            transform: 'translateZ(0)',
+            opacity: ready ? 1 : 0,
+            transition: 'opacity 0.8s ease-out',
+          }}
+          onCanPlay={handleReady}
+        />
+      ) : (
+        <img
+          src={desktopBg}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            filter: 'brightness(0.65)',
+            transform: 'translateZ(0)',
+            opacity: ready ? 1 : 0,
+            transition: 'opacity 0.8s ease-out',
+          }}
+          loading="eager"
+          onLoad={handleReady}
+        />
+      )}
 
       <div className="absolute inset-0" style={{
         background: isMobile
