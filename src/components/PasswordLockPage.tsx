@@ -140,6 +140,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [attempts, setAttempts] = useState(0);
   const [shake, setShake] = useState(false);
   const [successPhase, setSuccessPhase] = useState(0);
+  const [showErrorVideo, setShowErrorVideo] = useState(false);
 
   // Auto-dismiss intro after 2.5s + play intro sound
   useEffect(() => {
@@ -174,14 +175,23 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
         } else {
           setStatus("error");
           playErrorSound();
-          setAttempts(prev => prev + 1);
+          const newAttempts = attempts + 1;
+          setAttempts(newAttempts);
           setShake(true);
-          setTimeout(() => {
-            setShake(false);
-            setDigits(["", "", "", ""]);
-            setActiveIndex(0);
-            setStatus("idle");
-          }, 800);
+          if (newAttempts >= 2) {
+            // Show fullscreen error video on 2nd wrong attempt
+            setTimeout(() => {
+              setShake(false);
+              setShowErrorVideo(true);
+            }, 500);
+          } else {
+            setTimeout(() => {
+              setShake(false);
+              setDigits(["", "", "", ""]);
+              setActiveIndex(0);
+              setStatus("idle");
+            }, 800);
+          }
         }
       }, 200);
     } else {
