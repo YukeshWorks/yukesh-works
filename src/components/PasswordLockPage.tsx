@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowLeft, ShieldCheck, ShieldX, CheckCircle2 } from "lucide-react";
 import skeletonGif from "@/assets/skeleton-red.gif";
 import redEyesGif from "@/assets/red-eyes.gif";
+import wrongPasscodeVideo from "@/assets/wrong-passcode.mp4";
 
 const playClickSound = (pitch = 1) => {
   try {
