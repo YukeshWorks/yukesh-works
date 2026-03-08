@@ -279,7 +279,6 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
           src={wrongPasscodeVideo}
           autoPlay
           playsInline
-          autoPlay={true}
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.8 }}
         />
