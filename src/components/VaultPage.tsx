@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft } from "lucide-react";
+import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft, Joystick } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
 import IslandCreator from "./IslandCreator";
 import vaultLamp from "@/assets/vault-lamp.gif";
 
-type VaultSection = "menu" | "snake" | "scratch" | "memory" | "island";
+type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island";
 
 const VAULT_ITEMS: { id: VaultSection; icon: typeof Gamepad2; title: string; subtitle: string; delay: string }[] = [
   { id: "snake", icon: Gamepad2, title: "Snake Game", subtitle: "Classic arcade vibes", delay: "delay-100" },
@@ -16,7 +16,7 @@ const VAULT_ITEMS: { id: VaultSection; icon: typeof Gamepad2; title: string; sub
 ];
 
 const VaultPage = () => {
-  const [activeSection, setActiveSection] = useState<VaultSection>("menu");
+  const [activeSection, setActiveSection] = useState<VaultSection>("main");
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const navigateTo = (section: VaultSection) => {
@@ -31,34 +31,34 @@ const VaultPage = () => {
     ? "animate-[pageFadeOut_0.3s_ease-in_forwards]"
     : "animate-[pageEnter_0.6s_cubic-bezier(0.16,1,0.3,1)_forwards]";
 
-  const backButton = (
+  const backButton = (target: VaultSection = "main") => (
     <button
-      onClick={() => navigateTo("menu")}
-      className="fixed top-24 left-4 z-50 glass px-3 py-2 rounded-xl flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors btn-glow"
+      onClick={() => navigateTo(target)}
+      className="fixed top-24 left-4 z-50 bg-black/60 backdrop-blur-sm border border-white/10 px-3 py-2 rounded-xl flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
     >
       <ArrowLeft size={16} />
       Back
     </button>
   );
 
+  // Individual game views
   if (activeSection === "snake") {
-    return <div className={transClass}>{backButton}<SnakeGame /></div>;
+    return <div className={transClass}>{backButton("games-menu")}<SnakeGame /></div>;
   }
-
   if (activeSection === "scratch") {
     return (
       <div className={transClass}>
-        {backButton}
+        {backButton("games-menu")}
         <section className="min-h-[90vh] flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
-          <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background" />
-          <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float-slow" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
+          <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-float-slow" />
           <div className="relative z-10 flex flex-col items-center gap-4">
             <div className="text-center mb-1">
               <h2 className="font-display text-2xl md:text-3xl font-bold">
-                <span className="text-foreground">Rainbow</span>
-                <span className="gradient-text ml-2">Scratch</span>
+                <span className="text-white">Rainbow</span>
+                <span className="text-white/50 ml-2">Scratch</span>
               </h2>
-              <p className="text-muted-foreground text-xs mt-1">Scratch to reveal the hidden rainbow</p>
+              <p className="text-white/40 text-xs mt-1">Scratch to reveal the hidden rainbow</p>
             </div>
             <RainbowScratch />
           </div>
@@ -66,68 +66,111 @@ const VaultPage = () => {
       </div>
     );
   }
-
   if (activeSection === "memory") {
-    return <div className={transClass}>{backButton}<MemoryGame /></div>;
+    return <div className={transClass}>{backButton("games-menu")}<MemoryGame /></div>;
   }
-
   if (activeSection === "island") {
-    return <div className={transClass}>{backButton}<IslandCreator /></div>;
+    return <div className={transClass}>{backButton("games-menu")}<IslandCreator /></div>;
   }
 
-  // Menu
+  // Games submenu
+  if (activeSection === "games-menu") {
+    return (
+      <section className={`min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : 'page-transition'}`}>
+        <div className="absolute inset-0 bg-black" />
+        <img
+          src={vaultLamp}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-30"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none" />
+
+        {backButton("main")}
+
+        <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm px-4">
+          <div className="text-center fade-in-up">
+            <Joystick className="mx-auto mb-3 text-white/70" size={28} />
+            <h2 className="font-display text-2xl font-bold text-white tracking-wider">
+              Games
+            </h2>
+            <p className="text-white/30 text-xs mt-1 tracking-wide">Select your challenge</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 w-full">
+            {VAULT_ITEMS.map(item => (
+              <button
+                key={item.id}
+                onClick={() => navigateTo(item.id)}
+                className={`group bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-xl p-4 flex flex-col items-center gap-2 text-center
+                           hover:bg-white/[0.08] hover:border-white/20 hover:scale-[1.03] active:scale-[0.97]
+                           transition-all duration-500 cursor-pointer
+                           fade-in-up ${item.delay}`}
+                style={{ opacity: 0 }}
+              >
+                <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center
+                                group-hover:bg-white/[0.12] transition-all duration-500
+                                group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                  <item.icon className="text-white/60 group-hover:text-white transition-colors duration-300" size={18} />
+                </div>
+                <div>
+                  <h3 className="font-display text-xs font-bold text-white/80 group-hover:text-white transition-colors duration-300">
+                    {item.title}
+                  </h3>
+                  <p className="text-white/30 text-[9px] mt-0.5">{item.subtitle}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Main vault entrance
   return (
     <section className={`min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background" />
+      <div className="absolute inset-0 bg-black" />
       <img
         src={vaultLamp}
         alt=""
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
       />
-      <div className="absolute top-1/4 right-1/3 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-float-slow" />
-      <div className="absolute bottom-1/4 left-1/3 w-56 h-56 bg-primary/8 rounded-full blur-3xl animate-float-slow delay-300" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/70 pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col items-center gap-8">
+      <div className="relative z-10 flex flex-col items-center gap-10">
         <div className="text-center fade-in-up">
-          <h2 className="font-display text-3xl md:text-4xl font-bold mb-2">
-            <span className="gradient-text">Vault</span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold mb-2 text-white tracking-widest">
+            Vault
           </h2>
-          <p className="text-muted-foreground text-sm">Choose your adventure</p>
+          <p className="text-white/30 text-sm tracking-wide">Choose your adventure</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 max-w-md w-full px-4">
-          {VAULT_ITEMS.map(item => (
-            <button
-              key={item.id}
-              onClick={() => navigateTo(item.id)}
-              className={`group glass rounded-2xl p-5 flex flex-col items-center gap-3 text-center
-                         hover:scale-[1.04] active:scale-[0.97] transition-all duration-500 
-                         cursor-pointer glow-border relative overflow-hidden
-                         fade-in-up ${item.delay}`}
-              style={{ opacity: 0 }}
-            >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
-              </div>
+        <button
+          onClick={() => navigateTo("games-menu")}
+          className="group relative bg-white/[0.04] backdrop-blur-sm border border-white/[0.1] rounded-2xl p-8 md:p-10 flex flex-col items-center gap-5 text-center
+                     hover:bg-white/[0.08] hover:border-white/25 hover:scale-[1.03] active:scale-[0.97]
+                     transition-all duration-700 cursor-pointer w-56 md:w-64
+                     fade-in-up delay-200
+                     hover:shadow-[0_0_60px_rgba(255,255,255,0.08)]"
+          style={{ opacity: 0 }}
+        >
+          <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700
+                          bg-gradient-to-b from-white/[0.05] via-transparent to-transparent" />
+          
+          <div className="relative w-16 h-16 rounded-2xl bg-white/[0.06] flex items-center justify-center
+                          group-hover:bg-white/[0.12] transition-all duration-700
+                          group-hover:shadow-[0_0_40px_rgba(255,255,255,0.15)]">
+            <Joystick className="text-white/50 group-hover:text-white transition-colors duration-500" size={28} />
+            <div className="absolute inset-0 rounded-2xl border border-white/10 group-hover:border-white/25 transition-colors duration-500" />
+          </div>
 
-              <div className="relative w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center
-                              group-hover:bg-primary/20 transition-colors duration-500
-                              group-hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)]">
-                <item.icon className="text-primary" size={24} />
-                <div className="absolute inset-0 rounded-2xl border border-primary/20 
-                                group-hover:border-primary/40 transition-colors duration-500
-                                group-hover:animate-[pulse_2s_ease-in-out_infinite]" />
-              </div>
-
-              <div className="relative">
-                <h3 className="font-display text-sm font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-                  {item.title}
-                </h3>
-                <p className="text-muted-foreground text-[10px] mt-0.5">{item.subtitle}</p>
-              </div>
-            </button>
-          ))}
-        </div>
+          <div className="relative">
+            <h3 className="font-display text-lg font-bold text-white/90 group-hover:text-white transition-colors duration-300 tracking-wider">
+              Games
+            </h3>
+            <p className="text-white/25 text-[11px] mt-1 tracking-wide">4 mini-games inside</p>
+          </div>
+        </button>
       </div>
     </section>
   );
