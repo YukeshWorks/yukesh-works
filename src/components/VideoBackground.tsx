@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import desktopBg from "@/assets/home-bg.jpg";
+import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
 
 interface VideoBackgroundProps {
@@ -37,9 +37,12 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
           onCanPlay={handleReady}
         />
       ) : (
-        <img
-          src={desktopBg}
-          alt=""
+        <video
+          src={desktopBgVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
           className="absolute inset-0 w-full h-full object-cover"
           style={{
             filter: 'brightness(0.65)',
@@ -47,8 +50,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
             opacity: ready ? 1 : 0,
             transition: 'opacity 0.8s ease-out',
           }}
-          loading="eager"
-          onLoad={handleReady}
+          onCanPlay={handleReady}
         />
       )}
 
