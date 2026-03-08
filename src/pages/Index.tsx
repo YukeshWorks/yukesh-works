@@ -291,9 +291,23 @@ const Index = () => {
           0% { opacity: 1; }
           100% { opacity: 0; }
         }
-        @keyframes warn42Glow {
-          0%, 100% { box-shadow: 0 0 20px rgba(220,38,38,0.1); }
-          50% { box-shadow: 0 0 40px rgba(220,38,38,0.25), 0 0 80px rgba(220,38,38,0.1); }
+        @keyframes warn42Pop {
+          0% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.7); }
+          60% { transform: translateX(-50%) translateY(2px) scale(1.05); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
+        @keyframes warn42Shake {
+          0%, 100% { transform: translateX(0); }
+          15% { transform: translateX(-4px) rotate(-1deg); }
+          30% { transform: translateX(4px) rotate(1deg); }
+          45% { transform: translateX(-3px); }
+          60% { transform: translateX(3px); }
+          75% { transform: translateX(-2px); }
+          90% { transform: translateX(1px); }
+        }
+        @keyframes warn42Pulse {
+          0%, 100% { box-shadow: 0 0 12px rgba(220,38,38,0.15); }
+          50% { box-shadow: 0 0 20px rgba(220,38,38,0.3); }
         }
         @keyframes video42Enter {
           0% { opacity: 0; clip-path: inset(50% 0 50% 0); }
