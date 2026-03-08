@@ -141,11 +141,12 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
             />
           ) : (
             <div className="relative z-10 flex items-center justify-center">
-              <Crosshair
-                className="w-4 h-4 text-primary"
+              <img
+                src={navLogoGif}
+                alt="Logo"
+                className="w-6 h-6 object-contain"
                 style={{
                   filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.5))",
-                  animation: "navLogoPulse 2s ease-in-out infinite",
                 }}
               />
             </div>
