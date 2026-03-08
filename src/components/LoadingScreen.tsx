@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import homeBg from "@/assets/home-bg.jpg";
 import mobileBg from "@/assets/mobile-bg.jpg";
 import profileImg from "@/assets/profile.jpg";
+import profileHero from "@/assets/profile-hero.png";
 import loadingSpy from "@/assets/loading-spy.gif";
 import offlineCloud from "@/assets/offline-cloud.gif";
 import loadingCar from "@/assets/loading-car.gif";
@@ -9,6 +10,8 @@ import artFlame from "@/assets/art-flame.gif";
 import artHand from "@/assets/art-hand.gif";
 import artNoir from "@/assets/art-noir.gif";
 import artSpy from "@/assets/art-spy.gif";
+import pixelEyes from "@/assets/pixel-eyes.gif";
+import ambientVideo from "@/assets/ambient-bg.mp4";
 
 interface LoadingScreenProps {
   onLoadComplete: () => void;
@@ -22,34 +25,61 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
     const priorityBg = isMobile ? mobileBg : homeBg;
-    const otherImages = [
+
+    // ALL image assets used across every page
+    const allImages = [
+      priorityBg,
       isMobile ? homeBg : mobileBg,
-      profileImg, offlineCloud, loadingCar,
-      artFlame, artHand, artNoir, artSpy,
+      profileImg, profileHero, offlineCloud, loadingCar,
+      artFlame, artHand, artNoir, artSpy, pixelEyes,
     ];
-    const allImages = [priorityBg, ...otherImages];
+
     let loaded = 0;
-    const total = allImages.length;
+    // +1 for video, +1 for fonts
+    const total = allImages.length + 2;
     const startTime = Date.now();
 
-    const load = (src: string) => new Promise<void>(resolve => {
+    const tick = () => {
+      loaded++;
+      setProgress(Math.round((loaded / total) * 100));
+    };
+
+    const loadImage = (src: string) => new Promise<void>(resolve => {
       const img = new Image();
       img.src = src;
-      img.onload = img.onerror = () => {
-        loaded++;
-        setProgress(Math.round((loaded / total) * 100));
-        resolve();
-      };
+      img.onload = img.onerror = () => { tick(); resolve(); };
+    });
+
+    const loadVideo = (src: string) => new Promise<void>(resolve => {
+      const video = document.createElement("video");
+      video.preload = "auto";
+      video.muted = true;
+      video.src = src;
+      const done = () => { tick(); resolve(); };
+      video.oncanplaythrough = done;
+      video.onerror = done;
+      // Fallback timeout for slow video
+      setTimeout(done, 5000);
     });
 
     const run = async () => {
-      await load(priorityBg);
-      await Promise.all([...otherImages.map(load), document.fonts?.ready]);
-      const remaining = Math.max(0, 1500 - (Date.now() - startTime));
+      // Load priority bg first for instant visual
+      await loadImage(priorityBg);
+
+      // Load everything else in parallel
+      await Promise.all([
+        ...allImages.slice(1).map(loadImage),
+        loadVideo(ambientVideo),
+        document.fonts?.ready.then(tick),
+      ]);
+
+      // Minimal wait — just enough for the animation to feel intentional
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 800 - elapsed);
       setTimeout(() => {
         setReady(true);
         setFadeOut(true);
-        setTimeout(onLoadComplete, 400);
+        setTimeout(onLoadComplete, 300);
       }, remaining);
     };
     run();
@@ -87,7 +117,7 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       </div>
 
       <div className="absolute inset-0 pointer-events-none"
-        style={{ backgroundColor: "#f5a442", opacity: fadeOut ? 1 : 0, transition: "opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)", transform: 'translateZ(0)' }} />
+        style={{ backgroundColor: "#f5a442", opacity: fadeOut ? 1 : 0, transition: "opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)", transform: 'translateZ(0)' }} />
 
       <style>{`
         @keyframes cartoonBounce {
