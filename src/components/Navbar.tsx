@@ -6,6 +6,7 @@ interface NavbarProps {
   activeTab: "home" | "puzzle" | "info";
   onTabChange: (tab: "home" | "puzzle" | "info") => void;
   onLockClick?: () => void;
+  on42Click?: () => void;
 }
 
 const tabs = [
@@ -14,7 +15,7 @@ const tabs = [
   { id: "info" as const, label: "ABOUT", icon: User },
 ];
 
-const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
+const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps) => {
   const [entered, setEntered] = useState(false);
   const [pressedTab, setPressedTab] = useState<string | null>(null);
   const [morphX, setMorphX] = useState(0);
@@ -63,6 +64,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
 
   const handleLogoClick = () => {
     if (activeTab === "puzzle") onLockClick?.();
+    else on42Click?.();
   };
 
   return (
