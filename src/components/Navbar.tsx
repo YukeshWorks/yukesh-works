@@ -15,7 +15,7 @@ const tabs = [
   { id: "info" as const, label: "ABOUT", icon: User },
 ];
 
-const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
+const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps) => {
   const [entered, setEntered] = useState(false);
   const [pressedTab, setPressedTab] = useState<string | null>(null);
   const [morphX, setMorphX] = useState(0);
@@ -64,6 +64,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
 
   const handleLogoClick = () => {
     if (activeTab === "puzzle") onLockClick?.();
+    else on42Click?.();
   };
 
   return (
