@@ -19,8 +19,10 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
   const [pressedTab, setPressedTab] = useState<string | null>(null);
   const [morphX, setMorphX] = useState(0);
   const [morphW, setMorphW] = useState(0);
+  const [sparks, setSparks] = useState<{ id: number; x: number; y: number }[]>([]);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const sparkId = useRef(0);
 
   useEffect(() => {
     setTimeout(() => setEntered(true), 150);
@@ -36,9 +38,26 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
     }
   }, [activeTab]);
 
+  const spawnSparks = (el: HTMLButtonElement) => {
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const newSparks = Array.from({ length: 6 }, (_, i) => ({
+      id: ++sparkId.current,
+      x: cx,
+      y: cy,
+    }));
+    setSparks(prev => [...prev, ...newSparks]);
+    setTimeout(() => {
+      setSparks(prev => prev.filter(s => !newSparks.find(ns => ns.id === s.id)));
+    }, 800);
+  };
+
   const handleClick = useCallback((tab: "home" | "puzzle" | "info", i: number) => {
     setPressedTab(tab);
     setTimeout(() => setPressedTab(null), 500);
+    const el = tabRefs.current[i];
+    if (el) spawnSparks(el);
     onTabChange(tab);
   }, [onTabChange]);
 
@@ -48,6 +67,30 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
 
   return (
     <>
+      {/* Spark particles (portal to body level) */}
+      <div className="fixed inset-0 pointer-events-none z-[60]">
+        {sparks.map((s, i) => {
+          const angle = (i % 6) * 60 + Math.random() * 30;
+          const dist = 20 + Math.random() * 25;
+          const rad = (angle * Math.PI) / 180;
+          return (
+            <div
+              key={s.id}
+              className="absolute w-1 h-1 rounded-full"
+              style={{
+                left: s.x,
+                top: s.y,
+                background: "hsl(var(--primary))",
+                boxShadow: `0 0 6px hsl(var(--primary) / 0.8), 0 0 12px hsl(var(--primary) / 0.4)`,
+                animation: "navSparkFly 0.6s ease-out forwards",
+                "--spark-dx": `${Math.cos(rad) * dist}px`,
+                "--spark-dy": `${Math.sin(rad) * dist - 15}px`,
+              } as React.CSSProperties}
+            />
+          );
+        })}
+      </div>
+
       <nav
         className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-5 px-4"
         style={{
@@ -215,6 +258,16 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
       </nav>
 
       <style>{`
+        @keyframes navSparkFly {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(var(--spark-dx), var(--spark-dy)) scale(0);
+            opacity: 0;
+          }
+        }
         @keyframes navRingPulse {
           0%, 100% { transform: scale(1); opacity: 0.4; }
           50% { transform: scale(1.5); opacity: 0; }
