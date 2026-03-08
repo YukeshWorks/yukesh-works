@@ -83,38 +83,6 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [showIntro]);
 
-  if (showIntro) {
-    return (
-      <section className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
-        <div
-          className="flex flex-col items-center gap-4"
-          style={{
-            opacity: introFading ? 0 : 1,
-            transform: introFading ? 'scale(1.1)' : 'scale(1)',
-            transition: 'all 0.5s ease-out',
-          }}
-        >
-          <img
-            src={skeletonGif}
-            alt=""
-            className="w-72 h-72 md:w-96 md:h-96 object-contain"
-            style={{
-              animation: 'introZoom 2s ease-out forwards',
-              filter: 'brightness(1.3) contrast(1.2)',
-            }}
-          />
-        </div>
-        <style>{`
-          @keyframes introZoom {
-            0% { transform: scale(0.5); opacity: 0; filter: blur(10px) brightness(1.3) contrast(1.2); }
-            40% { transform: scale(1.05); opacity: 1; filter: blur(0) brightness(1.3) contrast(1.2); }
-            100% { transform: scale(1); opacity: 1; filter: blur(0) brightness(1.3) contrast(1.2); }
-          }
-        `}</style>
-      </section>
-    );
-  }
-
   const handleDigit = useCallback((digit: string) => {
     if (status === "success") return;
     if (activeIndex >= 4) return;
