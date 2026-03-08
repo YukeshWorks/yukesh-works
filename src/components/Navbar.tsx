@@ -200,6 +200,16 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
                         transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
                       }}
                     />
+                    {/* Ring pulse on active */}
+                    {isActive && (
+                      <div
+                        className="absolute -inset-1.5 rounded-full pointer-events-none"
+                        style={{
+                          border: "1px solid hsl(var(--primary) / 0.15)",
+                          animation: "navRingPulse 2.5s ease-in-out infinite",
+                        }}
+                      />
+                    )}
                   </div>
 
                   {/* Label with stagger */}
