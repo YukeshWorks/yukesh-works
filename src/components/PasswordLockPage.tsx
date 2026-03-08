@@ -187,6 +187,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [shake, setShake] = useState(false);
   const [successPhase, setSuccessPhase] = useState(0);
   const [showErrorVideo, setShowErrorVideo] = useState(false);
+  const [showSkullFlash, setShowSkullFlash] = useState(false);
 
   // Auto-dismiss intro after 2.5s + play intro sound
   useEffect(() => {
@@ -224,16 +225,18 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
           const newAttempts = attempts + 1;
           setAttempts(newAttempts);
           setShake(true);
+          setShowSkullFlash(true);
           if (newAttempts >= 2) {
-            // Show fullscreen error video on 2nd wrong attempt
             setTimeout(() => {
               setShake(false);
+              setShowSkullFlash(false);
               setShowErrorVideo(true);
               playFailureSound();
             }, 500);
           } else {
             setTimeout(() => {
               setShake(false);
+              setShowSkullFlash(false);
               setDigits(["", "", "", ""]);
               setActiveIndex(0);
               setStatus("idle");
@@ -285,15 +288,6 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
           style={{ opacity: 0.8 }}
         />
         <div className="relative z-10 flex flex-col items-center gap-6 mt-auto mb-24">
-          <img
-            src={skullErrorGif}
-            alt=""
-            className="w-28 h-28 md:w-36 md:h-36 object-contain"
-            style={{
-              animation: 'pageFadeIn 0.5s ease-out 0.3s both',
-              filter: 'drop-shadow(0 0 20px rgba(220,38,38,0.4))',
-            }}
-          />
           <p className="text-red-400 text-xs font-display tracking-[0.2em] uppercase"
             style={{ textShadow: '0 0 10px rgba(220,38,38,0.5)', animation: 'pageFadeIn 0.5s ease-out 0.5s both' }}>
             Wrong passcode
@@ -340,6 +334,21 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
         />
       </div>
     )}
+      {/* Skull flash on wrong attempt */}
+      {showSkullFlash && (
+        <div className="fixed inset-0 z-[9998] pointer-events-none flex items-center justify-center"
+          style={{ animation: 'skullFlashIn 0.6s ease-out forwards' }}>
+          <img
+            src={skullErrorGif}
+            alt=""
+            className="w-40 h-40 md:w-56 md:h-56 object-contain"
+            style={{
+              filter: 'drop-shadow(0 0 30px rgba(220,38,38,0.6)) brightness(1.2)',
+              animation: 'skullPulse 0.3s ease-in-out infinite alternate',
+            }}
+          />
+        </div>
+      )}
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
       {/* Skeleton GIF background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -545,6 +554,16 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
         @keyframes skeletonFloat {
           0%, 100% { transform: translateY(0) scale(1); }
           50% { transform: translateY(-15px) scale(1.03); }
+        }
+        @keyframes skullFlashIn {
+          0% { opacity: 0; background: rgba(220,38,38,0.15); }
+          20% { opacity: 1; background: rgba(220,38,38,0.1); }
+          80% { opacity: 1; background: rgba(0,0,0,0.3); }
+          100% { opacity: 0.8; background: rgba(0,0,0,0.2); }
+        }
+        @keyframes skullPulse {
+          0% { transform: scale(1); opacity: 0.9; }
+          100% { transform: scale(1.05); opacity: 1; }
         }
       `}</style>
     </section>
