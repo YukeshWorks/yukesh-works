@@ -302,7 +302,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
         </div>
 
         <ThemeToggle />
-        <ProModeButton />
+        
 
         {/* Bottom edge glow */}
         <div
