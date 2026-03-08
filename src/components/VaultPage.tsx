@@ -82,7 +82,7 @@ const VaultPage = () => {
       <img
         src={vaultLamp}
         alt=""
-        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
       />
       <div className="absolute top-1/4 right-1/3 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-float-slow" />
       <div className="absolute bottom-1/4 left-1/3 w-56 h-56 bg-primary/8 rounded-full blur-3xl animate-float-slow delay-300" />
