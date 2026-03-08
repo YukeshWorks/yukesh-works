@@ -412,7 +412,7 @@ const PuzzlePage = () => {
   };
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 page-transition">
+    <section className="h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 page-transition">
       {/* Retro sunset gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#ff6b35] via-[#f7931e] to-[#4a0e4e]" />
       
