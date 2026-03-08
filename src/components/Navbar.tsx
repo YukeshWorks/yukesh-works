@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { KeyRound, Home, ShieldHalf, User, Zap } from "lucide-react";
+import { KeyRound, Home, ShieldHalf, User, Crosshair } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
 interface NavbarProps {
