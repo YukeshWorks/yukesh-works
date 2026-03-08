@@ -4,6 +4,7 @@ import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
 import IslandCreator from "./IslandCreator";
+import vaultLamp from "@/assets/vault-lamp.gif";
 
 type VaultSection = "menu" | "snake" | "scratch" | "memory" | "island";
 
