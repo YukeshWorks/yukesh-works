@@ -51,6 +51,7 @@ const HomePage = () => {
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
+      second: "2-digit",
       hour12: true,
     });
   };
@@ -189,24 +190,25 @@ const HomePage = () => {
         </div>
       </div>
       
-      {/* Time/Date display - BOTTOM of page */}
-      <div className="absolute bottom-3 right-3 z-20">
-        <div className="flex items-center gap-2 text-[9px] text-muted-foreground/40 font-mono tracking-wider">
-          <span className="inline-block animate-timeFlip" key={formatTime(currentTime)}>{formatTime(currentTime)}</span>
-          <span className="w-1 h-1 rounded-full bg-primary/30 animate-pulse" />
-          <span className="animate-timeFade" key={formatDate(currentTime)}>{formatDate(currentTime)}</span>
+      {/* Time/Date display */}
+      <div className="absolute bottom-5 right-5 z-20">
+        <div className="flex flex-col items-end gap-1">
+          <span
+            className="text-base md:text-lg font-mono text-foreground/60 tracking-[0.15em] tabular-nums"
+            key={formatTime(currentTime)}
+            style={{ animation: "timeSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1)" }}
+          >
+            {formatTime(currentTime)}
+          </span>
+          <span className="text-[10px] font-heading tracking-[0.3em] uppercase text-muted-foreground/30">
+            {formatDate(currentTime)}
+          </span>
         </div>
         <style>{`
-          @keyframes timeFlip {
-            0% { opacity: 0; transform: translateY(6px) rotateX(40deg); }
-            100% { opacity: 1; transform: translateY(0) rotateX(0); }
+          @keyframes timeSlide {
+            0% { opacity: 0.3; transform: translateY(4px); }
+            100% { opacity: 1; transform: translateY(0); }
           }
-          @keyframes timeFade {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-          }
-          .animate-timeFlip { animation: timeFlip 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-          .animate-timeFade { animation: timeFade 0.6s ease-out; }
         `}</style>
       </div>
 
