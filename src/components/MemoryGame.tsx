@@ -176,17 +176,15 @@ const MemoryGame = () => {
           ))}
         </div>
 
-        {/* Savage mismatch popup */}
-        {showMismatchMsg && (
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 glass rounded-xl px-4 py-2 text-center animate-fade-in pointer-events-none">
-            <p className="text-destructive text-xs font-bold">{mismatchMsg}</p>
-            {consecutiveFails >= 3 && (
-              <p className="text-muted-foreground text-[10px] mt-1">
-                {consecutiveFails} misses in a row... impressive (not) 💀
-              </p>
-            )}
-          </div>
-        )}
+        {/* Savage mismatch message - below game grid */}
+        <div className="h-8 flex items-center justify-center">
+          {showMismatchMsg && (
+            <p className="text-destructive/80 text-[10px] font-medium animate-fade-in pointer-events-none">
+              {mismatchMsg}
+              {consecutiveFails >= 3 && ` (${consecutiveFails}x streak 💀)`}
+            </p>
+          )}
+        </div>
 
         {gameWon && (
           <div className="glass rounded-2xl p-6 text-center glow-border fade-in-up">
