@@ -102,27 +102,24 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
         <div
           className="relative flex items-center"
           style={{
-            background: "rgba(0, 0, 0, 0.85)",
-            backdropFilter: "blur(30px)",
-            borderRadius: "16px",
-            padding: "6px 8px",
-            border: "1px solid rgba(255,255,255,0.05)",
-            boxShadow: `
-              0 1px 0 rgba(255,255,255,0.04) inset,
-              0 20px 50px rgba(0,0,0,0.6)
-            `,
+            background: "rgba(0, 0, 0, 0.6)",
+            backdropFilter: "blur(20px)",
+            borderRadius: "50px",
+            padding: "4px 6px",
+            border: "1px solid rgba(255,255,255,0.06)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
           }}
         >
           {/* Logo button */}
           <button
             onClick={handleLogoClick}
-            className="relative w-10 h-10 rounded-xl flex items-center justify-center mr-1 group overflow-hidden"
+            className="relative w-8 h-8 rounded-full flex items-center justify-center mr-1 group overflow-hidden"
             style={{
               background: "rgba(255,255,255,0.03)",
               transition: "all 0.4s ease",
             }}
           >
-            <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100"
+            <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100"
               style={{
                 background: "radial-gradient(circle, hsl(var(--primary) / 0.12), transparent)",
                 transition: "opacity 0.5s ease",
@@ -144,7 +141,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
           <div ref={containerRef} className="relative flex items-center">
             {/* Morph blob indicator */}
             <div
-              className="absolute top-0 h-full rounded-xl pointer-events-none z-0"
+              className="absolute top-0 h-full rounded-full pointer-events-none z-0"
               style={{
                 left: morphX,
                 width: morphW,
@@ -180,7 +177,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
                   key={tab.id}
                   ref={el => (tabRefs.current[i] = el)}
                   onClick={() => handleClick(tab.id, i)}
-                  className="relative z-10 flex items-center gap-2 px-4 py-2.5 rounded-xl"
+                  className="relative z-10 flex items-center gap-1.5 px-3 py-2 rounded-full"
                   style={{
                     transform: isPressed
                       ? "scale(0.85) translateY(1px)"
@@ -243,7 +240,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
 
           {/* Ambient edge glow */}
           <div
-            className="absolute -inset-px rounded-2xl pointer-events-none"
+            className="absolute -inset-px rounded-full pointer-events-none"
             style={{
               background: "conic-gradient(from 180deg, transparent, hsl(var(--primary) / 0.06), transparent 40%)",
               animation: "navAmbientRotate 8s linear infinite",
@@ -251,7 +248,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
               maskComposite: "exclude",
               WebkitMaskComposite: "xor",
               padding: "1px",
-              borderRadius: "17px",
+              borderRadius: "50px",
             }}
           />
         </div>
