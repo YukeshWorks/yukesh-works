@@ -15,6 +15,41 @@ const CELL_SIZE = 16;
 const GAME_WIDTH = 320;
 const GAME_HEIGHT = 320;
 
+const SAVAGE_MESSAGES = [
+  "Bro really thought he was a snake charmer 🐍💀",
+  "Even a worm has better reflexes than you 🪱",
+  "Your snake died of embarrassment, not collision 😭",
+  "That wall was literally standing still... and you LOST? 🧱",
+  "Uninstall your fingers 🖐️🗑️",
+  "My grandma plays better... and she's a plant 🌱",
+  "You lasted shorter than my phone battery at 1% 🔋",
+  "The food was RIGHT THERE. Right. There. 🍎",
+  "Skill issue doesn't even begin to cover this 📉",
+  "POV: you thought 'up' meant 'into the wall' 🤡",
+  "The snake is filing a complaint against you 📝",
+  "Are you playing with your elbows? Be honest 💀",
+  "Achievement unlocked: Speedrun to Game Over! 🏆",
+  "Your reaction time is measured in geological eras 🦕",
+  "Even AI bots feel sorry watching you play 🤖",
+  "404: Skill not found 🚫",
+  "That wasn't gaming, that was a cry for help 😩",
+  "Bro's playing snake like it's a horror game - scared of everything 👻",
+  "You just set the world record... for fastest failure 🥇",
+  "The snake wanted to live, but YOU had other plans 💔",
+];
+
+const LOW_SCORE_ROASTS = [
+  "Score: {score}. That's not a score, that's a cry for help 😭",
+  "Score: {score}. My calculator shows more digits by accident 🧮",
+  "Score: {score}. Even a broken clock is right twice a day. You're never right 🕐",
+];
+
+const MID_SCORE_ROASTS = [
+  "Score: {score}. Almost impressive... almost 🤏",
+  "Score: {score}. Mediocrity has a new poster child 📸",
+  "Score: {score}. You peaked and it wasn't high enough 📊",
+];
+
 const SnakeGame = () => {
   const [snake, setSnake] = useState<SnakeSegment[]>([]);
   const [food, setFood] = useState<Point>({ x: 10, y: 10 });
@@ -23,6 +58,8 @@ const SnakeGame = () => {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
+  const [savageMsg, setSavageMsg] = useState("");
+  const [scoreRoast, setScoreRoast] = useState("");
   
   const gameRef = useRef<HTMLDivElement>(null);
   const directionRef = useRef(direction);
@@ -179,6 +216,9 @@ const SnakeGame = () => {
           setGameOver(true);
           setIsPlaying(false);
           setHighScore(prev => Math.max(prev, score));
+          setSavageMsg(SAVAGE_MESSAGES[Math.floor(Math.random() * SAVAGE_MESSAGES.length)]);
+          const roasts = score < 5 ? LOW_SCORE_ROASTS : MID_SCORE_ROASTS;
+          setScoreRoast(roasts[Math.floor(Math.random() * roasts.length)].replace("{score}", String(score)));
           return prevSnake;
         }
 
@@ -187,6 +227,9 @@ const SnakeGame = () => {
           setGameOver(true);
           setIsPlaying(false);
           setHighScore(prev => Math.max(prev, score));
+          setSavageMsg(SAVAGE_MESSAGES[Math.floor(Math.random() * SAVAGE_MESSAGES.length)]);
+          const roasts = score < 5 ? LOW_SCORE_ROASTS : MID_SCORE_ROASTS;
+          setScoreRoast(roasts[Math.floor(Math.random() * roasts.length)].replace("{score}", String(score)));
           return prevSnake;
         }
 
@@ -352,18 +395,32 @@ const SnakeGame = () => {
 
             {/* Start / Game Over overlay */}
             {(!isPlaying || gameOver) && (
-              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
-                <p className="font-display text-xl font-bold text-primary">
-                  {gameOver ? "Game Over!" : "Tap to Start"}
-                </p>
-                {gameOver && (
-                  <p className="text-muted-foreground text-sm">
-                    Score: {score}
-                  </p>
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-4">
+                {gameOver ? (
+                  <>
+                    <p className="font-display text-xl font-bold text-destructive animate-pulse">
+                      💀 WASTED 💀
+                    </p>
+                    <p className="text-foreground text-xs text-center font-medium max-w-[260px]">
+                      {savageMsg}
+                    </p>
+                    <p className="text-muted-foreground text-[10px] text-center italic max-w-[240px]">
+                      {scoreRoast}
+                    </p>
+                    <p className="text-primary text-xs mt-1 animate-pulse">
+                      Tap to embarrass yourself again 🔄
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-display text-xl font-bold text-primary">
+                      🐍 Tap to Start
+                    </p>
+                    <p className="text-muted-foreground/60 text-xs">
+                      Press Space or Tap
+                    </p>
+                  </>
                 )}
-                <p className="text-muted-foreground/60 text-xs">
-                  Press Space or Tap
-                </p>
               </div>
             )}
           </div>

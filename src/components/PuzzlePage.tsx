@@ -23,14 +23,23 @@ interface RoadSegment {
 const funnyMessages = [
   "Your bike just became modern art! 🎨",
   "That barrier had feelings, you know! 💔",
-  "Plot twist: The road was the enemy all along! 🛣️",
   "Your helmet protected nothing... especially your dignity! 🪖",
   "Achievement unlocked: Professional Crash Test Dummy! 🏆",
   "Breaking News: Local rider discovers physics! 📺",
-  "That was NOT in the tutorial! 📖",
   "Even the cone is disappointed in you! 🔶",
   "Your insurance company just unfriended you! 📱",
-  "Skill issue? Nah, that's a skill crisis! 🚨",
+  "Skill issue? Nah, that's a skill CATASTROPHE! 🚨",
+  "Bro thought this was a parking simulator 🅿️",
+  "The obstacle didn't move. YOU moved INTO IT. 🤡",
+  "My 3-year-old nephew wants his controller back 👶",
+  "You ride bikes like you parallel park... terribly 🚗",
+  "The road was literally straight. STRAIGHT. 📏",
+  "Did you sneeze or are you always this bad? 🤧",
+  "Somewhere, a driving instructor just felt a disturbance 👨‍🏫",
+  "Your reaction time is buffering... still buffering... 🔄",
+  "Alexa, show me what 0 hand-eye coordination looks like 🗣️",
+  "That cone has a family, you monster 🔶😢",
+  "You didn't crash. You aggressively parked. 🏎️",
 ];
 
 const weirdFacts = [
@@ -637,13 +646,21 @@ const PuzzlePage = () => {
                 {gameOver ? (
                   <>
                     <h3 className="font-display text-xl md:text-2xl font-bold text-red-400 mb-2 wiggle-animation">
-                      💥 WIPEOUT! 💥
+                      💀 WASTED 💀
                     </h3>
-                    <p className="text-white/80 mb-2 text-sm">
+                    <p className="text-white/80 mb-1 text-sm">
                       Distance: <span className="text-yellow-300 font-bold">{Math.floor(score / 10)}m</span>
                     </p>
-                    <p className="text-xs text-white/60 italic mb-4 max-w-xs mx-auto">
+                    {Math.floor(score / 10) < 20 && (
+                      <p className="text-red-300/80 text-[10px] mb-1">
+                        {Math.floor(score / 10)}m? That's not even a warm-up lap 🏃
+                      </p>
+                    )}
+                    <p className="text-xs text-white/70 italic mb-2 max-w-xs mx-auto font-medium">
                       {funnyMessage}
+                    </p>
+                    <p className="text-white/40 text-[10px] mb-3">
+                      (The obstacles are laughing at you rn 😂)
                     </p>
                   </>
                 ) : (
