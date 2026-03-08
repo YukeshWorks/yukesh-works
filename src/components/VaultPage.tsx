@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft, Joystick } from "lucide-react";
+import GameAuthButton from "./GameAuthButton";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
