@@ -9,11 +9,12 @@ interface VideoBackgroundProps {
 
 const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) => {
   const [isMobile] = useState(() => window.innerWidth < 768);
+  const [imgReady, setImgReady] = useState(false);
 
-  useEffect(() => {
-    // Images are already preloaded by LoadingScreen, fire immediately
+  const handleImgLoad = () => {
+    setImgReady(true);
     onLoaded?.();
-  }, [onLoaded]);
+  };
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -21,8 +22,14 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
         src={isMobile ? mobileBg : desktopBg}
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: 'brightness(0.65)', transform: 'translateZ(0)' }}
+        style={{
+          filter: 'brightness(0.65)',
+          transform: 'translateZ(0)',
+          opacity: imgReady ? 1 : 0,
+          transition: 'opacity 0.8s ease-out',
+        }}
         loading="eager"
+        onLoad={handleImgLoad}
       />
 
       <div className="absolute inset-0" style={{
