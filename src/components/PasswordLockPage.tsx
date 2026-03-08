@@ -60,6 +60,51 @@ const playErrorSound = () => {
   } catch {}
 };
 
+const playFailureSound = () => {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    // Deep doom impact
+    const impact = ctx.createOscillator();
+    const impactGain = ctx.createGain();
+    impact.connect(impactGain);
+    impactGain.connect(ctx.destination);
+    impact.type = "sawtooth";
+    impact.frequency.setValueAtTime(80, ctx.currentTime);
+    impact.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 1.5);
+    impactGain.gain.setValueAtTime(0.2, ctx.currentTime);
+    impactGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.8);
+    impact.start();
+    impact.stop(ctx.currentTime + 1.8);
+    // Alarm beeps
+    [0, 0.25, 0.5].forEach(delay => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "square";
+      osc.frequency.value = 300;
+      const t = ctx.currentTime + delay;
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+      osc.start(t);
+      osc.stop(t + 0.15);
+    });
+    // Static noise
+    const bufSize = ctx.sampleRate * 0.5;
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * 0.3;
+    const ns = ctx.createBufferSource();
+    const ng = ctx.createGain();
+    ns.buffer = buf;
+    ns.connect(ng);
+    ng.connect(ctx.destination);
+    ng.gain.setValueAtTime(0.06, ctx.currentTime + 0.1);
+    ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    ns.start(ctx.currentTime + 0.1);
+  } catch {}
+};
+
 const playIntroSound = () => {
   try {
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
