@@ -225,6 +225,46 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
   return (
     <>
+    {/* Fullscreen error video on 2nd wrong attempt */}
+    {showErrorVideo && (
+      <div className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center"
+        style={{ animation: 'pageFadeIn 0.4s ease-out' }}>
+        <video
+          src={wrongPasscodeVideo}
+          autoPlay
+          playsInline
+          muted
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.8 }}
+        />
+        <div className="relative z-10 flex flex-col items-center gap-4 mt-auto mb-24">
+          <p className="text-red-400 text-xs font-display tracking-[0.2em] uppercase"
+            style={{ textShadow: '0 0 10px rgba(220,38,38,0.5)', animation: 'pageFadeIn 0.5s ease-out 0.5s both' }}>
+            Wrong passcode
+          </p>
+          <button
+            onClick={() => {
+              setShowErrorVideo(false);
+              setDigits(["", "", "", ""]);
+              setActiveIndex(0);
+              setStatus("idle");
+              setAttempts(0);
+            }}
+            className="px-6 py-2.5 rounded-xl text-xs font-display tracking-[0.2em] uppercase transition-all duration-300 hover:scale-105 active:scale-95"
+            style={{
+              background: 'rgba(220, 38, 38, 0.15)',
+              border: '1px solid rgba(220, 38, 38, 0.4)',
+              color: 'rgba(220, 38, 38, 0.9)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 0 20px rgba(220, 38, 38, 0.1)',
+              animation: 'pageFadeIn 0.5s ease-out 0.8s both',
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )}
     {showIntro && (
       <div className="fixed inset-0 z-[9999] bg-black" style={{ width: '100vw', height: '100vh', top: 0, left: 0 }}>
         <img
