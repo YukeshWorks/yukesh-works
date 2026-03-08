@@ -1,39 +1,33 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, ExternalLink, FolderOpen, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowLeft, ExternalLink, ArrowRight } from "lucide-react";
 
 interface WelcomePageProps {
   onBack: () => void;
 }
 
 const WelcomePage = ({ onBack }: WelcomePageProps) => {
-  const [show, setShow] = useState(false);
-  const [showTitle, setShowTitle] = useState(false);
-  const [showSubtitle, setShowSubtitle] = useState(false);
-  const [showCard, setShowCard] = useState(false);
+  const [phase, setPhase] = useState(0);
 
   useEffect(() => {
-    setTimeout(() => setShow(true), 100);
-    setTimeout(() => setShowTitle(true), 400);
-    setTimeout(() => setShowSubtitle(true), 700);
-    setTimeout(() => setShowCard(true), 1000);
+    setTimeout(() => setPhase(1), 100);
+    setTimeout(() => setPhase(2), 500);
+    setTimeout(() => setPhase(3), 900);
+    setTimeout(() => setPhase(4), 1300);
   }, []);
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-background">
-      {/* Background glow */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-primary/3" />
-        <div
-          className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[100px] transition-all duration-[2000ms]"
-          style={{
-            background: "radial-gradient(circle, hsl(var(--primary) / 0.12), transparent 70%)",
-            opacity: show ? 1 : 0,
-            transform: `translate(-50%, 0) scale(${show ? 1 : 0.5})`,
-          }}
-        />
-      </div>
+      {/* Subtle center glow */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full transition-all duration-[2500ms]"
+        style={{
+          background: "radial-gradient(circle, hsl(var(--primary) / 0.06) 0%, transparent 70%)",
+          opacity: phase >= 1 ? 1 : 0,
+          transform: `translate(-50%, -50%) scale(${phase >= 1 ? 1.2 : 0.5})`,
+        }}
+      />
 
-      {/* Back button */}
+      {/* Back */}
       <button
         onClick={onBack}
         className="absolute top-24 left-6 glass px-4 py-2 rounded-full flex items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-105 z-20"
@@ -43,88 +37,72 @@ const WelcomePage = ({ onBack }: WelcomePageProps) => {
       </button>
 
       <div className="relative z-10 flex flex-col items-center px-6 max-w-lg mx-auto text-center">
-        {/* Icon */}
+        {/* Thin line accent */}
         <div
-          className="mb-6 transition-all duration-700"
+          className="w-12 h-px bg-primary/40 mb-8 transition-all duration-700"
           style={{
-            opacity: show ? 1 : 0,
-            transform: `scale(${show ? 1 : 0}) rotate(${show ? 0 : -180}deg)`,
+            opacity: phase >= 1 ? 1 : 0,
+            transform: `scaleX(${phase >= 1 ? 1 : 0})`,
           }}
-        >
-          <div className="p-4 rounded-full glass border border-primary/20">
-            <Sparkles className="w-8 h-8 text-primary" />
-          </div>
-        </div>
+        />
 
         {/* Title */}
         <h1
-          className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-3 transition-all duration-700"
+          className="font-display text-2xl md:text-4xl font-extrabold tracking-tight text-foreground mb-3 transition-all duration-700"
           style={{
-            opacity: showTitle ? 1 : 0,
-            transform: `translateY(${showTitle ? 0 : 24}px)`,
+            opacity: phase >= 2 ? 1 : 0,
+            transform: `translateY(${phase >= 2 ? 0 : 16}px)`,
           }}
         >
-          Welcome to the Vault
+          Welcome.
         </h1>
 
         {/* Subtitle */}
         <p
-          className="text-muted-foreground text-base md:text-lg mb-10 transition-all duration-700"
+          className="text-muted-foreground text-sm md:text-base mb-12 tracking-wide transition-all duration-700"
           style={{
-            opacity: showSubtitle ? 1 : 0,
-            transform: `translateY(${showSubtitle ? 0 : 16}px)`,
+            opacity: phase >= 3 ? 1 : 0,
+            transform: `translateY(${phase >= 3 ? 0 : 12}px)`,
           }}
         >
-          You've cracked the code. Here's your reward.
+          Access granted.
         </p>
 
-        {/* Drive Card */}
+        {/* Drive link — clean card */}
         <a
           href="https://drive.google.com/drive/folders/1VMYgLwCL_VjV92Wjs48wCzkRv5dAOrSw"
           target="_blank"
           rel="noopener noreferrer"
-          className="group w-full transition-all duration-700"
+          className="group w-full max-w-sm transition-all duration-700"
           style={{
-            opacity: showCard ? 1 : 0,
-            transform: `translateY(${showCard ? 0 : 30}px)`,
+            opacity: phase >= 4 ? 1 : 0,
+            transform: `translateY(${phase >= 4 ? 0 : 20}px)`,
           }}
         >
-          <div
-            className="glass rounded-2xl p-7 hover:scale-[1.02] transition-all duration-500 cursor-pointer relative overflow-hidden border border-primary/10 hover:border-primary/25"
-            style={{
-              boxShadow: "0 0 40px hsl(var(--primary) / 0.06)",
-            }}
-          >
-            <div className="absolute inset-0 bg-primary/3 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-            <div className="relative z-10 flex flex-col items-center gap-4">
-              <div className="p-3.5 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors duration-300">
-                <FolderOpen className="w-7 h-7 text-primary" />
-              </div>
-
-              <div>
-                <h2 className="font-display text-lg md:text-xl font-bold text-foreground mb-1.5">
-                  Access the Files
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  Open the shared Google Drive folder
+          <div className="relative rounded-xl border border-border/40 bg-card/30 backdrop-blur-sm p-6 hover:border-primary/30 transition-all duration-400 group-hover:shadow-[0_0_30px_hsl(var(--primary)/0.08)]">
+            <div className="flex items-center justify-between">
+              <div className="text-left">
+                <p className="text-foreground text-sm font-display font-bold tracking-wide mb-1">
+                  Open Files
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  Shared folder
                 </p>
               </div>
-
-              <div className="flex items-center gap-2 text-primary text-sm font-medium mt-1 group-hover:gap-3 transition-all duration-300">
-                <span>Open Drive</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                <ExternalLink className="w-3.5 h-3.5 opacity-50" />
+              <div className="flex items-center gap-1.5 text-primary text-xs font-medium opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-300" />
+                <ExternalLink className="w-3 h-3" />
               </div>
             </div>
           </div>
         </a>
       </div>
 
-      {/* Bottom */}
-      <div className="absolute bottom-8 text-center text-[10px] text-muted-foreground/20 tracking-widest uppercase">
-        <p>🔓 Access Granted</p>
-      </div>
+      {/* Bottom line */}
+      <div
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 w-8 h-px bg-muted-foreground/15 transition-all duration-1000"
+        style={{ opacity: phase >= 4 ? 1 : 0 }}
+      />
     </section>
   );
 };
