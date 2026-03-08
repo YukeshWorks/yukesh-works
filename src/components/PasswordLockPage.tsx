@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowLeft, ShieldCheck, ShieldX, CheckCircle2 } from "lucide-react";
+import skeletonGif from "@/assets/skeleton-red.gif";
 
 const playClickSound = (pitch = 1) => {
   try {
@@ -137,13 +138,25 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
+      {/* Skeleton GIF background */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <img
+          src={skeletonGif}
+          alt=""
+          className="w-64 h-64 md:w-80 md:h-80 object-contain opacity-20"
+          style={{
+            filter: "brightness(1.2) contrast(1.3)",
+            animation: "skeletonFloat 4s ease-in-out infinite",
+          }}
+        />
+      </div>
+
       {/* Background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-primary/3" />
         {status === "success" && (
           <>
             <div className="absolute inset-0 animate-successGlow" />
-            {/* Radiating rings */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               {[0, 1, 2].map(i => (
                 <div

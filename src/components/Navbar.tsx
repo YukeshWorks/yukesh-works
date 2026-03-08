@@ -71,7 +71,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
       }}
     >
       <div
-        className="relative flex items-center gap-0.5 px-1.5 py-1.5 rounded-2xl overflow-hidden"
+        className="relative flex items-center gap-0.5 px-1.5 py-1.5 rounded-full overflow-hidden"
         style={{
           background: "linear-gradient(135deg, hsl(var(--background) / 0.65), hsl(var(--card) / 0.45))",
           backdropFilter: "blur(24px) saturate(1.4)",
@@ -86,7 +86,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
       >
         {/* Animated top edge light sweep */}
         <div
-          className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+          className="absolute top-0 left-0 right-0 h-px pointer-events-none rounded-full"
           style={{
             background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), transparent)",
             animation: "navSweep 4s ease-in-out infinite",
