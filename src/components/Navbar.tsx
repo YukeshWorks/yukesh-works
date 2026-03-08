@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { Lock, KeyRound, Crosshair, Fingerprint, Eye } from "lucide-react";
+import { Lock, KeyRound, Crosshair, Fingerprint, Eye, Zap } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
 interface NavbarProps {
@@ -8,325 +8,343 @@ interface NavbarProps {
   onLockClick?: () => void;
 }
 
-interface Tab {
-  id: "home" | "puzzle" | "info";
-  label: string;
-  icon: React.ReactNode;
-}
-
 const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const [clickedTab, setClickedTab] = useState<string | null>(null);
-  const [ripples, setRipples] = useState<{ id: number; tab: string; x: number; y: number }[]>([]);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [navVisible, setNavVisible] = useState(false);
-  const [lockHover, setLockHover] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [entered, setEntered] = useState(false);
+  const [logoSpin, setLogoSpin] = useState(false);
+  const [pulseActive, setPulseActive] = useState(false);
+  const [glitching, setGlitching] = useState(false);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const navRef = useRef<HTMLDivElement>(null);
-  const rippleId = useRef(0);
 
-  const tabs: Tab[] = useMemo(
-    () => [
-      { id: "home", label: "", icon: <Crosshair className="w-3.5 h-3.5" /> },
-      { id: "puzzle", label: "VAULT", icon: <Fingerprint className="w-3.5 h-3.5" /> },
-      { id: "info", label: "", icon: <Eye className="w-3.5 h-3.5" /> },
-    ],
-    []
-  );
+  const tabs = useMemo(() => [
+    { id: "home" as const, label: "HOME", icon: <Crosshair className="w-4 h-4" /> },
+    { id: "puzzle" as const, label: "VAULT", icon: <Fingerprint className="w-4 h-4" /> },
+    { id: "info" as const, label: "INTEL", icon: <Eye className="w-4 h-4" /> },
+  ], []);
 
-  // Entrance animation
+  // Dramatic staggered entrance
   useEffect(() => {
-    setTimeout(() => setNavVisible(true), 200);
+    setTimeout(() => setEntered(true), 300);
   }, []);
 
-  // Scroll detection
+  // Periodic glitch effect
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const interval = setInterval(() => {
+      setGlitching(true);
+      setTimeout(() => setGlitching(false), 150);
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    const activeIndex = tabs.findIndex(t => t.id === activeTab);
-    const activeRef = tabRefs.current[activeIndex];
-    if (activeRef) {
-      setIndicatorStyle({
-        left: activeRef.offsetLeft,
-        width: activeRef.offsetWidth,
-      });
-    }
+    const i = tabs.findIndex(t => t.id === activeTab);
+    const ref = tabRefs.current[i];
+    if (ref) setIndicatorStyle({ left: ref.offsetLeft, width: ref.offsetWidth });
   }, [activeTab, tabs]);
 
-  const handleTabClick = useCallback((tab: "home" | "puzzle" | "info", e: React.MouseEvent) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const id = ++rippleId.current;
-    setRipples(prev => [...prev, { id, tab, x, y }]);
-    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 800);
-
+  const handleTabClick = useCallback((tab: "home" | "puzzle" | "info") => {
     setClickedTab(tab);
-    setTimeout(() => setClickedTab(null), 500);
+    setPulseActive(true);
+    setTimeout(() => setClickedTab(null), 600);
+    setTimeout(() => setPulseActive(false), 1000);
     onTabChange(tab);
   }, [onTabChange]);
 
+  const handleLogoClick = () => {
+    if (activeTab === "puzzle") {
+      setLogoSpin(true);
+      setTimeout(() => setLogoSpin(false), 800);
+      onLockClick?.();
+    }
+  };
+
   return (
     <nav
-      className="fixed top-4 left-1/2 z-50"
+      className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4"
       style={{
-        transform: `translateX(-50%) translateY(${navVisible ? 0 : -30}px) scale(${navVisible ? 1 : 0.9})`,
-        opacity: navVisible ? 1 : 0,
-        transition: "all 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
-        filter: navVisible ? "blur(0)" : "blur(6px)",
+        transform: `translateY(${entered ? 0 : -60}px)`,
+        opacity: entered ? 1 : 0,
+        transition: "all 1s cubic-bezier(0.16, 1, 0.3, 1)",
+        filter: entered ? "blur(0)" : "blur(12px)",
       }}
     >
       <div
-        ref={navRef}
-        className="flex items-center gap-1 px-2 py-1.5 rounded-2xl backdrop-blur-2xl border border-border/40"
+        className="relative flex items-center gap-0.5 px-1.5 py-1.5 rounded-2xl overflow-hidden"
         style={{
-          background: scrolled
-            ? "linear-gradient(135deg, hsl(var(--background) / 0.9), hsl(var(--card) / 0.8))"
-            : "linear-gradient(135deg, hsl(var(--background) / 0.7), hsl(var(--card) / 0.5))",
+          background: "linear-gradient(135deg, hsl(var(--background) / 0.65), hsl(var(--card) / 0.45))",
+          backdropFilter: "blur(24px) saturate(1.4)",
+          border: "1px solid hsl(var(--primary) / 0.15)",
           boxShadow: `
-            0 0 ${scrolled ? 50 : 30}px hsl(var(--primary) / ${scrolled ? 0.08 : 0.05}),
-            0 ${scrolled ? 16 : 10}px ${scrolled ? 50 : 35}px rgba(0,0,0,${scrolled ? 0.6 : 0.4}),
-            inset 0 1px 0 hsl(var(--foreground) / 0.06)
+            0 0 60px hsl(var(--primary) / 0.08),
+            0 20px 60px rgba(0,0,0,0.5),
+            inset 0 1px 0 hsl(var(--foreground) / 0.08),
+            inset 0 -1px 0 hsl(var(--background) / 0.3)
           `,
-          transition: "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
-        {/* Lock/Logo button */}
-        {activeTab === "puzzle" ? (
-          <button
-            onClick={onLockClick}
-            onMouseEnter={() => setLockHover(true)}
-            onMouseLeave={() => setLockHover(false)}
-            className="relative w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center transition-all duration-500 group overflow-hidden"
-            style={{
-              boxShadow: lockHover ? "0 0 20px hsl(var(--primary) / 0.25), inset 0 0 15px hsl(var(--primary) / 0.1)" : "none",
-            }}
-          >
-            <KeyRound
-              className="w-4 h-4 text-primary transition-all duration-500"
-              style={{
-                transform: lockHover ? "scale(1.2) rotate(20deg)" : "scale(1) rotate(0deg)",
-                filter: lockHover ? "drop-shadow(0 0 8px hsl(var(--primary) / 0.7))" : "none",
-              }}
-            />
-            <Lock
-              className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 text-muted-foreground transition-all duration-500"
-              style={{
-                transform: lockHover ? "scale(0) rotate(-90deg)" : "scale(1) rotate(0)",
-                opacity: lockHover ? 0 : 1,
-              }}
-            />
-            {/* Lock hover ring */}
-            <div
-              className="absolute inset-0 rounded-xl border border-primary/0 transition-all duration-500"
-              style={{
-                borderColor: lockHover ? "hsl(var(--primary) / 0.4)" : "transparent",
-                transform: lockHover ? "scale(1.05)" : "scale(1)",
-              }}
-            />
-          </button>
-        ) : (
-          <div className="relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden group">
-            {/* Animated border orbit */}
-            <div
-              className="absolute inset-0 rounded-xl"
-              style={{
-                background: "conic-gradient(from var(--logo-angle, 0deg), hsl(var(--primary) / 0.3), transparent 40%, transparent 60%, hsl(var(--primary) / 0.15))",
-                animation: "logoOrbit 4s linear infinite",
-                mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                maskComposite: "exclude",
-                WebkitMaskComposite: "xor",
-                padding: "1.5px",
-              }}
-            />
-            <div className="absolute inset-[1.5px] rounded-[10px] bg-card/60" />
-            <span className="text-sm font-bold gradient-text font-display tracking-widest relative z-10">42</span>
-            {/* Breathing glow */}
-            <div
-              className="absolute inset-0 rounded-xl pointer-events-none"
-              style={{
-                boxShadow: "0 0 15px hsl(var(--primary) / 0.1)",
-                animation: "logoBreathe 3s ease-in-out infinite",
-              }}
-            />
+        {/* Animated top edge light sweep */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+          style={{
+            background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), transparent)",
+            animation: "navSweep 4s ease-in-out infinite",
+          }}
+        />
+
+        {/* Glitch overlay */}
+        {glitching && (
+          <div className="absolute inset-0 pointer-events-none z-30 rounded-2xl overflow-hidden">
+            <div style={{
+              position: "absolute", inset: 0,
+              background: `repeating-linear-gradient(0deg, transparent, transparent 2px, hsl(var(--primary) / 0.03) 2px, hsl(var(--primary) / 0.03) 4px)`,
+              animation: "navGlitch 0.15s steps(3) forwards",
+            }} />
           </div>
         )}
 
-        {/* Tab navigation */}
+        {/* Logo / Lock */}
+        <button
+          onClick={handleLogoClick}
+          className="relative w-11 h-11 rounded-xl flex items-center justify-center overflow-hidden group"
+          style={{
+            background: activeTab === "puzzle"
+              ? "linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--primary) / 0.08))"
+              : "linear-gradient(135deg, hsl(var(--card) / 0.6), hsl(var(--card) / 0.3))",
+            border: `1px solid hsl(var(--primary) / ${activeTab === "puzzle" ? 0.35 : 0.1})`,
+            transition: "all 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          {/* Rotating border ring */}
+          <div
+            className="absolute inset-[-1px] rounded-xl pointer-events-none"
+            style={{
+              background: "conic-gradient(from var(--nav-orbit, 0deg), hsl(var(--primary) / 0.4), transparent 30%, transparent 70%, hsl(var(--primary) / 0.2))",
+              mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+              maskComposite: "exclude",
+              WebkitMaskComposite: "xor",
+              padding: "1.5px",
+              animation: "navOrbit 3s linear infinite",
+            }}
+          />
+
+          {activeTab === "puzzle" ? (
+            <KeyRound
+              className="w-4.5 h-4.5 text-primary relative z-10"
+              style={{
+                transform: logoSpin ? "rotate(360deg) scale(1.3)" : "rotate(0) scale(1)",
+                filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.5))",
+                transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            />
+          ) : (
+            <div className="relative z-10 flex items-center justify-center">
+              <Zap
+                className="w-4 h-4 text-primary"
+                style={{
+                  filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.5))",
+                  animation: "navLogoPulse 2s ease-in-out infinite",
+                }}
+              />
+            </div>
+          )}
+        </button>
+
+        {/* Tabs */}
         <div className="relative flex items-center">
-          {/* Sliding indicator with glow trail */}
+          {/* Sliding indicator — morphing blob */}
           <div
             className="absolute h-full top-0 rounded-xl pointer-events-none"
             style={{
               left: indicatorStyle.left,
               width: indicatorStyle.width,
-              transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              background: "linear-gradient(180deg, hsl(var(--primary) / 0.14), hsl(var(--primary) / 0.06))",
-              border: "1px solid hsl(var(--primary) / 0.25)",
+              transition: "all 0.65s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              background: "linear-gradient(180deg, hsl(var(--primary) / 0.18), hsl(var(--primary) / 0.06))",
+              border: "1px solid hsl(var(--primary) / 0.3)",
               boxShadow: `
-                0 0 28px hsl(var(--primary) / 0.15),
-                0 0 10px hsl(var(--primary) / 0.1),
-                inset 0 1px 0 hsl(var(--primary) / 0.2),
-                inset 0 -1px 0 hsl(var(--primary) / 0.05)
+                0 0 30px hsl(var(--primary) / 0.2),
+                0 0 12px hsl(var(--primary) / 0.12),
+                inset 0 1px 0 hsl(var(--primary) / 0.25)
               `,
             }}
           />
-          {/* Indicator glow aura (behind) */}
+          {/* Expanding glow behind indicator */}
           <div
-            className="absolute h-[130%] top-[-15%] rounded-2xl pointer-events-none"
+            className="absolute top-[-30%] h-[160%] rounded-3xl pointer-events-none"
             style={{
-              left: indicatorStyle.left - 4,
-              width: indicatorStyle.width + 8,
-              transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              background: "radial-gradient(ellipse, hsl(var(--primary) / 0.08), transparent 70%)",
-              filter: "blur(4px)",
+              left: indicatorStyle.left - 8,
+              width: indicatorStyle.width + 16,
+              transition: "all 0.65s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              background: "radial-gradient(ellipse, hsl(var(--primary) / 0.1), transparent)",
+              filter: "blur(8px)",
+              opacity: pulseActive ? 1 : 0.6,
             }}
           />
 
-          {tabs.map((tab, index) => (
-            <button
-              key={tab.id}
-              ref={(el) => (tabRefs.current[index] = el)}
-              onClick={(e) => handleTabClick(tab.id, e)}
-              onMouseEnter={() => setHovered(tab.id)}
-              onMouseLeave={() => setHovered(null)}
-              className="relative flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 group overflow-hidden"
-            >
-              {/* Ripple effects */}
-              {ripples.filter(r => r.tab === tab.id).map(r => (
-                <div
-                  key={r.id}
-                  className="absolute rounded-full pointer-events-none"
-                  style={{
-                    left: r.x,
-                    top: r.y,
-                    width: 0,
-                    height: 0,
-                    background: "radial-gradient(circle, hsl(var(--primary) / 0.35), transparent 70%)",
-                    animation: "navRipplePoint 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-                    transform: "translate(-50%, -50%)",
-                  }}
-                />
-              ))}
+          {tabs.map((tab, index) => {
+            const isActive = activeTab === tab.id;
+            const isHovered = hovered === tab.id;
+            const isClicked = clickedTab === tab.id;
 
-              {/* Hover glow underline */}
-              <div
-                className="absolute bottom-0 left-[20%] right-[20%] h-px transition-all duration-400"
-                style={{
-                  background: "linear-gradient(to right, transparent, hsl(var(--primary) / 0.4), transparent)",
-                  opacity: hovered === tab.id && activeTab !== tab.id ? 1 : 0,
-                  transform: `scaleX(${hovered === tab.id && activeTab !== tab.id ? 1 : 0})`,
-                }}
-              />
-
-              {/* Icon */}
-              <span
-                className="relative z-10 transition-all duration-300"
-                style={{
-                  color: activeTab === tab.id
-                    ? "hsl(var(--primary))"
-                    : hovered === tab.id
-                    ? "hsl(var(--foreground))"
-                    : "hsl(var(--muted-foreground))",
-                  transform:
-                    clickedTab === tab.id
-                      ? "scale(0.7) rotate(-8deg)"
-                      : activeTab === tab.id
-                      ? "scale(1.2)"
-                      : hovered === tab.id
-                      ? "scale(1.1) translateY(-1px)"
-                      : "scale(1)",
-                  filter: activeTab === tab.id ? "drop-shadow(0 0 6px hsl(var(--primary) / 0.6))" : "none",
-                  transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                }}
+            return (
+              <button
+                key={tab.id}
+                ref={(el) => (tabRefs.current[index] = el)}
+                onClick={() => handleTabClick(tab.id)}
+                onMouseEnter={() => setHovered(tab.id)}
+                onMouseLeave={() => setHovered(null)}
+                className="relative flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl overflow-hidden"
+                style={{ minWidth: 52 }}
               >
-                {tab.icon}
-              </span>
+                {/* Click flash */}
+                {isClicked && (
+                  <div
+                    className="absolute inset-0 rounded-xl pointer-events-none"
+                    style={{
+                      background: "radial-gradient(circle, hsl(var(--primary) / 0.4), transparent 60%)",
+                      animation: "navFlash 0.6s ease-out forwards",
+                    }}
+                  />
+                )}
 
-              {/* Label */}
-              {tab.label && (
+                {/* Icon with spring animation */}
                 <span
-                  className="relative z-10 text-[10px] font-heading tracking-[0.25em] uppercase transition-all duration-400"
+                  className="relative z-10 transition-all"
                   style={{
-                    color: activeTab === tab.id ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-                    opacity: activeTab === tab.id ? 1 : hovered === tab.id ? 0.8 : 0.5,
-                    letterSpacing: activeTab === tab.id ? "0.3em" : "0.25em",
+                    color: isActive
+                      ? "hsl(var(--primary))"
+                      : isHovered
+                      ? "hsl(var(--foreground))"
+                      : "hsl(var(--muted-foreground))",
+                    transform: isClicked
+                      ? "scale(0.6) translateY(2px)"
+                      : isActive
+                      ? "scale(1.25) translateY(-1px)"
+                      : isHovered
+                      ? "scale(1.15) translateY(-2px)"
+                      : "scale(1)",
+                    filter: isActive
+                      ? "drop-shadow(0 0 8px hsl(var(--primary) / 0.7)) drop-shadow(0 2px 4px hsl(var(--primary) / 0.3))"
+                      : "none",
+                    transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  }}
+                >
+                  {tab.icon}
+                </span>
+
+                {/* Label — appears below icon */}
+                <span
+                  className="relative z-10 text-[8px] font-display tracking-[0.2em] uppercase leading-none"
+                  style={{
+                    color: isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+                    opacity: isActive ? 1 : isHovered ? 0.7 : 0.35,
+                    transform: isActive ? "translateY(0) scaleX(1)" : isHovered ? "translateY(0) scaleX(0.95)" : "translateY(2px) scaleX(0.8)",
                     transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
                   }}
                 >
                   {tab.label}
                 </span>
-              )}
 
-              {/* Active bottom dot with ring */}
-              {activeTab === tab.id && (
-                <div className="absolute -bottom-0.5 left-1/2 flex items-center justify-center" style={{ transform: "translateX(-50%)" }}>
-                  <div
-                    className="w-1 h-1 rounded-full bg-primary"
-                    style={{
-                      boxShadow: "0 0 8px 2px hsl(var(--primary) / 0.6)",
-                      animation: "navDotPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
-                    }}
-                  />
-                  <div
-                    className="absolute w-3 h-3 rounded-full border border-primary/20"
-                    style={{ animation: "navDotRing 1.5s ease-out infinite" }}
-                  />
-                </div>
-              )}
-            </button>
-          ))}
+                {/* Active indicator — animated bar + glow */}
+                <div
+                  className="absolute -bottom-[1px] left-[25%] right-[25%] h-[2px] rounded-full"
+                  style={{
+                    background: isActive
+                      ? "linear-gradient(90deg, transparent, hsl(var(--primary)), transparent)"
+                      : "transparent",
+                    boxShadow: isActive ? "0 0 10px hsl(var(--primary) / 0.5), 0 0 4px hsl(var(--primary) / 0.3)" : "none",
+                    transform: `scaleX(${isActive ? 1 : 0})`,
+                    transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  }}
+                />
+
+                {/* Hover particles */}
+                {isHovered && !isActive && (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+                    {[0, 1, 2].map(i => (
+                      <div
+                        key={i}
+                        className="absolute w-0.5 h-0.5 rounded-full bg-primary/40"
+                        style={{
+                          left: `${30 + i * 20}%`,
+                          bottom: "20%",
+                          animation: `navParticle 0.8s ease-out forwards`,
+                          animationDelay: `${i * 0.1}s`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Animated separator */}
-        <div className="relative w-px h-5 mx-0.5 overflow-hidden">
+        {/* Separator with energy line */}
+        <div className="relative w-px h-7 mx-1">
           <div
-            className="w-full h-full"
+            className="absolute inset-0"
             style={{
-              background: "linear-gradient(to bottom, transparent, hsl(var(--border) / 0.5), transparent)",
-              animation: "sepShimmer 3s ease-in-out infinite",
+              background: "linear-gradient(to bottom, transparent 10%, hsl(var(--primary) / 0.3) 50%, transparent 90%)",
+              animation: "navSepPulse 2s ease-in-out infinite",
             }}
+          />
+          <div
+            className="absolute w-1 h-1 rounded-full bg-primary/50 left-1/2 -translate-x-1/2"
+            style={{ animation: "navSepDot 2s ease-in-out infinite" }}
           />
         </div>
 
         <ThemeToggle />
+
+        {/* Bottom edge glow */}
+        <div
+          className="absolute bottom-0 left-[10%] right-[10%] h-px pointer-events-none"
+          style={{
+            background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.2), transparent)",
+          }}
+        />
       </div>
 
       <style>{`
-        @keyframes logoOrbit {
-          to { --logo-angle: 360deg; }
-        }
-        @property --logo-angle {
+        @property --nav-orbit {
           syntax: "<angle>";
           inherits: false;
           initial-value: 0deg;
         }
-        @keyframes logoBreathe {
-          0%, 100% { box-shadow: 0 0 10px hsl(var(--primary) / 0.05); }
-          50% { box-shadow: 0 0 20px hsl(var(--primary) / 0.15); }
+        @keyframes navOrbit { to { --nav-orbit: 360deg; } }
+        @keyframes navSweep {
+          0% { transform: translateX(-100%); opacity: 0; }
+          30% { opacity: 1; }
+          70% { opacity: 1; }
+          100% { transform: translateX(100%); opacity: 0; }
         }
-        @keyframes navRipplePoint {
-          0% { width: 0; height: 0; opacity: 0.6; }
-          100% { width: 120px; height: 120px; opacity: 0; }
+        @keyframes navLogoPulse {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px hsl(var(--primary) / 0.4)); }
+          50% { transform: scale(1.1); filter: drop-shadow(0 0 10px hsl(var(--primary) / 0.7)); }
         }
-        @keyframes navDotPop {
-          0% { transform: scale(0); opacity: 0; }
-          50% { transform: scale(1.8); }
-          100% { transform: scale(1); opacity: 1; }
+        @keyframes navFlash {
+          0% { opacity: 1; transform: scale(0.8); }
+          100% { opacity: 0; transform: scale(1.5); }
         }
-        @keyframes navDotRing {
-          0% { transform: scale(0.5); opacity: 0.5; }
-          100% { transform: scale(2); opacity: 0; }
+        @keyframes navParticle {
+          0% { transform: translateY(0); opacity: 0.8; }
+          100% { transform: translateY(-16px); opacity: 0; }
         }
-        @keyframes sepShimmer {
-          0%, 100% { opacity: 0.3; transform: translateY(0); }
-          50% { opacity: 0.7; transform: translateY(-2px); }
+        @keyframes navSepPulse {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 1; }
+        }
+        @keyframes navSepDot {
+          0%, 100% { top: 70%; opacity: 0.3; }
+          50% { top: 20%; opacity: 0.8; }
+        }
+        @keyframes navGlitch {
+          0% { clip-path: inset(20% 0 60% 0); transform: translateX(-2px); }
+          33% { clip-path: inset(50% 0 10% 0); transform: translateX(2px); }
+          66% { clip-path: inset(10% 0 70% 0); transform: translateX(-1px); }
+          100% { clip-path: inset(0); transform: translateX(0); opacity: 0; }
         }
       `}</style>
     </nav>
