@@ -83,6 +83,32 @@
     --gradient-start: 0 0% 80%;
     --gradient-end: 0 0% 60%;
   }
+
+  .theme-pro {
+    --background: 30 10% 4%;
+    --foreground: 40 30% 95%;
+    --card: 30 10% 8%;
+    --card-foreground: 40 30% 95%;
+    --popover: 30 10% 8%;
+    --popover-foreground: 40 30% 95%;
+    --primary: 42 90% 55%;
+    --primary-foreground: 30 10% 4%;
+    --secondary: 30 10% 12%;
+    --secondary-foreground: 40 30% 95%;
+    --muted: 30 8% 16%;
+    --muted-foreground: 35 15% 60%;
+    --accent: 42 90% 55%;
+    --accent-foreground: 30 10% 4%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 40 30% 95%;
+    --border: 35 15% 18%;
+    --input: 35 15% 18%;
+    --ring: 42 90% 55%;
+    --glow-primary: 42 90% 55%;
+    --glow-secondary: 28 80% 50%;
+    --gradient-start: 42 90% 55%;
+    --gradient-end: 28 80% 50%;
+  }
 }
 
 @layer base {
