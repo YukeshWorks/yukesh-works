@@ -237,25 +237,21 @@ const Index = () => {
 
       {/* Warning toast on first 42 tap */}
       {show42Warning && (
-        <div className="fixed inset-0 z-[9998] pointer-events-none">
-          {/* Screen flash */}
-          <div className="absolute inset-0" style={{
-            background: 'radial-gradient(circle at center, rgba(220,38,38,0.08), transparent 70%)',
-            animation: 'warn42Flash 0.6s ease-out forwards',
-          }} />
-          {/* Warning card */}
-          <div className="absolute top-24 left-1/2 -translate-x-1/2 px-6 py-3.5 rounded-2xl"
+        <div className="fixed top-20 left-1/2 z-[9998]" style={{
+          animation: 'warn42Pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        }}>
+          <div className="relative px-4 py-2 rounded-lg"
             style={{
-              background: 'rgba(0, 0, 0, 0.8)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(220, 38, 38, 0.4)',
-              boxShadow: '0 0 30px rgba(220, 38, 38, 0.15), 0 0 60px rgba(220, 38, 38, 0.05)',
-              animation: 'warn42Enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, shake 0.4s ease-in-out 0.15s, warn42Glow 2s ease-in-out infinite 0.5s',
+              background: 'rgba(15, 0, 0, 0.9)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(220, 38, 38, 0.5)',
+              boxShadow: '0 0 16px rgba(220, 38, 38, 0.2)',
+              animation: 'warn42Shake 0.5s ease-in-out 0.2s, warn42Pulse 1.5s ease-in-out infinite 0.7s',
             }}
           >
-            <p className="text-red-400 text-xs font-display tracking-[0.2em] uppercase text-center whitespace-nowrap"
-              style={{ textShadow: '0 0 10px rgba(220, 38, 38, 0.5)' }}>
-              ⚠️ Don't touch it again...
+            <p className="text-red-400 text-[10px] font-display tracking-[0.15em] uppercase text-center whitespace-nowrap"
+              style={{ textShadow: '0 0 8px rgba(220, 38, 38, 0.6)' }}>
+              ⚠ Don't touch again
             </p>
           </div>
         </div>
