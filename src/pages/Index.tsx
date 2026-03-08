@@ -28,17 +28,79 @@ const Index = () => {
   const prevThemeRef = useRef<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const playWarningSound = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Eerie descending tone
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.8);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
+      osc.start();
+      osc.stop(ctx.currentTime + 1);
+      // Static burst
+      const bufSize = ctx.sampleRate * 0.15;
+      const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * 0.4;
+      const ns = ctx.createBufferSource();
+      const ng = ctx.createGain();
+      ns.buffer = buf;
+      ns.connect(ng);
+      ng.connect(ctx.destination);
+      ng.gain.setValueAtTime(0.1, ctx.currentTime);
+      ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      ns.start();
+    } catch {}
+  }, []);
+
+  const playVideoEntrySound = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Deep impact
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(80, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(25, ctx.currentTime + 0.6);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.8);
+      // Glitch noise
+      const bufSize = ctx.sampleRate * 0.3;
+      const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * 0.6;
+      const ns = ctx.createBufferSource();
+      const ng = ctx.createGain();
+      ns.buffer = buf;
+      ns.connect(ng);
+      ng.connect(ctx.destination);
+      ng.gain.setValueAtTime(0.12, ctx.currentTime);
+      ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      ns.start();
+    } catch {}
+  }, []);
+
   const handle42Click = useCallback(() => {
     if (!tapped42Ref.current) {
-      // First tap — show warning
       tapped42Ref.current = true;
       setShow42Warning(true);
+      playWarningSound();
       setTimeout(() => setShow42Warning(false), 2500);
     } else {
-      // Second tap — play video
+      playVideoEntrySound();
       setShow42Video(true);
     }
-  }, []);
+  }, [playWarningSound, playVideoEntrySound]);
 
   const handle42VideoEnd = useCallback(() => {
     setShow42Video(false);
