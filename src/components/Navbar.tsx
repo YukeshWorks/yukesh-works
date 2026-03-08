@@ -16,33 +16,48 @@ const tabs = [
 
 const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
   const [entered, setEntered] = useState(false);
-  const [clicked, setClicked] = useState<string | null>(null);
-  const [ripples, setRipples] = useState<{ id: number; tab: string }[]>([]);
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [pressedTab, setPressedTab] = useState<string | null>(null);
+  const [morphX, setMorphX] = useState(0);
+  const [morphW, setMorphW] = useState(0);
+  const [sparks, setSparks] = useState<{ id: number; x: number; y: number }[]>([]);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const rippleId = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sparkId = useRef(0);
 
   useEffect(() => {
-    const t = setTimeout(() => setEntered(true), 200);
-    return () => clearTimeout(t);
+    setTimeout(() => setEntered(true), 150);
   }, []);
 
   useEffect(() => {
     const i = tabs.findIndex(t => t.id === activeTab);
     const el = tabRefs.current[i];
-    if (el) setIndicatorStyle({ left: el.offsetLeft, width: el.offsetWidth });
+    const container = containerRef.current;
+    if (el && container) {
+      setMorphX(el.offsetLeft - container.offsetLeft);
+      setMorphW(el.offsetWidth);
+    }
   }, [activeTab]);
 
-  const handleClick = useCallback((tab: "home" | "puzzle" | "info") => {
-    // Trigger press animation
-    setClicked(tab);
-    setTimeout(() => setClicked(null), 400);
+  const spawnSparks = (el: HTMLButtonElement) => {
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const newSparks = Array.from({ length: 6 }, (_, i) => ({
+      id: ++sparkId.current,
+      x: cx,
+      y: cy,
+    }));
+    setSparks(prev => [...prev, ...newSparks]);
+    setTimeout(() => {
+      setSparks(prev => prev.filter(s => !newSparks.find(ns => ns.id === s.id)));
+    }, 800);
+  };
 
-    // Spawn ripple
-    const id = ++rippleId.current;
-    setRipples(prev => [...prev, { id, tab }]);
-    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 700);
-
+  const handleClick = useCallback((tab: "home" | "puzzle" | "info", i: number) => {
+    setPressedTab(tab);
+    setTimeout(() => setPressedTab(null), 500);
+    const el = tabRefs.current[i];
+    if (el) spawnSparks(el);
     onTabChange(tab);
   }, [onTabChange]);
 
@@ -51,209 +66,223 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
   };
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4"
-      style={{
-        transform: entered ? "translateY(0)" : "translateY(-50px)",
-        opacity: entered ? 1 : 0,
-        transition: "transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.7s ease",
-      }}
-    >
-      <div
-        className="relative flex items-center gap-0.5 px-1.5 py-1.5 rounded-2xl"
-        style={{
-          background: "rgba(0, 0, 0, 0.75)",
-          backdropFilter: "blur(24px) saturate(1.2)",
-          border: "1px solid rgba(255, 255, 255, 0.06)",
-          boxShadow: "0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
-        {/* Subtle shimmer line on top */}
-        <div
-          className="absolute top-0 left-0 right-0 h-px rounded-full pointer-events-none overflow-hidden"
-        >
-          <div
-            style={{
-              height: "100%",
-              background: "linear-gradient(90deg, transparent 20%, hsl(var(--primary) / 0.25) 50%, transparent 80%)",
-              animation: "navShimmer 6s ease-in-out infinite",
-            }}
-          />
-        </div>
-
-        {/* Logo */}
-        <button
-          onClick={handleLogoClick}
-          className="relative w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden group"
-          style={{
-            background: activeTab === "puzzle" ? "hsl(var(--primary) / 0.1)" : "rgba(255,255,255,0.04)",
-            transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-          }}
-        >
-          {activeTab === "puzzle" ? (
-            <KeyRound
-              className="w-3.5 h-3.5 text-primary"
+    <>
+      {/* Spark particles (portal to body level) */}
+      <div className="fixed inset-0 pointer-events-none z-[60]">
+        {sparks.map((s, i) => {
+          const angle = (i % 6) * 60 + Math.random() * 30;
+          const dist = 20 + Math.random() * 25;
+          const rad = (angle * Math.PI) / 180;
+          return (
+            <div
+              key={s.id}
+              className="absolute w-1 h-1 rounded-full"
               style={{
-                filter: "drop-shadow(0 0 4px hsl(var(--primary) / 0.4))",
-                animation: "navKeyBreathe 2.5s ease-in-out infinite",
-              }}
+                left: s.x,
+                top: s.y,
+                background: "hsl(var(--primary))",
+                boxShadow: `0 0 6px hsl(var(--primary) / 0.8), 0 0 12px hsl(var(--primary) / 0.4)`,
+                animation: "navSparkFly 0.6s ease-out forwards",
+                "--spark-dx": `${Math.cos(rad) * dist}px`,
+                "--spark-dy": `${Math.sin(rad) * dist - 15}px`,
+              } as React.CSSProperties}
             />
-          ) : (
-            <span
-              className="text-xs font-bold font-display tracking-wider"
-              style={{
-                color: "hsl(var(--primary))",
-                filter: "drop-shadow(0 0 4px hsl(var(--primary) / 0.3))",
-              }}
-            >
-              42
-            </span>
-          )}
-          <div
-            className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none"
-            style={{
-              background: "radial-gradient(circle, hsl(var(--primary) / 0.08), transparent 70%)",
-              transition: "opacity 0.4s ease",
-            }}
-          />
-        </button>
-
-        {/* Tabs container */}
-        <div className="relative flex items-center">
-          {/* Sliding indicator */}
-          <div
-            className="absolute h-full top-0 rounded-xl pointer-events-none"
-            style={{
-              left: indicatorStyle.left,
-              width: indicatorStyle.width,
-              background: "hsl(var(--primary) / 0.08)",
-              border: "1px solid hsl(var(--primary) / 0.15)",
-              boxShadow: "0 0 16px hsl(var(--primary) / 0.06), inset 0 0 8px hsl(var(--primary) / 0.03)",
-              transition: "all 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            }}
-          />
-
-          {tabs.map((tab, i) => {
-            const isActive = activeTab === tab.id;
-            const isClicked = clicked === tab.id;
-            const Icon = tab.icon;
-            const tabRipples = ripples.filter(r => r.tab === tab.id);
-
-            return (
-              <button
-                key={tab.id}
-                ref={el => (tabRefs.current[i] = el)}
-                onClick={() => handleClick(tab.id)}
-                className="relative flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl overflow-hidden"
-                style={{
-                  transform: isClicked ? "scale(0.9)" : "scale(1)",
-                  transition: "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                }}
-              >
-                {/* Ripple effects */}
-                {tabRipples.map(r => (
-                  <div
-                    key={r.id}
-                    className="absolute inset-0 pointer-events-none rounded-xl"
-                    style={{
-                      background: "radial-gradient(circle at center, hsl(var(--primary) / 0.2) 0%, transparent 70%)",
-                      animation: "navRippleExpand 0.7s ease-out forwards",
-                    }}
-                  />
-                ))}
-
-                {/* Icon */}
-                <div className="relative">
-                  <Icon
-                    className="w-4 h-4"
-                    style={{
-                      color: isActive ? "hsl(var(--primary))" : "rgba(255,255,255,0.35)",
-                      filter: isActive ? "drop-shadow(0 0 6px hsl(var(--primary) / 0.5))" : "none",
-                      transform: isActive ? "scale(1.15)" : isClicked ? "scale(0.8) rotate(-8deg)" : "scale(1)",
-                      transition: "all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                    }}
-                  />
-                  {/* Icon glow pulse when active */}
-                  {isActive && (
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        background: "radial-gradient(circle, hsl(var(--primary) / 0.3), transparent 60%)",
-                        animation: "navIconGlow 2s ease-in-out infinite",
-                        filter: "blur(4px)",
-                      }}
-                    />
-                  )}
-                </div>
-
-                {/* Label */}
-                <span
-                  className="text-[9px] font-display tracking-[0.18em] uppercase leading-none"
-                  style={{
-                    color: isActive ? "hsl(var(--primary))" : "rgba(255,255,255,0.3)",
-                    opacity: isActive ? 1 : 0.6,
-                    transform: isClicked ? "translateX(2px)" : "translateX(0)",
-                    transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                    textShadow: isActive ? "0 0 12px hsl(var(--primary) / 0.3)" : "none",
-                  }}
-                >
-                  {tab.label}
-                </span>
-
-                {/* Bottom active bar */}
-                <div
-                  className="absolute bottom-0 left-[20%] right-[20%] h-[1.5px] rounded-full"
-                  style={{
-                    background: isActive ? "linear-gradient(90deg, transparent, hsl(var(--primary)), transparent)" : "transparent",
-                    boxShadow: isActive ? "0 0 8px hsl(var(--primary) / 0.4)" : "none",
-                    transform: `scaleX(${isActive ? 1 : 0})`,
-                    transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                  }}
-                />
-
-                {/* Hover highlight */}
-                <div
-                  className="absolute inset-0 rounded-xl pointer-events-none opacity-0 hover-parent"
-                  style={{
-                    background: "rgba(255,255,255,0.02)",
-                    transition: "opacity 0.3s ease",
-                  }}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Divider */}
-        <div
-          className="w-px h-5 mx-1 rounded-full"
-          style={{
-            background: "linear-gradient(to bottom, transparent 10%, rgba(255,255,255,0.08) 50%, transparent 90%)",
-          }}
-        />
-
-        <ThemeToggle />
+          );
+        })}
       </div>
 
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-5 px-4"
+        style={{
+          opacity: entered ? 1 : 0,
+          transform: entered ? "translateY(0) scale(1)" : "translateY(-30px) scale(0.95)",
+          transition: "all 1s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        <div
+          className="relative flex items-center"
+          style={{
+            background: "rgba(0, 0, 0, 0.85)",
+            backdropFilter: "blur(30px)",
+            borderRadius: "16px",
+            padding: "6px 8px",
+            border: "1px solid rgba(255,255,255,0.05)",
+            boxShadow: `
+              0 1px 0 rgba(255,255,255,0.04) inset,
+              0 20px 50px rgba(0,0,0,0.6)
+            `,
+          }}
+        >
+          {/* Logo button */}
+          <button
+            onClick={handleLogoClick}
+            className="relative w-10 h-10 rounded-xl flex items-center justify-center mr-1 group overflow-hidden"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              transition: "all 0.4s ease",
+            }}
+          >
+            <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100"
+              style={{
+                background: "radial-gradient(circle, hsl(var(--primary) / 0.12), transparent)",
+                transition: "opacity 0.5s ease",
+              }}
+            />
+            {activeTab === "puzzle" ? (
+              <KeyRound className="w-4 h-4 text-primary relative z-10" style={{
+                filter: "drop-shadow(0 0 5px hsl(var(--primary) / 0.4))",
+              }} />
+            ) : (
+              <span className="text-sm font-bold font-display text-primary relative z-10"
+                style={{ filter: "drop-shadow(0 0 5px hsl(var(--primary) / 0.3))" }}>
+                42
+              </span>
+            )}
+          </button>
+
+          {/* Tab section */}
+          <div ref={containerRef} className="relative flex items-center">
+            {/* Morph blob indicator */}
+            <div
+              className="absolute top-0 h-full rounded-xl pointer-events-none z-0"
+              style={{
+                left: morphX,
+                width: morphW,
+                background: `linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--primary) / 0.04))`,
+                border: "1px solid hsl(var(--primary) / 0.18)",
+                boxShadow: `
+                  0 0 24px hsl(var(--primary) / 0.08),
+                  inset 0 1px 0 hsl(var(--primary) / 0.1)
+                `,
+                transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            />
+
+            {/* Glow trail under indicator */}
+            <div
+              className="absolute -bottom-2 h-4 rounded-full pointer-events-none z-0"
+              style={{
+                left: morphX + morphW * 0.2,
+                width: morphW * 0.6,
+                background: "hsl(var(--primary) / 0.12)",
+                filter: "blur(10px)",
+                transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            />
+
+            {tabs.map((tab, i) => {
+              const isActive = activeTab === tab.id;
+              const isPressed = pressedTab === tab.id;
+              const Icon = tab.icon;
+
+              return (
+                <button
+                  key={tab.id}
+                  ref={el => (tabRefs.current[i] = el)}
+                  onClick={() => handleClick(tab.id, i)}
+                  className="relative z-10 flex items-center gap-2 px-4 py-2.5 rounded-xl"
+                  style={{
+                    transform: isPressed
+                      ? "scale(0.85) translateY(1px)"
+                      : "scale(1) translateY(0)",
+                    transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  }}
+                >
+                  {/* Icon wrapper */}
+                  <div className="relative">
+                    <Icon
+                      className="w-4 h-4 relative z-10"
+                      style={{
+                        color: isActive ? "hsl(var(--primary))" : "rgba(255,255,255,0.3)",
+                        transform: isActive
+                          ? "scale(1.2)"
+                          : isPressed
+                          ? "scale(0.7) rotate(-12deg)"
+                          : "scale(1)",
+                        filter: isActive ? `drop-shadow(0 0 8px hsl(var(--primary) / 0.6))` : "none",
+                        transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                      }}
+                    />
+                    {/* Ring pulse on active */}
+                    {isActive && (
+                      <div
+                        className="absolute -inset-1.5 rounded-full pointer-events-none"
+                        style={{
+                          border: "1px solid hsl(var(--primary) / 0.15)",
+                          animation: "navRingPulse 2.5s ease-in-out infinite",
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Label with stagger */}
+                  <span
+                    className="text-[10px] font-display tracking-[0.2em] uppercase"
+                    style={{
+                      color: isActive ? "hsl(var(--primary))" : "rgba(255,255,255,0.25)",
+                      fontWeight: isActive ? 600 : 400,
+                      letterSpacing: isActive ? "0.25em" : "0.15em",
+                      textShadow: isActive ? "0 0 15px hsl(var(--primary) / 0.35)" : "none",
+                      transform: isPressed ? "translateX(3px) scale(0.95)" : "translateX(0) scale(1)",
+                      transition: "all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                    }}
+                  >
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Separator */}
+          <div className="w-px h-6 mx-2 rounded-full"
+            style={{ background: "rgba(255,255,255,0.06)" }}
+          />
+
+          <ThemeToggle />
+
+          {/* Ambient edge glow */}
+          <div
+            className="absolute -inset-px rounded-2xl pointer-events-none"
+            style={{
+              background: "conic-gradient(from 180deg, transparent, hsl(var(--primary) / 0.06), transparent 40%)",
+              animation: "navAmbientRotate 8s linear infinite",
+              mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+              maskComposite: "exclude",
+              WebkitMaskComposite: "xor",
+              padding: "1px",
+              borderRadius: "17px",
+            }}
+          />
+        </div>
+      </nav>
+
       <style>{`
-        @keyframes navShimmer {
-          0%, 100% { transform: translateX(-100%); }
-          50% { transform: translateX(100%); }
+        @keyframes navSparkFly {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(var(--spark-dx), var(--spark-dy)) scale(0);
+            opacity: 0;
+          }
         }
-        @keyframes navRippleExpand {
-          0% { opacity: 0.8; transform: scale(0.5); }
-          100% { opacity: 0; transform: scale(1.4); }
+        @keyframes navRingPulse {
+          0%, 100% { transform: scale(1); opacity: 0.4; }
+          50% { transform: scale(1.5); opacity: 0; }
         }
-        @keyframes navIconGlow {
-          0%, 100% { opacity: 0.4; transform: scale(1); }
-          50% { opacity: 0.8; transform: scale(1.3); }
+        @keyframes navAmbientRotate {
+          from { --nav-conic: 0deg; }
+          to { --nav-conic: 360deg; }
         }
-        @keyframes navKeyBreathe {
-          0%, 100% { transform: scale(1) rotate(0deg); }
-          50% { transform: scale(1.08) rotate(3deg); }
+        @property --nav-conic {
+          syntax: "<angle>";
+          inherits: false;
+          initial-value: 0deg;
         }
       `}</style>
-    </nav>
+    </>
   );
 };
 
