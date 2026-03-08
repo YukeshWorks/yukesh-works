@@ -296,18 +296,15 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
       <div className={`relative z-10 flex flex-col items-center w-full max-w-xs mx-auto px-4 ${shake ? 'animate-shake' : ''}`}>
         
-        {/* Icon */}
-        <div className={`mb-6 transition-all duration-700 ease-out ${successPhase >= 2 ? "scale-0 opacity-0" : successPhase >= 1 ? "scale-110" : ""}`}>
-          {status === "success" ? (
+        {/* Icon - only show on success */}
+        {status === "success" && (
+          <div className={`mb-6 transition-all duration-700 ease-out ${successPhase >= 2 ? "scale-0 opacity-0" : "scale-110"}`}>
             <div className="p-5 rounded-full bg-primary/15 border border-primary/30 animate-successPulse">
               <ShieldCheck className="w-10 h-10 text-primary" />
             </div>
-          ) : (
-            <div className={`p-5 rounded-full glass border ${status === "error" ? "border-destructive/40" : "border-border/40"} transition-colors duration-300`}>
-              <ShieldX className={`w-10 h-10 transition-colors duration-300 ${status === "error" ? "text-destructive" : "text-muted-foreground"}`} />
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+        {status !== "success" && <div className="mb-6" />}
 
         {/* Title */}
         <h2 className={`font-display text-xl tracking-[0.15em] uppercase text-foreground mb-1 transition-all duration-500 ${successPhase >= 2 ? "opacity-0 -translate-y-4" : ""}`}>
