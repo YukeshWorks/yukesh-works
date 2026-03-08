@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Gamepad2, Sparkles, Brain, Palmtree, ArrowLeft } from "lucide-react";
+import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
@@ -11,7 +11,7 @@ const VAULT_ITEMS: { id: VaultSection; icon: typeof Gamepad2; title: string; sub
   { id: "snake", icon: Gamepad2, title: "Snake Game", subtitle: "Classic arcade vibes", delay: "delay-100" },
   { id: "scratch", icon: Sparkles, title: "Rainbow Scratch", subtitle: "Reveal hidden colors", delay: "delay-200" },
   { id: "memory", icon: Brain, title: "Memory Match", subtitle: "Find all the pairs", delay: "delay-300" },
-  { id: "island", icon: Palmtree, title: "Island Creator", subtitle: "Build your paradise", delay: "delay-400" },
+  { id: "island", icon: TreePalm, title: "Island Creator", subtitle: "Build your paradise", delay: "delay-400" },
 ];
 
 const VaultPage = () => {
