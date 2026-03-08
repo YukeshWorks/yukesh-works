@@ -128,7 +128,7 @@ const VaultPage = () => {
 
   // Main vault entrance
   return (
-    <section className={`min-h-screen flex flex-col items-center justify-end relative overflow-hidden page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
+    <section className={`min-h-screen flex flex-col items-center relative overflow-hidden page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
       <div className="absolute inset-0 bg-black" />
       <img
         src={vaultLamp}
@@ -136,7 +136,7 @@ const VaultPage = () => {
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
       />
 
-      <div className="relative z-10 flex flex-col items-center pb-[15vh] fade-in-up delay-300" style={{ opacity: 0 }}>
+      <div className="relative z-10 flex flex-col items-center mt-[45vh] fade-in-up delay-300" style={{ opacity: 0 }}>
         <button
           onClick={() => navigateTo("games-menu")}
           className="group relative bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-xl px-8 py-3 flex items-center gap-3
