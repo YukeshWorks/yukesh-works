@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft, Joystick } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
@@ -18,6 +18,13 @@ const VAULT_ITEMS: { id: VaultSection; icon: typeof Gamepad2; title: string; sub
 const VaultPage = () => {
   const [activeSection, setActiveSection] = useState<VaultSection>("main");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false);
+
+  const handleImgLoad = useCallback(() => {
+    setImgLoaded(true);
+    setTimeout(() => setContentVisible(true), 400);
+  }, []);
 
   const navigateTo = (section: VaultSection) => {
     setIsTransitioning(true);
@@ -81,7 +88,12 @@ const VaultPage = () => {
         <img
           src={vaultLamp}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-30"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{
+            opacity: imgLoaded ? 0.3 : 0,
+            transition: 'opacity 0.8s ease-out',
+          }}
+          onLoad={handleImgLoad}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none" />
 
@@ -134,9 +146,21 @@ const VaultPage = () => {
         src={vaultLamp}
         alt=""
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        style={{
+          opacity: imgLoaded ? 1 : 0,
+          transition: 'opacity 0.8s ease-out',
+        }}
+        onLoad={handleImgLoad}
       />
 
-      <div className="relative z-10 flex flex-col items-center mt-[50vh] ml-56 fade-in-up delay-300" style={{ opacity: 0 }}>
+      <div
+        className="relative z-10 flex flex-col items-center mt-[50vh] ml-56"
+        style={{
+          opacity: contentVisible ? 1 : 0,
+          transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
         <button
           onClick={() => navigateTo("games-menu")}
           className="group relative bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-xl px-8 py-3 flex items-center gap-3
