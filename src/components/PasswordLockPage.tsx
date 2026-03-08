@@ -1,190 +1,209 @@
 import { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, Lock, Unlock, Skull, PartyPopper } from "lucide-react";
+import { ArrowLeft, ShieldCheck, ShieldX } from "lucide-react";
 
 interface PasswordLockPageProps {
   onBack: () => void;
   onUnlock: () => void;
 }
 
-const funnyFailMessages = [
-  "Nice try, but that's as wrong as pineapple on pizza! 🍕",
-  "Error 403: Brain not found 🧠",
-  "Did you even try? My grandma could guess better 👵",
-  "That password is more broken than my sleep schedule 😴",
-  "Incorrect! The universe laughs at your attempt 🌌",
-  "Wrong! Even a potato would do better 🥔",
-  "Nope! Try 'password123'... just kidding, don't 🙃",
-  "Access Denied: Have you tried turning your brain on and off? 🔌",
-];
-
-const funnyHints = [
-  "Hint: The simplest beginning... 🔢",
-  "Hint: Start from zero, end at one 🎯",
-  "Hint: Three zeros and a hero 🦸",
-  "Hint: Binary's little brother 💾",
-  "Hint: The loneliest sequence 🔑",
-];
+const correctPassword = "0001";
 
 const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
-  const [password, setPassword] = useState("");
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [failMessage, setFailMessage] = useState("");
-  const [hint, setHint] = useState("");
+  const [digits, setDigits] = useState<string[]>(["", "", "", ""]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
   const [attempts, setAttempts] = useState(0);
   const [shake, setShake] = useState(false);
-  const [showCelebration, setShowCelebration] = useState(false);
 
-  const correctPassword = "0001";
+  const handleDigit = useCallback((digit: string) => {
+    if (status === "success") return;
+    if (activeIndex >= 4) return;
 
-  useEffect(() => {
-    setHint(funnyHints[Math.floor(Math.random() * funnyHints.length)]);
-  }, []);
+    const newDigits = [...digits];
+    newDigits[activeIndex] = digit;
+    setDigits(newDigits);
+    setStatus("idle");
 
-  const handleSubmit = useCallback(() => {
-    if (password === correctPassword) {
-      setIsUnlocked(true);
-      setShowCelebration(true);
+    if (activeIndex === 3) {
+      // All 4 digits entered, check
+      const code = newDigits.join("");
       setTimeout(() => {
-        onUnlock();
-      }, 2000);
+        if (code === correctPassword) {
+          setStatus("success");
+          setTimeout(onUnlock, 1800);
+        } else {
+          setStatus("error");
+          setAttempts(prev => prev + 1);
+          setShake(true);
+          setTimeout(() => {
+            setShake(false);
+            setDigits(["", "", "", ""]);
+            setActiveIndex(0);
+            setStatus("idle");
+          }, 800);
+        }
+      }, 200);
     } else {
-      setAttempts(prev => prev + 1);
-      setShake(true);
-      setFailMessage(funnyFailMessages[Math.floor(Math.random() * funnyFailMessages.length)]);
-      setPassword("");
-      setTimeout(() => setShake(false), 500);
-      
-      // Change hint after fails
-      if (attempts >= 2) {
-        setHint(funnyHints[Math.floor(Math.random() * funnyHints.length)]);
-      }
+      setActiveIndex(activeIndex + 1);
     }
-  }, [password, attempts, onUnlock]);
+  }, [digits, activeIndex, status, onUnlock]);
 
-  const handleKeyPress = (key: string) => {
-    if (isUnlocked) return;
-    
-    if (key === "clear") {
-      setPassword("");
-    } else if (key === "enter") {
-      handleSubmit();
-    } else if (password.length < 10) {
-      setPassword(prev => prev + key);
-    }
-  };
+  const handleDelete = useCallback(() => {
+    if (status === "success") return;
+    if (activeIndex === 0 && digits[0] === "") return;
+    const idx = digits[activeIndex] !== "" ? activeIndex : activeIndex - 1;
+    if (idx < 0) return;
+    const newDigits = [...digits];
+    newDigits[idx] = "";
+    setDigits(newDigits);
+    setActiveIndex(idx);
+    setStatus("idle");
+  }, [digits, activeIndex, status]);
 
-  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "clear", "0", "enter"];
+  // Keyboard support
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key >= "0" && e.key <= "9") handleDigit(e.key);
+      else if (e.key === "Backspace") handleDelete();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [handleDigit, handleDelete]);
+
+  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "del", "0", ""];
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
-      {/* Cinematic background */}
+      {/* Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse delay-500" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-primary/3" />
+        {status === "success" && (
+          <div className="absolute inset-0 animate-successGlow" />
+        )}
       </div>
 
       {/* Back button */}
       <button
         onClick={onBack}
-        className="absolute top-24 left-6 glass px-4 py-2 rounded-full flex items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-500 hover:scale-105 z-20"
+        className="absolute top-24 left-6 glass px-4 py-2 rounded-full flex items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-105 z-20"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span className="text-sm">Back</span>
+        <span className="text-sm font-sans">Back</span>
       </button>
 
-      {/* Main lock container */}
-      <div className={`relative z-10 max-w-sm w-full mx-6 ${shake ? 'animate-shake' : ''}`}>
-        {/* Lock icon */}
-        <div className="flex justify-center mb-8">
-          <div className={`p-6 rounded-full glass glow-border transition-all duration-700 ${isUnlocked ? 'bg-primary/20 scale-110' : ''}`}>
-            {isUnlocked ? (
-              <Unlock className="w-12 h-12 text-primary animate-pulse" />
-            ) : (
-              <Lock className="w-12 h-12 text-muted-foreground" />
-            )}
-          </div>
+      <div className={`relative z-10 flex flex-col items-center w-full max-w-xs mx-auto px-4 ${shake ? 'animate-shake' : ''}`}>
+        
+        {/* Icon */}
+        <div className={`mb-6 transition-all duration-700 ${status === "success" ? "scale-125" : ""}`}>
+          {status === "success" ? (
+            <div className="p-5 rounded-full bg-primary/15 border border-primary/30 animate-successPulse">
+              <ShieldCheck className="w-10 h-10 text-primary" />
+            </div>
+          ) : (
+            <div className={`p-5 rounded-full glass border ${status === "error" ? "border-destructive/40" : "border-border/40"} transition-colors duration-300`}>
+              <ShieldX className={`w-10 h-10 transition-colors duration-300 ${status === "error" ? "text-destructive" : "text-muted-foreground"}`} />
+            </div>
+          )}
         </div>
 
         {/* Title */}
-        <h2 className="font-display text-2xl md:text-3xl text-center mb-2 text-foreground">
-          {isUnlocked ? "ACCESS GRANTED" : "ENTER PASSCODE"}
+        <h2 className="font-display text-xl tracking-[0.15em] uppercase text-foreground mb-1 transition-all duration-500">
+          {status === "success" ? "Access Granted" : "Enter Passcode"}
         </h2>
-        
-        {/* Subtitle/Hint */}
-        <p className="text-center text-muted-foreground text-sm mb-8 px-4">
-          {isUnlocked ? "Welcome, chosen one! 🎉" : hint}
+        <p className="text-muted-foreground text-xs mb-8 tracking-wider">
+          {status === "success"
+            ? "Welcome back, agent."
+            : status === "error"
+            ? `Wrong code · Attempt ${attempts}`
+            : "4-digit passcode required"}
         </p>
 
-        {/* Password display */}
-        <div className="glass rounded-2xl p-4 mb-6 glow-border">
-          <div className="flex justify-center gap-2 h-12 items-center">
-            {password.split("").map((char, i) => (
-              <div 
-                key={i}
-                className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-mono text-lg fade-in-up"
-                style={{ animationDelay: `${i * 0.05}s` }}
-              >
-                {char}
-              </div>
-            ))}
-            {password.length === 0 && (
-              <span className="text-muted-foreground/50 text-sm">Enter the sacred numbers...</span>
-            )}
-          </div>
+        {/* Dot indicators */}
+        <div className="flex gap-4 mb-10">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${
+                status === "success"
+                  ? "bg-primary scale-110 shadow-[0_0_12px_hsl(var(--primary)/0.6)]"
+                  : status === "error"
+                  ? "bg-destructive scale-95"
+                  : digits[i] !== ""
+                  ? "bg-foreground scale-105"
+                  : "bg-muted-foreground/20 border border-muted-foreground/30"
+              }`}
+              style={{
+                transitionDelay: status === "success" ? `${i * 100}ms` : "0ms",
+              }}
+            />
+          ))}
         </div>
 
-        {/* Fail message */}
-        {failMessage && !isUnlocked && (
-          <div className="text-center mb-4 fade-in-up">
-            <p className="text-destructive text-sm flex items-center justify-center gap-2">
-              <Skull className="w-4 h-4" />
-              {failMessage}
-            </p>
-            <p className="text-muted-foreground text-xs mt-1">Attempts: {attempts}</p>
+        {/* Success overlay */}
+        {status === "success" && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+            <div className="flex flex-col items-center gap-3 animate-successReveal">
+              <div className="w-20 h-20 rounded-full border-2 border-primary/40 flex items-center justify-center">
+                <ShieldCheck className="w-10 h-10 text-primary" />
+              </div>
+              <span className="text-primary text-sm font-display tracking-[0.3em] uppercase">Verified</span>
+            </div>
           </div>
         )}
 
         {/* Keypad */}
-        {!isUnlocked && (
-          <div className="grid grid-cols-3 gap-3">
-            {keys.map((key) => (
-              <button
-                key={key}
-                onClick={() => handleKeyPress(key)}
-                className={`h-14 rounded-xl glass text-lg font-mono transition-all duration-300 hover:scale-105 active:scale-95 ${
-                  key === "enter" 
-                    ? "bg-primary/20 text-primary hover:bg-primary/30" 
-                    : key === "clear"
-                    ? "text-destructive hover:bg-destructive/10"
-                    : "text-foreground hover:bg-primary/10 hover:text-primary"
-                }`}
-                style={{
-                  boxShadow: '0 4px 20px hsl(var(--background) / 0.5)',
-                }}
-              >
-                {key === "clear" ? "CLR" : key === "enter" ? "→" : key}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Celebration */}
-        {showCelebration && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="flex gap-4 animate-bounce">
-              <PartyPopper className="w-8 h-8 text-primary" />
-              <PartyPopper className="w-8 h-8 text-primary rotate-90" />
-              <PartyPopper className="w-8 h-8 text-primary -rotate-90" />
-            </div>
+        {status !== "success" && (
+          <div className="grid grid-cols-3 gap-2.5 w-full">
+            {keys.map((key, idx) => {
+              if (key === "") return <div key={idx} />;
+              return (
+                <button
+                  key={key}
+                  onClick={() => key === "del" ? handleDelete() : handleDigit(key)}
+                  className={`h-14 rounded-xl text-base font-mono transition-all duration-200 active:scale-90 ${
+                    key === "del"
+                      ? "text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+                      : "text-foreground hover:bg-primary/8 hover:text-primary"
+                  }`}
+                  style={{
+                    background: key === "del" ? "transparent" : "hsl(var(--card) / 0.4)",
+                    backdropFilter: "blur(8px)",
+                    border: "1px solid hsl(var(--border) / 0.3)",
+                  }}
+                >
+                  {key === "del" ? "⌫" : key}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Easter egg at bottom */}
-      <div className="absolute bottom-8 text-center text-xs text-muted-foreground/30 fade-in-up delay-700">
-        <p>🔒 Security Level: Maximum Overkill 🔒</p>
+      {/* Bottom text */}
+      <div className="absolute bottom-8 text-center text-[10px] text-muted-foreground/20 tracking-widest uppercase">
+        <p>Secure Access Terminal</p>
       </div>
+
+      <style>{`
+        @keyframes successGlow {
+          0% { background: transparent; }
+          50% { background: radial-gradient(circle at center, hsl(var(--primary) / 0.08) 0%, transparent 70%); }
+          100% { background: radial-gradient(circle at center, hsl(var(--primary) / 0.04) 0%, transparent 70%); }
+        }
+        .animate-successGlow { animation: successGlow 1.5s ease-out forwards; }
+        
+        @keyframes successPulse {
+          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.3); }
+          50% { box-shadow: 0 0 30px 8px hsl(var(--primary) / 0.15); }
+        }
+        .animate-successPulse { animation: successPulse 1.5s ease-in-out infinite; }
+        
+        @keyframes successReveal {
+          0% { opacity: 0; transform: scale(0.8); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-successReveal { animation: successReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.3s; opacity: 0; }
+      `}</style>
     </section>
   );
 };
