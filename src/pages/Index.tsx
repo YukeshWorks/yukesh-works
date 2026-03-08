@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import HomePage from "@/components/HomePage";
 import VaultPage from "@/components/VaultPage";
@@ -9,6 +9,7 @@ import OfflinePage from "@/components/OfflinePage";
 import WelcomePage from "@/components/WelcomePage";
 import ParticleBackground from "@/components/ParticleBackground";
 import CursorLight from "@/components/CursorLight";
+import ethernetVideo from "@/assets/ethernet-video.mp4";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
