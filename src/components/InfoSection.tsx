@@ -149,24 +149,15 @@ const InfoSection = () => {
 
       {/* "That's Me" label */}
       {showContent && (
-        <div className="absolute right-4 md:right-16 top-[22%] md:top-1/3 z-10 fade-in-up opacity-0 delay-500 flex items-center gap-0">
-          <div className="px-3 py-1.5 rounded-full glass border border-primary/30"
-            style={{
-              boxShadow: '0 0 12px hsl(var(--primary) / 0.15)',
-              animation: 'thatsMeBounce 2s ease-in-out infinite',
-            }}
-          >
-            <span className="text-[8px] md:text-[9px] font-heading uppercase tracking-[0.3em] text-primary whitespace-nowrap"
-              style={{ textShadow: '0 0 8px hsl(var(--primary) / 0.4)' }}>
-              That's Me
-            </span>
+        <div className="absolute right-6 md:right-16 top-1/3 z-10 fade-in-up opacity-0 delay-500 hidden md:flex items-center gap-0">
+          <div className="px-3 py-1.5 rounded-l-full glass border border-primary/20 border-r-0">
+            <span className="text-[9px] font-heading uppercase tracking-[0.3em] text-primary whitespace-nowrap">That's Me</span>
           </div>
-          {/* Animated arrow pointing right toward photo */}
-          <div className="ml-1 text-primary/60" style={{ animation: 'thatsMeArrow 1.5s ease-in-out infinite' }}>
-            <svg width="20" height="12" viewBox="0 0 20 12" fill="none">
-              <path d="M0 6h16M12 1l5 5-5 5" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
-            </svg>
-          </div>
+          <div className="w-0 h-0" style={{
+            borderTop: '6px solid transparent',
+            borderBottom: '6px solid transparent',
+            borderLeft: '8px solid hsl(var(--primary) / 0.3)',
+          }} />
         </div>
       )}
 
@@ -178,14 +169,6 @@ const InfoSection = () => {
         @keyframes aboutSweep {
           0% { transform: translateX(-100%); }
           50%, 100% { transform: translateX(100%); }
-        }
-        @keyframes thatsMeBounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-6px); }
-        }
-        @keyframes thatsMeArrow {
-          0%, 100% { transform: translateX(0); opacity: 0.6; }
-          50% { transform: translateX(5px); opacity: 1; }
         }
       `}</style>
     </section>
