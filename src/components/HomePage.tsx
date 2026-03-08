@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Github, Linkedin, Instagram, Mail, Sparkles, Triangle, Circle } from "lucide-react";
+import { Linkedin, Instagram, Mail, Phone, Sparkles, Triangle, Circle } from "lucide-react";
 import offlineCloud from "@/assets/offline-cloud.gif";
 import PortfolioModal from "./PortfolioModal";
 import ContactModal from "./ContactModal";
@@ -172,17 +172,17 @@ const HomePage = () => {
             <span className="text-[10px] font-heading tracking-[0.3em] uppercase opacity-70">Connect</span>
             <div className="w-8 h-0.5 bg-foreground/30 rounded-full" />
             <div className="flex gap-2">
-              <a href="#" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
-                <Github className="w-4 h-4" />
-              </a>
-              <a href="#" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
+              <a href="https://www.linkedin.com/in/yukesh-kumar-a01647322" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
                 <Linkedin className="w-4 h-4" />
               </a>
-              <a href="#" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
+              <a href="https://instagram.com/yuk3shh" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
                 <Instagram className="w-4 h-4" />
               </a>
               <a href="mailto:mailtoyukesh33@gmail.com" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
                 <Mail className="w-4 h-4" />
+              </a>
+              <a href="tel:9080861733" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
+                <Phone className="w-4 h-4" />
               </a>
             </div>
           </div>
