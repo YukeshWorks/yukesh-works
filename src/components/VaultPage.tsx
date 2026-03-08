@@ -51,12 +51,13 @@ const VaultPage = () => {
 
   // Individual game views
   if (activeSection === "snake") {
-    return <div className={transClass}>{backButton("games-menu")}<SnakeGame /></div>;
+    return <div className={transClass}>{backButton("games-menu")}<GameAuthButton /><SnakeGame /></div>;
   }
   if (activeSection === "scratch") {
     return (
       <div className={transClass}>
         {backButton("games-menu")}
+        <GameAuthButton />
         <section className="min-h-[90vh] flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
           <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
           <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-float-slow" />
@@ -75,10 +76,10 @@ const VaultPage = () => {
     );
   }
   if (activeSection === "memory") {
-    return <div className={transClass}>{backButton("games-menu")}<MemoryGame /></div>;
+    return <div className={transClass}>{backButton("games-menu")}<GameAuthButton /><MemoryGame /></div>;
   }
   if (activeSection === "island") {
-    return <div className={transClass}>{backButton("games-menu")}<IslandCreator /></div>;
+    return <div className={transClass}>{backButton("games-menu")}<GameAuthButton /><IslandCreator /></div>;
   }
 
   // Games submenu
@@ -99,6 +100,7 @@ const VaultPage = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none" />
 
         {backButton("main")}
+        <GameAuthButton />
 
         <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm px-4">
           <div className="text-center fade-in-up">
