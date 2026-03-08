@@ -6,6 +6,7 @@ interface NavbarProps {
   activeTab: "home" | "puzzle" | "info";
   onTabChange: (tab: "home" | "puzzle" | "info") => void;
   onLockClick?: () => void;
+  on42Click?: () => void;
 }
 
 const tabs = [
