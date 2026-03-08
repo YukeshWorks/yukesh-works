@@ -237,17 +237,27 @@ const Index = () => {
 
       {/* Warning toast on first 42 tap */}
       {show42Warning && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-xl"
-          style={{
-            background: 'rgba(220, 38, 38, 0.15)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(220, 38, 38, 0.3)',
-            animation: 'pageFadeIn 0.3s ease-out, shake 0.5s ease-in-out 0.1s',
-          }}
-        >
-          <p className="text-red-400 text-xs font-display tracking-[0.15em] uppercase text-center">
-            ⚠️ Don't touch it again...
-          </p>
+        <div className="fixed inset-0 z-[9998] pointer-events-none">
+          {/* Screen flash */}
+          <div className="absolute inset-0" style={{
+            background: 'radial-gradient(circle at center, rgba(220,38,38,0.08), transparent 70%)',
+            animation: 'warn42Flash 0.6s ease-out forwards',
+          }} />
+          {/* Warning card */}
+          <div className="absolute top-24 left-1/2 -translate-x-1/2 px-6 py-3.5 rounded-2xl"
+            style={{
+              background: 'rgba(0, 0, 0, 0.8)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(220, 38, 38, 0.4)',
+              boxShadow: '0 0 30px rgba(220, 38, 38, 0.15), 0 0 60px rgba(220, 38, 38, 0.05)',
+              animation: 'warn42Enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, shake 0.4s ease-in-out 0.15s, warn42Glow 2s ease-in-out infinite 0.5s',
+            }}
+          >
+            <p className="text-red-400 text-xs font-display tracking-[0.2em] uppercase text-center whitespace-nowrap"
+              style={{ textShadow: '0 0 10px rgba(220, 38, 38, 0.5)' }}>
+              ⚠️ Don't touch it again...
+            </p>
+          </div>
         </div>
       )}
 
@@ -256,8 +266,13 @@ const Index = () => {
         <div
           className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
           onClick={handle42VideoEnd}
-          style={{ animation: 'pageFadeIn 0.3s ease-out' }}
+          style={{ animation: 'video42Enter 0.4s ease-out forwards' }}
         >
+          {/* Glitch lines */}
+          <div className="absolute inset-0 pointer-events-none z-10" style={{
+            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px)',
+            animation: 'video42Scanlines 0.1s steps(2) infinite',
+          }} />
           <video
             ref={videoRef}
             src={ethernetVideo}
@@ -266,9 +281,38 @@ const Index = () => {
             muted
             onEnded={handle42VideoEnd}
             className="w-full h-full object-cover"
+            style={{ animation: 'video42Zoom 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
           />
         </div>
       )}
+
+      <style>{`
+        @keyframes warn42Enter {
+          0% { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.8); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
+        @keyframes warn42Flash {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes warn42Glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(220,38,38,0.1); }
+          50% { box-shadow: 0 0 40px rgba(220,38,38,0.25), 0 0 80px rgba(220,38,38,0.1); }
+        }
+        @keyframes video42Enter {
+          0% { opacity: 0; clip-path: inset(50% 0 50% 0); }
+          30% { opacity: 1; clip-path: inset(20% 0 20% 0); }
+          100% { opacity: 1; clip-path: inset(0 0 0 0); }
+        }
+        @keyframes video42Zoom {
+          0% { transform: scale(1.3); filter: brightness(2) contrast(1.5); }
+          100% { transform: scale(1); filter: brightness(1) contrast(1); }
+        }
+        @keyframes video42Scanlines {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(4px); }
+        }
+      `}</style>
     </div>
   );
 };
