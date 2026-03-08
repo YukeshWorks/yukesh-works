@@ -119,7 +119,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
               transition: "all 0.4s ease",
             }}
           >
-            <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100"
+            <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100"
               style={{
                 background: "radial-gradient(circle, hsl(var(--primary) / 0.12), transparent)",
                 transition: "opacity 0.5s ease",
