@@ -161,10 +161,13 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
           <img
             src={skeletonGif}
             alt=""
-            className="w-72 h-72 md:w-96 md:h-96 object-contain"
+            className="w-full h-full object-contain"
             style={{
               animation: 'introZoom 2s ease-out forwards',
               filter: 'brightness(1.3) contrast(1.2)',
+              maxWidth: '100vw',
+              maxHeight: '100vh',
+              padding: '2rem',
             }}
           />
         </div>
