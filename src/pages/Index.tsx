@@ -23,15 +23,26 @@ const Index = () => {
   const [showPasswordLock, setShowPasswordLock] = useState(false);
   const [showWelcomePage, setShowWelcomePage] = useState(false);
   const [show42Video, setShow42Video] = useState(false);
+  const [show42Warning, setShow42Warning] = useState(false);
+  const tapped42Ref = useRef(false);
   const prevThemeRef = useRef<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handle42Click = useCallback(() => {
-    setShow42Video(true);
+    if (!tapped42Ref.current) {
+      // First tap — show warning
+      tapped42Ref.current = true;
+      setShow42Warning(true);
+      setTimeout(() => setShow42Warning(false), 2500);
+    } else {
+      // Second tap — play video
+      setShow42Video(true);
+    }
   }, []);
 
   const handle42VideoEnd = useCallback(() => {
     setShow42Video(false);
+    tapped42Ref.current = false;
   }, []);
 
   // Auto-switch theme based on active tab
@@ -161,6 +172,22 @@ const Index = () => {
           {renderPage()}
         </div>
       </div>
+
+      {/* Warning toast on first 42 tap */}
+      {show42Warning && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-xl"
+          style={{
+            background: 'rgba(220, 38, 38, 0.15)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(220, 38, 38, 0.3)',
+            animation: 'pageFadeIn 0.3s ease-out, shake 0.5s ease-in-out 0.1s',
+          }}
+        >
+          <p className="text-red-400 text-xs font-display tracking-[0.15em] uppercase text-center">
+            ⚠️ Don't touch it again...
+          </p>
+        </div>
+      )}
 
       {/* Fullscreen 42 video overlay */}
       {show42Video && (
