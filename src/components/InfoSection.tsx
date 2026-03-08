@@ -18,8 +18,14 @@ const InfoSection = () => {
           decoding="sync"
           loading="eager"
           fetchPriority="high"
-          className="h-full w-auto max-w-none object-contain object-center md:object-right opacity-90"
-          style={{ minHeight: '100vh', contentVisibility: 'auto' }}
+          className="h-full w-auto max-w-none object-contain object-center md:object-right"
+          style={{
+            minHeight: '100vh',
+            contentVisibility: 'auto',
+            opacity: imgLoaded ? 0.9 : 0,
+            transition: 'opacity 0.8s ease-out',
+          }}
+          onLoad={() => setImgLoaded(true)}
         />
         <div className="hidden md:block absolute inset-0" style={{
           background: `
