@@ -22,7 +22,17 @@ const Index = () => {
   const [showOfflinePage, setShowOfflinePage] = useState(!navigator.onLine);
   const [showPasswordLock, setShowPasswordLock] = useState(false);
   const [showWelcomePage, setShowWelcomePage] = useState(false);
+  const [show42Video, setShow42Video] = useState(false);
   const prevThemeRef = useRef<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handle42Click = useCallback(() => {
+    setShow42Video(true);
+  }, []);
+
+  const handle42VideoEnd = useCallback(() => {
+    setShow42Video(false);
+  }, []);
 
   // Auto-switch theme based on active tab
   useEffect(() => {
