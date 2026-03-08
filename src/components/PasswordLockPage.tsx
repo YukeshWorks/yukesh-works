@@ -186,6 +186,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [shake, setShake] = useState(false);
   const [successPhase, setSuccessPhase] = useState(0);
   const [showErrorVideo, setShowErrorVideo] = useState(false);
+  const errorVideoRef = useRef<HTMLVideoElement>(null);
 
   // Auto-dismiss intro after 2.5s + play intro sound
   useEffect(() => {
