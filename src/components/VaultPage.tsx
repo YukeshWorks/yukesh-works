@@ -79,6 +79,11 @@ const VaultPage = () => {
   return (
     <section className={`min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
       <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background" />
+      <img
+        src={vaultLamp}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+      />
       <div className="absolute top-1/4 right-1/3 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-float-slow" />
       <div className="absolute bottom-1/4 left-1/3 w-56 h-56 bg-primary/8 rounded-full blur-3xl animate-float-slow delay-300" />
 
