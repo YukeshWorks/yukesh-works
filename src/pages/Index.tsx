@@ -23,17 +23,19 @@ const Index = () => {
   const [showWelcomePage, setShowWelcomePage] = useState(false);
   const prevThemeRef = useRef<string | null>(null);
 
-  // Auto-switch to red theme on About tab
+  // Auto-switch theme based on active tab
   useEffect(() => {
     const root = document.documentElement;
-    if (activeTab === "info") {
+    if (activeTab === "info" || activeTab === "puzzle") {
       // Save current theme before switching
-      const currentTheme = ["theme-blue", "theme-red", "theme-dark"].find(c => root.classList.contains(c)) || "theme-blue";
-      prevThemeRef.current = currentTheme;
+      if (!prevThemeRef.current) {
+        const currentTheme = ["theme-blue", "theme-red", "theme-dark"].find(c => root.classList.contains(c)) || "theme-blue";
+        prevThemeRef.current = currentTheme;
+      }
       root.classList.remove("theme-blue", "theme-red", "theme-dark");
-      root.classList.add("theme-red");
+      root.classList.add(activeTab === "info" ? "theme-red" : "theme-dark");
     } else if (prevThemeRef.current) {
-      // Restore previous theme when leaving About
+      // Restore previous theme when back to home
       root.classList.remove("theme-blue", "theme-red", "theme-dark");
       root.classList.add(prevThemeRef.current);
       prevThemeRef.current = null;
