@@ -71,7 +71,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
       }}
     >
       <div
-        className="relative flex items-center gap-0.5 px-1.5 py-1.5 rounded-2xl overflow-hidden"
+        className="relative flex items-center gap-0.5 px-1.5 py-1.5 rounded-full overflow-hidden"
         style={{
           background: "linear-gradient(135deg, hsl(var(--background) / 0.65), hsl(var(--card) / 0.45))",
           backdropFilter: "blur(24px) saturate(1.4)",
@@ -86,7 +86,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
       >
         {/* Animated top edge light sweep */}
         <div
-          className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+          className="absolute top-0 left-0 right-0 h-px pointer-events-none rounded-full"
           style={{
             background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), transparent)",
             animation: "navSweep 4s ease-in-out infinite",
@@ -107,7 +107,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
         {/* Logo / Lock */}
         <button
           onClick={handleLogoClick}
-          className="relative w-11 h-11 rounded-xl flex items-center justify-center overflow-hidden group"
+          className="relative w-9 h-9 rounded-full flex items-center justify-center overflow-hidden group"
           style={{
             background: activeTab === "puzzle"
               ? "linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--primary) / 0.08))"
@@ -118,7 +118,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
         >
           {/* Rotating border ring */}
           <div
-            className="absolute inset-[-1px] rounded-xl pointer-events-none"
+            className="absolute inset-[-1px] rounded-full pointer-events-none"
             style={{
               background: "conic-gradient(from var(--nav-orbit, 0deg), hsl(var(--primary) / 0.4), transparent 30%, transparent 70%, hsl(var(--primary) / 0.2))",
               mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
@@ -131,7 +131,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
 
           {activeTab === "puzzle" ? (
             <KeyRound
-              className="w-4.5 h-4.5 text-primary relative z-10"
+              className="w-3.5 h-3.5 text-primary relative z-10"
               style={{
                 transform: logoSpin ? "rotate(360deg) scale(1.3)" : "rotate(0) scale(1)",
                 filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.5))",
