@@ -372,6 +372,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
         }
       `}</style>
     </section>
+    </>
   );
 };
 
