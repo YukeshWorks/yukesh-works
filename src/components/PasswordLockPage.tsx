@@ -18,11 +18,11 @@ const funnyFailMessages = [
 ];
 
 const funnyHints = [
-  "Hint: It's the meaning of life, the universe, and everything 🌌",
-  "Hint: What do you get when you multiply 6 by 9 in base 13? 🤓",
-  "Hint: Douglas Adams knows the answer 📚",
-  "Hint: How many roads must a man walk down? 🛤️",
-  "Hint: It's between 41 and 43... inclusive-ish 🎯",
+  "Hint: The simplest beginning... 🔢",
+  "Hint: Start from zero, end at one 🎯",
+  "Hint: Three zeros and a hero 🦸",
+  "Hint: Binary's little brother 💾",
+  "Hint: The loneliest sequence 🔑",
 ];
 
 const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
@@ -34,7 +34,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [shake, setShake] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
-  const correctPassword = "42";
+  const correctPassword = "0001";
 
   useEffect(() => {
     setHint(funnyHints[Math.floor(Math.random() * funnyHints.length)]);
