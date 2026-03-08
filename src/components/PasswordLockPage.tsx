@@ -34,7 +34,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [shake, setShake] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
-  const correctPassword = "42";
+  const correctPassword = "0001";
 
   useEffect(() => {
     setHint(funnyHints[Math.floor(Math.random() * funnyHints.length)]);
