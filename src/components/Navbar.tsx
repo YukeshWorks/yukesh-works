@@ -240,7 +240,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
 
           {/* Ambient edge glow */}
           <div
-            className="absolute -inset-px rounded-2xl pointer-events-none"
+            className="absolute -inset-px rounded-full pointer-events-none"
             style={{
               background: "conic-gradient(from 180deg, transparent, hsl(var(--primary) / 0.06), transparent 40%)",
               animation: "navAmbientRotate 8s linear infinite",
@@ -248,7 +248,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
               maskComposite: "exclude",
               WebkitMaskComposite: "xor",
               padding: "1px",
-              borderRadius: "17px",
+              borderRadius: "50px",
             }}
           />
         </div>
