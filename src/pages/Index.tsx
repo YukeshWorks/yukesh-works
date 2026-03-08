@@ -155,12 +155,31 @@ const Index = () => {
     <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
       <ParticleBackground />
       <CursorLight />
-      <Navbar activeTab={activeTab} onTabChange={handleTabChange} onLockClick={handleLockClick} />
+      <Navbar activeTab={activeTab} onTabChange={handleTabChange} onLockClick={handleLockClick} on42Click={handle42Click} />
       <div className="page-container" style={{ perspective: '1500px' }}>
         <div className={getTransitionClasses()}>
           {renderPage()}
         </div>
       </div>
+
+      {/* Fullscreen 42 video overlay */}
+      {show42Video && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
+          onClick={handle42VideoEnd}
+          style={{ animation: 'pageFadeIn 0.3s ease-out' }}
+        >
+          <video
+            ref={videoRef}
+            src={ethernetVideo}
+            autoPlay
+            playsInline
+            muted
+            onEnded={handle42VideoEnd}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
     </div>
   );
 };
