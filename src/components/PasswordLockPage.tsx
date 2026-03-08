@@ -277,8 +277,8 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
       <div className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center"
         style={{ animation: 'pageFadeIn 0.4s ease-out' }}>
         <video
+          ref={errorVideoRef}
           src={wrongPasscodeVideo}
-          autoPlay
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.8 }}
