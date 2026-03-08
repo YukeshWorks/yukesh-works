@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import desktopBg from "@/assets/home-bg.jpg";
+import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
 
 interface VideoBackgroundProps {
