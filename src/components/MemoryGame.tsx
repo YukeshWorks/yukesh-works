@@ -177,9 +177,9 @@ const MemoryGame = () => {
         </div>
 
         {/* Savage mismatch message - below game grid */}
-        <div className="h-8 flex items-center justify-center">
+        <div className="h-10 flex items-center justify-center">
           {showMismatchMsg && (
-            <p className="text-destructive/80 text-[10px] font-medium animate-fade-in pointer-events-none">
+            <p className="text-destructive text-sm font-bold animate-fade-in pointer-events-none">
               {mismatchMsg}
               {consecutiveFails >= 3 && ` (${consecutiveFails}x streak 💀)`}
             </p>
