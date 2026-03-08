@@ -67,9 +67,11 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
       setTimeout(() => {
         if (code === correctPassword) {
           setStatus("success");
+          playUnlockSound();
           setTimeout(onUnlock, 1800);
         } else {
           setStatus("error");
+          playErrorSound();
           setAttempts(prev => prev + 1);
           setShake(true);
           setTimeout(() => {
