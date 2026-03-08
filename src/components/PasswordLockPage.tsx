@@ -228,6 +228,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
             setTimeout(() => {
               setShake(false);
               setShowErrorVideo(true);
+              playFailureSound();
             }, 500);
           } else {
             setTimeout(() => {
