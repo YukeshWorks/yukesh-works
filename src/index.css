@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Urbanist:wght@300;400;500&family=Bebas+Neue&family=Fira+Code:wght@400;500&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Urbanist:wght@300;400;500&family=Bebas+Neue&family=Fira+Code:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -83,32 +83,6 @@
     --gradient-start: 0 0% 80%;
     --gradient-end: 0 0% 60%;
   }
-
-  .theme-pro {
-    --background: 30 10% 4%;
-    --foreground: 40 30% 95%;
-    --card: 30 10% 8%;
-    --card-foreground: 40 30% 95%;
-    --popover: 30 10% 8%;
-    --popover-foreground: 40 30% 95%;
-    --primary: 42 90% 55%;
-    --primary-foreground: 30 10% 4%;
-    --secondary: 30 10% 12%;
-    --secondary-foreground: 40 30% 95%;
-    --muted: 30 8% 16%;
-    --muted-foreground: 35 15% 60%;
-    --accent: 42 90% 55%;
-    --accent-foreground: 30 10% 4%;
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 40 30% 95%;
-    --border: 35 15% 18%;
-    --input: 35 15% 18%;
-    --ring: 42 90% 55%;
-    --glow-primary: 42 90% 55%;
-    --glow-secondary: 28 80% 50%;
-    --gradient-start: 42 90% 55%;
-    --gradient-end: 28 80% 50%;
-  }
 }
 
 @layer base {
@@ -131,27 +105,6 @@
 }
 
 @layer components {
-  /* Pro mode enhancements */
-  .theme-pro .glass {
-    @apply bg-card/50 backdrop-blur-2xl;
-    border: 1px solid hsl(42 90% 55% / 0.12);
-    box-shadow: 0 4px 30px hsl(42 90% 55% / 0.06), inset 0 1px 0 hsl(42 90% 55% / 0.08);
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .theme-pro h1, .theme-pro h2, .theme-pro h3 {
-    font-family: 'Playfair Display', Georgia, serif;
-    letter-spacing: 0.04em;
-  }
-  .theme-pro .gradient-text {
-    background-image: linear-gradient(135deg, hsl(42 90% 60%), hsl(28 80% 50%), hsl(42 90% 70%));
-    background-size: 200% 200%;
-    animation: proGradientShift 4s ease infinite;
-  }
-  @keyframes proGradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-
   .glass {
     @apply bg-card/40 backdrop-blur-xl border border-white/10;
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);

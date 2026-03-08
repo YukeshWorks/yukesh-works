@@ -149,19 +149,25 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   return (
     <>
     {showIntro && (
-      <section className="fixed inset-0 z-[100] bg-black overflow-hidden">
-        <img
-          src={skeletonGif}
-          alt=""
-          className="absolute inset-0 w-screen h-screen object-cover"
+      <section className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+        <div
+          className="flex flex-col items-center gap-4"
           style={{
             opacity: introFading ? 0 : 1,
-            transform: introFading ? 'scale(1.08)' : 'scale(1)',
-            transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
-            animation: 'introZoom 2s ease-out forwards',
-            filter: 'brightness(1.25) contrast(1.2)',
+            transform: introFading ? 'scale(1.1)' : 'scale(1)',
+            transition: 'all 0.5s ease-out',
           }}
-        />
+        >
+          <img
+            src={skeletonGif}
+            alt=""
+            className="w-72 h-72 md:w-96 md:h-96 object-contain"
+            style={{
+              animation: 'introZoom 2s ease-out forwards',
+              filter: 'brightness(1.3) contrast(1.2)',
+            }}
+          />
+        </div>
         <style>{`
           @keyframes introZoom {
             0% { transform: scale(0.5); opacity: 0; filter: blur(10px); }
