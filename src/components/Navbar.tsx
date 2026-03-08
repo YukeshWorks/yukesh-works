@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { KeyRound, Home, ShieldHalf, User } from "lucide-react";
 import navLogoGif from "@/assets/nav-logo.gif";
 import ThemeToggle from "./ThemeToggle";
-import ProModeButton from "./ProModeButton";
+
 
 interface NavbarProps {
   activeTab: "home" | "puzzle" | "info";
@@ -302,7 +302,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
         </div>
 
         <ThemeToggle />
-        <ProModeButton />
+        
 
         {/* Bottom edge glow */}
         <div
