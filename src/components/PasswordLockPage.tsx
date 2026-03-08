@@ -66,12 +66,22 @@ interface PasswordLockPageProps {
 const correctPassword = "0001";
 
 const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
+  const [showIntro, setShowIntro] = useState(true);
+  const [introFading, setIntroFading] = useState(false);
   const [digits, setDigits] = useState<string[]>(["", "", "", ""]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
   const [attempts, setAttempts] = useState(0);
   const [shake, setShake] = useState(false);
-  const [successPhase, setSuccessPhase] = useState(0); // 0=none, 1=dots fill, 2=reveal, 3=fade out
+  const [successPhase, setSuccessPhase] = useState(0);
+
+  // Auto-dismiss intro after 2.5s
+  useEffect(() => {
+    if (!showIntro) return;
+    const t1 = setTimeout(() => setIntroFading(true), 2000);
+    const t2 = setTimeout(() => setShowIntro(false), 2500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [showIntro]);
 
   const handleDigit = useCallback((digit: string) => {
     if (status === "success") return;
@@ -137,6 +147,36 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "del", "0", ""];
 
   return (
+    <>
+    {showIntro && (
+      <section className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+        <div
+          className="flex flex-col items-center gap-4"
+          style={{
+            opacity: introFading ? 0 : 1,
+            transform: introFading ? 'scale(1.1)' : 'scale(1)',
+            transition: 'all 0.5s ease-out',
+          }}
+        >
+          <img
+            src={skeletonGif}
+            alt=""
+            className="w-72 h-72 md:w-96 md:h-96 object-contain"
+            style={{
+              animation: 'introZoom 2s ease-out forwards',
+              filter: 'brightness(1.3) contrast(1.2)',
+            }}
+          />
+        </div>
+        <style>{`
+          @keyframes introZoom {
+            0% { transform: scale(0.5); opacity: 0; filter: blur(10px); }
+            40% { transform: scale(1.05); opacity: 1; filter: blur(0); }
+            100% { transform: scale(1); opacity: 1; filter: blur(0); }
+          }
+        `}</style>
+      </section>
+    )}
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
       {/* Skeleton GIF background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -333,6 +373,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
         }
       `}</style>
     </section>
+    </>
   );
 };
 
