@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import homeBg from "@/assets/home-bg.jpg";
 import mobileBg from "@/assets/mobile-bg.jpg";
 import profileImg from "@/assets/profile.jpg";
-import profileHero from "@/assets/profile-hero.png";
+import profileHero from "@/assets/profile-hero.webp";
 import loadingSpy from "@/assets/loading-spy.gif";
 import offlineCloud from "@/assets/offline-cloud.gif";
 import loadingCar from "@/assets/loading-car.gif";
