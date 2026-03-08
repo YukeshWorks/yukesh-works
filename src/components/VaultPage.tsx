@@ -6,7 +6,7 @@ import MemoryGame from "./MemoryGame";
 import IslandCreator from "./IslandCreator";
 import vaultLamp from "@/assets/vault-lamp.gif";
 
-type VaultSection = "menu" | "snake" | "scratch" | "memory" | "island";
+type VaultSection = "menu" | "folder" | "snake" | "scratch" | "memory" | "island";
 
 const VAULT_ITEMS: { id: VaultSection; icon: typeof Gamepad2; title: string; subtitle: string; delay: string }[] = [
   { id: "snake", icon: Gamepad2, title: "Snake Game", subtitle: "Classic arcade vibes", delay: "delay-100" },
