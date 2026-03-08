@@ -3,6 +3,7 @@ import { ArrowLeft, ShieldCheck, ShieldX, CheckCircle2 } from "lucide-react";
 import skeletonGif from "@/assets/skeleton-red.gif";
 import redEyesGif from "@/assets/red-eyes.gif";
 import wrongPasscodeVideo from "@/assets/wrong-passcode.mp4";
+import skullErrorGif from "@/assets/skull-error.gif";
 
 const playClickSound = (pitch = 1) => {
   try {
@@ -283,7 +284,16 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.8 }}
         />
-        <div className="relative z-10 flex flex-col items-center gap-4 mt-auto mb-24">
+        <div className="relative z-10 flex flex-col items-center gap-6 mt-auto mb-24">
+          <img
+            src={skullErrorGif}
+            alt=""
+            className="w-28 h-28 md:w-36 md:h-36 object-contain"
+            style={{
+              animation: 'pageFadeIn 0.5s ease-out 0.3s both',
+              filter: 'drop-shadow(0 0 20px rgba(220,38,38,0.4))',
+            }}
+          />
           <p className="text-red-400 text-xs font-display tracking-[0.2em] uppercase"
             style={{ textShadow: '0 0 10px rgba(220,38,38,0.5)', animation: 'pageFadeIn 0.5s ease-out 0.5s both' }}>
             Wrong passcode
