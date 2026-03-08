@@ -139,9 +139,10 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [shake, setShake] = useState(false);
   const [successPhase, setSuccessPhase] = useState(0);
 
-  // Auto-dismiss intro after 2.5s
+  // Auto-dismiss intro after 2.5s + play intro sound
   useEffect(() => {
     if (!showIntro) return;
+    playIntroSound();
     const t1 = setTimeout(() => setIntroFading(true), 2000);
     const t2 = setTimeout(() => setShowIntro(false), 2500);
     return () => { clearTimeout(t1); clearTimeout(t2); };
