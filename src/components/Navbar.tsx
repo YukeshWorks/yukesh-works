@@ -113,7 +113,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
           {/* Logo button */}
           <button
             onClick={handleLogoClick}
-            className="relative w-10 h-10 rounded-xl flex items-center justify-center mr-1 group overflow-hidden"
+            className="relative w-8 h-8 rounded-full flex items-center justify-center mr-1 group overflow-hidden"
             style={{
               background: "rgba(255,255,255,0.03)",
               transition: "all 0.4s ease",
