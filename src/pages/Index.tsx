@@ -21,6 +21,24 @@ const Index = () => {
   const [showOfflinePage, setShowOfflinePage] = useState(!navigator.onLine);
   const [showPasswordLock, setShowPasswordLock] = useState(false);
   const [showWelcomePage, setShowWelcomePage] = useState(false);
+  const prevThemeRef = useRef<string | null>(null);
+
+  // Auto-switch to red theme on About tab
+  useEffect(() => {
+    const root = document.documentElement;
+    if (activeTab === "info") {
+      // Save current theme before switching
+      const currentTheme = ["theme-blue", "theme-red", "theme-dark"].find(c => root.classList.contains(c)) || "theme-blue";
+      prevThemeRef.current = currentTheme;
+      root.classList.remove("theme-blue", "theme-red", "theme-dark");
+      root.classList.add("theme-red");
+    } else if (prevThemeRef.current) {
+      // Restore previous theme when leaving About
+      root.classList.remove("theme-blue", "theme-red", "theme-dark");
+      root.classList.add(prevThemeRef.current);
+      prevThemeRef.current = null;
+    }
+  }, [activeTab]);
 
   const idleTimerRef = useRef<NodeJS.Timeout>();
 
