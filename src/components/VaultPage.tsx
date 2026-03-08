@@ -88,7 +88,12 @@ const VaultPage = () => {
         <img
           src={vaultLamp}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-30"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{
+            opacity: imgLoaded ? 0.3 : 0,
+            transition: 'opacity 0.8s ease-out',
+          }}
+          onLoad={handleImgLoad}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none" />
 
