@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Instagram, Facebook } from "lucide-react";
-import profileHero from "@/assets/profile-hero.png";
+import profileHero from "@/assets/profile-hero.webp";
 import pixelEyes from "@/assets/pixel-eyes.gif";
 
 const InfoSection = () => {
