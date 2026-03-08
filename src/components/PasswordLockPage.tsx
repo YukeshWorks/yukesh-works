@@ -334,6 +334,21 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
         />
       </div>
     )}
+      {/* Skull flash on wrong attempt */}
+      {showSkullFlash && (
+        <div className="fixed inset-0 z-[9998] pointer-events-none flex items-center justify-center"
+          style={{ animation: 'skullFlashIn 0.6s ease-out forwards' }}>
+          <img
+            src={skullErrorGif}
+            alt=""
+            className="w-40 h-40 md:w-56 md:h-56 object-contain"
+            style={{
+              filter: 'drop-shadow(0 0 30px rgba(220,38,38,0.6)) brightness(1.2)',
+              animation: 'skullPulse 0.3s ease-in-out infinite alternate',
+            }}
+          />
+        </div>
+      )}
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
       {/* Skeleton GIF background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
