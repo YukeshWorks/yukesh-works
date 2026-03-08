@@ -128,48 +128,27 @@ const VaultPage = () => {
 
   // Main vault entrance
   return (
-    <section className={`min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
+    <section className={`min-h-screen flex flex-col items-center justify-end relative overflow-hidden page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
       <div className="absolute inset-0 bg-black" />
       <img
         src={vaultLamp}
         alt=""
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/70 pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col items-center gap-10">
-        <div className="text-center fade-in-up">
-          <h2 className="font-display text-3xl md:text-4xl font-bold mb-2 text-white tracking-widest">
-            Vault
-          </h2>
-          <p className="text-white/30 text-sm tracking-wide">Choose your adventure</p>
-        </div>
-
+      <div className="relative z-10 flex flex-col items-center pb-[15vh] fade-in-up delay-300" style={{ opacity: 0 }}>
         <button
           onClick={() => navigateTo("games-menu")}
-          className="group relative bg-white/[0.04] backdrop-blur-sm border border-white/[0.1] rounded-2xl p-8 md:p-10 flex flex-col items-center gap-5 text-center
-                     hover:bg-white/[0.08] hover:border-white/25 hover:scale-[1.03] active:scale-[0.97]
-                     transition-all duration-700 cursor-pointer w-56 md:w-64
-                     fade-in-up delay-200
-                     hover:shadow-[0_0_60px_rgba(255,255,255,0.08)]"
-          style={{ opacity: 0 }}
+          className="group relative bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-xl px-8 py-3 flex items-center gap-3
+                     hover:bg-white/[0.1] hover:border-white/20 hover:scale-[1.05] active:scale-[0.95]
+                     transition-all duration-500 cursor-pointer
+                     hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]
+                     animate-[breatheGlow_3s_ease-in-out_infinite]"
         >
-          <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700
-                          bg-gradient-to-b from-white/[0.05] via-transparent to-transparent" />
-          
-          <div className="relative w-16 h-16 rounded-2xl bg-white/[0.06] flex items-center justify-center
-                          group-hover:bg-white/[0.12] transition-all duration-700
-                          group-hover:shadow-[0_0_40px_rgba(255,255,255,0.15)]">
-            <Joystick className="text-white/50 group-hover:text-white transition-colors duration-500" size={28} />
-            <div className="absolute inset-0 rounded-2xl border border-white/10 group-hover:border-white/25 transition-colors duration-500" />
-          </div>
-
-          <div className="relative">
-            <h3 className="font-display text-lg font-bold text-white/90 group-hover:text-white transition-colors duration-300 tracking-wider">
-              Games
-            </h3>
-            <p className="text-white/25 text-[11px] mt-1 tracking-wide">4 mini-games inside</p>
-          </div>
+          <Joystick className="text-white/60 group-hover:text-white transition-colors duration-300" size={18} />
+          <span className="font-display text-sm font-bold text-white/80 group-hover:text-white transition-colors duration-300 tracking-widest uppercase">
+            Games
+          </span>
         </button>
       </div>
     </section>
