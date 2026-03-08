@@ -6,6 +6,7 @@ import pixelEyes from "@/assets/pixel-eyes.gif";
 const InfoSection = () => {
   const [showContent, setShowContent] = useState(false);
   const [btnHover, setBtnHover] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
     <section className="min-h-screen flex flex-col relative overflow-hidden page-transition bg-background">
