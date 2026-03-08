@@ -149,18 +149,20 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   return (
     <>
     {showIntro && (
-      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center" style={{ width: '100vw', height: '100vh', top: 0, left: 0 }}>
+      <div className="fixed inset-0 z-[9999] bg-black" style={{ width: '100vw', height: '100vh', top: 0, left: 0 }}>
         <img
           src={skeletonGif}
           alt=""
           style={{
-            maxWidth: '100vw',
-            maxHeight: '100vh',
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            objectFit: 'cover',
             opacity: introFading ? 0 : 1,
             transition: 'opacity 0.5s ease-out',
+            filter: 'brightness(1.3) contrast(1.2)',
           }}
         />
       </div>
