@@ -236,15 +236,15 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
       {/* Skeleton GIF background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {/* Red eyes GIF when typing */}
+        {/* Red eyes GIF when typing — blend black bg into dark background */}
         <img
           src={redEyesGif}
           alt=""
-          className="absolute w-48 h-48 md:w-64 md:h-64 object-contain"
+          className="absolute w-64 h-40 md:w-80 md:h-52 object-contain"
           style={{
-            opacity: digits.some(d => d !== "") && status !== "success" ? 0.7 : 0,
+            opacity: digits.some(d => d !== "") && status !== "success" ? 1 : 0,
             transition: "opacity 0.5s ease-in-out",
-            filter: "brightness(1.4) drop-shadow(0 0 20px rgba(255,0,0,0.4))",
+            mixBlendMode: "lighten",
             top: "8%",
             zIndex: 1,
           }}
