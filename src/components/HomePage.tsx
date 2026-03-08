@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Linkedin, Instagram, Mail, Phone, Sparkles, Triangle, Circle } from "lucide-react";
+import { Linkedin, Instagram, Mail, MessageCircle, Sparkles, Triangle, Circle } from "lucide-react";
 import offlineCloud from "@/assets/offline-cloud.gif";
 import PortfolioModal from "./PortfolioModal";
 import ContactModal from "./ContactModal";
@@ -181,8 +181,8 @@ const HomePage = () => {
               <a href="mailto:mailtoyukesh33@gmail.com" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
                 <Mail className="w-4 h-4" />
               </a>
-              <a href="tel:9080861733" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
-                <Phone className="w-4 h-4" />
+              <a href="https://wa.me/919080861733" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
+                <MessageCircle className="w-4 h-4" />
               </a>
             </div>
           </div>
@@ -190,12 +190,24 @@ const HomePage = () => {
       </div>
       
       {/* Time/Date display - BOTTOM of page */}
-      <div className="absolute bottom-3 right-3 z-20 fade-in-up opacity-0 delay-500">
-        <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/50 font-mono tracking-wider">
-          <span className="time-pulse">{formatTime(currentTime)}</span>
-          <span className="opacity-30">•</span>
-          <span>{formatDate(currentTime)}</span>
+      <div className="absolute bottom-3 right-3 z-20">
+        <div className="flex items-center gap-2 text-[9px] text-muted-foreground/40 font-mono tracking-wider">
+          <span className="inline-block animate-timeFlip" key={formatTime(currentTime)}>{formatTime(currentTime)}</span>
+          <span className="w-1 h-1 rounded-full bg-primary/30 animate-pulse" />
+          <span className="animate-timeFade" key={formatDate(currentTime)}>{formatDate(currentTime)}</span>
         </div>
+        <style>{`
+          @keyframes timeFlip {
+            0% { opacity: 0; transform: translateY(6px) rotateX(40deg); }
+            100% { opacity: 1; transform: translateY(0) rotateX(0); }
+          }
+          @keyframes timeFade {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+          }
+          .animate-timeFlip { animation: timeFlip 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+          .animate-timeFade { animation: timeFade 0.6s ease-out; }
+        `}</style>
       </div>
 
       {/* Modals */}
