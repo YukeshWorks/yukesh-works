@@ -130,10 +130,13 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
           </form>
         )}
         
-        {/* Direct email link */}
-        <div className="mt-4 pt-4 border-t border-border/50 text-center">
+        {/* Direct contact info */}
+        <div className="mt-4 pt-4 border-t border-border/50 text-center space-y-1">
           <p className="text-[10px] text-muted-foreground">
-            Or email directly: <a href="mailto:mailtoyukesh33@gmail.com" className="text-primary hover:underline">mailtoyukesh33@gmail.com</a>
+            Email: <a href="mailto:mailtoyukesh33@gmail.com" className="text-primary hover:underline">mailtoyukesh33@gmail.com</a>
+          </p>
+          <p className="text-[10px] text-muted-foreground">
+            Phone: <a href="tel:9080861733" className="text-primary hover:underline">9080861733</a>
           </p>
         </div>
       </div>
