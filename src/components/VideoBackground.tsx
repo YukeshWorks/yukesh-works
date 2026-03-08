@@ -8,22 +8,22 @@ interface VideoBackgroundProps {
 }
 
 const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [bgLoaded, setBgLoaded] = useState(false);
+  const [isMobile] = useState(() => window.innerWidth < 768);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', check, { passive: true });
-    return () => window.removeEventListener('resize', check);
-  }, []);
+    // Images are already preloaded by LoadingScreen, fire immediately
+    onLoaded?.();
+  }, [onLoaded]);
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 transition-opacity duration-500 ease-out" style={{ opacity: bgLoaded ? 1 : 0, transform: 'translateZ(0)' }}>
-        <img src={isMobile ? mobileBg : desktopBg} alt="" className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: 'brightness(0.65)', transform: 'translateZ(0)' }}
-          onLoad={() => { setBgLoaded(true); onLoaded?.(); }} loading="eager" />
-      </div>
+      <img
+        src={isMobile ? mobileBg : desktopBg}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ filter: 'brightness(0.65)', transform: 'translateZ(0)' }}
+        loading="eager"
+      />
 
       <div className="absolute inset-0" style={{
         background: isMobile

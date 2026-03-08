@@ -13,12 +13,11 @@ const HomePage = () => {
   const [beatIntensity, setBeatIntensity] = useState(0);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [contentVisible, setContentVisible] = useState(false);
-  const [bgReady, setBgReady] = useState(false);
 
-  // Show content only after background image has loaded
+  // Assets already preloaded by LoadingScreen — show content immediately
   const handleBgLoaded = useCallback(() => {
-    setBgReady(true);
-    setTimeout(() => setContentVisible(true), 150);
+    // Use rAF to batch with next paint instead of setTimeout
+    requestAnimationFrame(() => setContentVisible(true));
   }, []);
 
   useEffect(() => {
