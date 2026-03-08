@@ -236,13 +236,27 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
       {/* Skeleton GIF background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {/* Red eyes GIF when typing */}
+        <img
+          src={redEyesGif}
+          alt=""
+          className="absolute w-48 h-48 md:w-64 md:h-64 object-contain"
+          style={{
+            opacity: activeIndex > 0 && status !== "success" ? 0.6 : 0,
+            transition: "opacity 0.5s ease-in-out",
+            filter: "brightness(1.4)",
+            top: "10%",
+          }}
+        />
         <img
           src={skeletonGif}
           alt=""
-          className="w-64 h-64 md:w-80 md:h-80 object-contain opacity-20"
+          className="w-64 h-64 md:w-80 md:h-80 object-contain"
           style={{
+            opacity: activeIndex > 0 && status !== "success" ? 0.05 : 0.2,
             filter: "brightness(1.2) contrast(1.3)",
             animation: "skeletonFloat 4s ease-in-out infinite",
+            transition: "opacity 0.5s ease-in-out",
           }}
         />
       </div>
