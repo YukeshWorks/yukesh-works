@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowLeft, ShieldCheck, ShieldX, CheckCircle2 } from "lucide-react";
 import skeletonGif from "@/assets/skeleton-red.gif";
 import redEyesGif from "@/assets/red-eyes.gif";
+import wrongPasscodeVideo from "@/assets/wrong-passcode.mp4";
 
 const playClickSound = (pitch = 1) => {
   try {
@@ -139,6 +140,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [attempts, setAttempts] = useState(0);
   const [shake, setShake] = useState(false);
   const [successPhase, setSuccessPhase] = useState(0);
+  const [showErrorVideo, setShowErrorVideo] = useState(false);
 
   // Auto-dismiss intro after 2.5s + play intro sound
   useEffect(() => {
@@ -173,14 +175,23 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
         } else {
           setStatus("error");
           playErrorSound();
-          setAttempts(prev => prev + 1);
+          const newAttempts = attempts + 1;
+          setAttempts(newAttempts);
           setShake(true);
-          setTimeout(() => {
-            setShake(false);
-            setDigits(["", "", "", ""]);
-            setActiveIndex(0);
-            setStatus("idle");
-          }, 800);
+          if (newAttempts >= 2) {
+            // Show fullscreen error video on 2nd wrong attempt
+            setTimeout(() => {
+              setShake(false);
+              setShowErrorVideo(true);
+            }, 500);
+          } else {
+            setTimeout(() => {
+              setShake(false);
+              setDigits(["", "", "", ""]);
+              setActiveIndex(0);
+              setStatus("idle");
+            }, 800);
+          }
         }
       }, 200);
     } else {
@@ -214,6 +225,46 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
   return (
     <>
+    {/* Fullscreen error video on 2nd wrong attempt */}
+    {showErrorVideo && (
+      <div className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center"
+        style={{ animation: 'pageFadeIn 0.4s ease-out' }}>
+        <video
+          src={wrongPasscodeVideo}
+          autoPlay
+          playsInline
+          muted
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.8 }}
+        />
+        <div className="relative z-10 flex flex-col items-center gap-4 mt-auto mb-24">
+          <p className="text-red-400 text-xs font-display tracking-[0.2em] uppercase"
+            style={{ textShadow: '0 0 10px rgba(220,38,38,0.5)', animation: 'pageFadeIn 0.5s ease-out 0.5s both' }}>
+            Wrong passcode
+          </p>
+          <button
+            onClick={() => {
+              setShowErrorVideo(false);
+              setDigits(["", "", "", ""]);
+              setActiveIndex(0);
+              setStatus("idle");
+              setAttempts(0);
+            }}
+            className="px-6 py-2.5 rounded-xl text-xs font-display tracking-[0.2em] uppercase transition-all duration-300 hover:scale-105 active:scale-95"
+            style={{
+              background: 'rgba(220, 38, 38, 0.15)',
+              border: '1px solid rgba(220, 38, 38, 0.4)',
+              color: 'rgba(220, 38, 38, 0.9)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 0 20px rgba(220, 38, 38, 0.1)',
+              animation: 'pageFadeIn 0.5s ease-out 0.8s both',
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )}
     {showIntro && (
       <div className="fixed inset-0 z-[9999] bg-black" style={{ width: '100vw', height: '100vh', top: 0, left: 0 }}>
         <img
