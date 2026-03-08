@@ -58,6 +58,70 @@ const playErrorSound = () => {
   } catch {}
 };
 
+const playIntroSound = () => {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+    // Deep rumble
+    const rumbleOsc = ctx.createOscillator();
+    const rumbleGain = ctx.createGain();
+    rumbleOsc.connect(rumbleGain);
+    rumbleGain.connect(ctx.destination);
+    rumbleOsc.type = "sawtooth";
+    rumbleOsc.frequency.setValueAtTime(45, ctx.currentTime);
+    rumbleOsc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 1.8);
+    rumbleGain.gain.setValueAtTime(0, ctx.currentTime);
+    rumbleGain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.3);
+    rumbleGain.gain.setValueAtTime(0.12, ctx.currentTime + 1.2);
+    rumbleGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.2);
+    rumbleOsc.start();
+    rumbleOsc.stop(ctx.currentTime + 2.2);
+
+    // Eerie high tone
+    const highOsc = ctx.createOscillator();
+    const highGain = ctx.createGain();
+    highOsc.connect(highGain);
+    highGain.connect(ctx.destination);
+    highOsc.type = "sine";
+    highOsc.frequency.setValueAtTime(880, ctx.currentTime);
+    highOsc.frequency.linearRampToValueAtTime(660, ctx.currentTime + 2);
+    highGain.gain.setValueAtTime(0, ctx.currentTime);
+    highGain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.5);
+    highGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2);
+    highOsc.start();
+    highOsc.stop(ctx.currentTime + 2);
+
+    // Static noise burst
+    const bufferSize = ctx.sampleRate * 0.4;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = (Math.random() * 2 - 1) * 0.5;
+    }
+    const noiseSource = ctx.createBufferSource();
+    const noiseGain = ctx.createGain();
+    noiseSource.buffer = noiseBuffer;
+    noiseSource.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noiseGain.gain.setValueAtTime(0.08, ctx.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    noiseSource.start();
+
+    // Impact hit
+    const impactOsc = ctx.createOscillator();
+    const impactGain = ctx.createGain();
+    impactOsc.connect(impactGain);
+    impactGain.connect(ctx.destination);
+    impactOsc.type = "triangle";
+    impactOsc.frequency.setValueAtTime(120, ctx.currentTime);
+    impactOsc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+    impactGain.gain.setValueAtTime(0.2, ctx.currentTime);
+    impactGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    impactOsc.start();
+    impactOsc.stop(ctx.currentTime + 0.4);
+  } catch {}
+};
+
 interface PasswordLockPageProps {
   onBack: () => void;
   onUnlock: () => void;
@@ -75,9 +139,10 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [shake, setShake] = useState(false);
   const [successPhase, setSuccessPhase] = useState(0);
 
-  // Auto-dismiss intro after 2.5s
+  // Auto-dismiss intro after 2.5s + play intro sound
   useEffect(() => {
     if (!showIntro) return;
+    playIntroSound();
     const t1 = setTimeout(() => setIntroFading(true), 2000);
     const t2 = setTimeout(() => setShowIntro(false), 2500);
     return () => { clearTimeout(t1); clearTimeout(t2); };
