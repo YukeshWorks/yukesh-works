@@ -63,24 +63,20 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
     });
 
     const run = async () => {
-      // Load priority bg first for instant visual
+      // Load priority bg first
       await loadImage(priorityBg);
 
-      // Load everything else in parallel
+      // Load rest in parallel
       await Promise.all([
         ...allImages.slice(1).map(loadImage),
         loadVideo(ambientVideo),
         document.fonts?.ready.then(tick),
       ]);
 
-      // Minimal wait — just enough for the animation to feel intentional
-      const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, 800 - elapsed);
-      setTimeout(() => {
-        setReady(true);
-        setFadeOut(true);
-        setTimeout(onLoadComplete, 300);
-      }, remaining);
+      // No artificial delay — go immediately
+      setReady(true);
+      setFadeOut(true);
+      setTimeout(onLoadComplete, 200);
     };
     run();
   }, [onLoadComplete]);
