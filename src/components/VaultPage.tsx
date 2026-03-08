@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft } from "lucide-react";
+import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft, Folder } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
