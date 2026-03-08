@@ -141,7 +141,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick }: NavbarProps) => {
           <div ref={containerRef} className="relative flex items-center">
             {/* Morph blob indicator */}
             <div
-              className="absolute top-0 h-full rounded-xl pointer-events-none z-0"
+              className="absolute top-0 h-full rounded-full pointer-events-none z-0"
               style={{
                 left: morphX,
                 width: morphW,
