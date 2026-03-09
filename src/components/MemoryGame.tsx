@@ -113,7 +113,7 @@ const MemoryGame = () => {
   };
 
   return (
-    <section className="h-screen flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
+    <section className="min-h-[90vh] flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background" />
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float-slow" />
       <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-primary/10 rounded-full blur-3xl animate-float-slow delay-300" />

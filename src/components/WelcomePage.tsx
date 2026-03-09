@@ -18,7 +18,7 @@ const WelcomePage = ({ onBack }: WelcomePageProps) => {
   }, [imgLoaded]);
 
   return (
-    <section className="h-screen flex flex-col items-center justify-center relative overflow-hidden bg-black">
+    <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-black">
       {/* Background image */}
       <img
         src={projectsFolder}

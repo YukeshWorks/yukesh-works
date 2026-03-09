@@ -64,7 +64,7 @@ const HomePage = () => {
   };
 
   return (
-    <section className="h-screen flex items-center relative overflow-hidden page-transition">
+    <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
       {/* Cinematic video background */}
       <VideoBackground beatIntensity={beatIntensity} onLoaded={handleBgLoaded} />
       

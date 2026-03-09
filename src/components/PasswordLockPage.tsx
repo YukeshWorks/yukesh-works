@@ -330,7 +330,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
         />
       </div>
     )}
-    <section className="h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
+    <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
       {/* Skeleton GIF background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         {/* Red eyes GIF when typing — blend black bg into dark background */}

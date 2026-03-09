@@ -9,7 +9,7 @@ const InfoSection = () => {
   const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
-    <section className="h-screen flex flex-col relative overflow-hidden page-transition bg-background">
+    <section className="min-h-screen flex flex-col relative overflow-hidden page-transition bg-background">
       {/* Full-screen photo background */}
       <div className="absolute inset-0 flex items-center justify-center md:justify-end">
         <img
