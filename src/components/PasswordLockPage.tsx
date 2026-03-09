@@ -331,27 +331,27 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
       </div>
     )}
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
-      {/* Skeleton GIF background - positioned below content */}
-      <div className="absolute inset-0 flex items-end justify-center pointer-events-none pb-32">
+      {/* Skeleton GIF background */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         {/* Red eyes GIF when typing — blend black bg into dark background */}
         <img
           src={redEyesGif}
           alt=""
-          className="absolute w-48 h-32 md:w-64 md:h-40 object-contain"
+          className="absolute w-64 h-40 md:w-80 md:h-52 object-contain"
           style={{
-            opacity: digits.some(d => d !== "") && status !== "success" ? 0.6 : 0,
+            opacity: digits.some(d => d !== "") && status !== "success" ? 1 : 0,
             transition: "opacity 0.5s ease-in-out",
             mixBlendMode: "lighten",
-            bottom: "15%",
-            zIndex: 0,
+            top: "8%",
+            zIndex: 1,
           }}
         />
         <img
           src={skeletonGif}
           alt=""
-          className="w-48 h-48 md:w-64 md:h-64 object-contain"
+          className="w-64 h-64 md:w-80 md:h-80 object-contain"
           style={{
-            opacity: digits.some(d => d !== "") && status !== "success" ? 0.03 : 0.1,
+            opacity: digits.some(d => d !== "") && status !== "success" ? 0.05 : 0.2,
             filter: "brightness(1.2) contrast(1.3)",
             animation: "skeletonFloat 4s ease-in-out infinite",
             transition: "opacity 0.5s ease-in-out",
