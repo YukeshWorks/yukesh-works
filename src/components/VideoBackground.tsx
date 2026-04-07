@@ -37,21 +37,40 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
           onCanPlay={handleReady}
         />
       ) : (
-        <video
-          src={desktopBgVideo}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            filter: 'brightness(0.65)',
-            transform: 'translateZ(0)',
-            opacity: ready ? 1 : 0,
-            transition: 'opacity 0.8s ease-out',
-          }}
-          onCanPlay={handleReady}
-        />
+        <>
+          {/* Blurred fill behind to cover gaps */}
+          <video
+            src={desktopBgVideo}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{
+              filter: 'brightness(0.4) blur(30px)',
+              transform: 'scale(1.1) translateZ(0)',
+              opacity: ready ? 1 : 0,
+              transition: 'opacity 0.8s ease-out',
+            }}
+          />
+          {/* Sharp centered video */}
+          <video
+            src={desktopBgVideo}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 h-full object-contain mx-auto"
+            style={{
+              filter: 'brightness(0.65)',
+              left: '50%',
+              transform: 'translateX(-50%) translateZ(0)',
+              opacity: ready ? 1 : 0,
+              transition: 'opacity 0.8s ease-out',
+            }}
+            onCanPlay={handleReady}
+          />
+        </>
       )}
 
       <div className="absolute inset-0" style={{
