@@ -63,11 +63,10 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
             className="absolute inset-0 h-full object-contain mx-auto"
             style={{
               filter: 'brightness(0.65)',
-              transform: 'translateZ(0)',
-              opacity: ready ? 1 : 0,
-              transition: 'opacity 0.8s ease-out',
               left: '50%',
               transform: 'translateX(-50%) translateZ(0)',
+              opacity: ready ? 1 : 0,
+              transition: 'opacity 0.8s ease-out',
             }}
             onCanPlay={handleReady}
           />
