@@ -61,7 +61,7 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       video.oncanplaythrough = done;
       video.onerror = done;
       // Fallback timeout for slow video
-      setTimeout(done, 5000);
+      setTimeout(done, 3000);
     });
 
     const run = async () => {
