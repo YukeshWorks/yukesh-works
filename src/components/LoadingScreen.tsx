@@ -72,6 +72,8 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       await Promise.all([
         ...allImages.slice(1).map(loadImage),
         loadVideo(ambientVideo),
+        loadVideo(isMobile ? mobileBgVideo : desktopBgVideo),
+        loadVideo(isMobile ? desktopBgVideo : mobileBgVideo),
         document.fonts?.ready.then(tick),
       ]);
 
