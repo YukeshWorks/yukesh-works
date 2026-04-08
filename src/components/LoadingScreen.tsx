@@ -37,8 +37,8 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
     ];
 
     let loaded = 0;
-    // +1 for video, +1 for fonts
-    const total = allImages.length + 2;
+    // +3 for videos (ambient + desktop bg + mobile bg), +1 for fonts
+    const total = allImages.length + 4;
     const startTime = Date.now();
 
     const tick = () => {
