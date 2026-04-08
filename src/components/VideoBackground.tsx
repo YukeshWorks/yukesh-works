@@ -47,7 +47,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
           className="absolute"
           style={{
             filter: 'brightness(0.65)',
-            transform: 'rotate(90deg) translateZ(0)',
+            transform: 'rotate(-90deg) translateZ(0)',
             transformOrigin: 'center center',
             width: '100vh',
             height: '100vw',
