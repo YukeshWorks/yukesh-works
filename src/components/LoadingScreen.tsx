@@ -12,6 +12,8 @@ import artNoir from "@/assets/art-noir.gif";
 import artSpy from "@/assets/art-spy.gif";
 import pixelEyes from "@/assets/pixel-eyes.gif";
 import ambientVideo from "@/assets/ambient-bg.mp4";
+import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
+import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
 
 interface LoadingScreenProps {
   onLoadComplete: () => void;
