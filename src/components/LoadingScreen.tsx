@@ -12,6 +12,8 @@ import artNoir from "@/assets/art-noir.gif";
 import artSpy from "@/assets/art-spy.gif";
 import pixelEyes from "@/assets/pixel-eyes.gif";
 import ambientVideo from "@/assets/ambient-bg.mp4";
+import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
+import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
 
 interface LoadingScreenProps {
   onLoadComplete: () => void;
@@ -35,8 +37,8 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
     ];
 
     let loaded = 0;
-    // +1 for video, +1 for fonts
-    const total = allImages.length + 2;
+    // +3 for videos (ambient + desktop bg + mobile bg), +1 for fonts
+    const total = allImages.length + 4;
     const startTime = Date.now();
 
     const tick = () => {
@@ -59,7 +61,7 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       video.oncanplaythrough = done;
       video.onerror = done;
       // Fallback timeout for slow video
-      setTimeout(done, 5000);
+      setTimeout(done, 3000);
     });
 
     const run = async () => {
@@ -70,6 +72,8 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       await Promise.all([
         ...allImages.slice(1).map(loadImage),
         loadVideo(ambientVideo),
+        loadVideo(isMobile ? mobileBgVideo : desktopBgVideo),
+        loadVideo(isMobile ? desktopBgVideo : mobileBgVideo),
         document.fonts?.ready.then(tick),
       ]);
 
