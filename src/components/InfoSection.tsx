@@ -146,7 +146,7 @@ const InfoSection = () => {
 
       {/* "That's Me" label */}
       {showContent && (
-        <div className="absolute right-6 md:right-16 top-1/3 z-10 fade-in-up opacity-0 delay-500 hidden md:flex items-center gap-0">
+        <div className="absolute right-2 md:right-6 top-1/2 md:top-[58%] z-10 hidden md:flex items-center gap-0" style={{ animation: 'thatsMeFloat 3s ease-in-out infinite, fadeInRight 0.8s ease-out 0.5s both' }}>
           <div className="px-3 py-1.5 rounded-l-full glass border border-primary/20 border-r-0">
             <span className="text-[9px] font-heading uppercase tracking-[0.3em] text-primary whitespace-nowrap">That's Me</span>
           </div>
