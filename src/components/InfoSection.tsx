@@ -28,7 +28,7 @@ const InfoSection = () => {
           onLoad={() => setImgLoaded(true)}
         />
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: `linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 55%, hsl(var(--background) / 0.92) 65%, hsl(var(--background) / 0.6) 75%, hsl(var(--background) / 0.2) 88%, transparent 100%)`
+          background: `linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background) / 0.9) 25%, hsl(var(--background) / 0.5) 38%, transparent 55%)`
         }} />
       </div>
 
@@ -146,7 +146,7 @@ const InfoSection = () => {
 
       {/* "That's Me" label */}
       {showContent && (
-        <div className="absolute right-6 md:right-16 top-1/3 z-10 fade-in-up opacity-0 delay-500 hidden md:flex items-center gap-0">
+        <div className="absolute right-2 md:right-6 top-1/2 md:top-[58%] z-10 hidden md:flex items-center gap-0" style={{ animation: 'thatsMeFloat 3s ease-in-out infinite, fadeInRight 0.8s ease-out 0.5s both' }}>
           <div className="px-3 py-1.5 rounded-l-full glass border border-primary/20 border-r-0">
             <span className="text-[9px] font-heading uppercase tracking-[0.3em] text-primary whitespace-nowrap">That's Me</span>
           </div>
@@ -166,6 +166,14 @@ const InfoSection = () => {
         @keyframes aboutSweep {
           0% { transform: translateX(-100%); }
           50%, 100% { transform: translateX(100%); }
+        }
+        @keyframes thatsMeFloat {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(-6px) translateX(-3px); }
+        }
+        @keyframes fadeInRight {
+          0% { opacity: 0; transform: translateX(20px); }
+          100% { opacity: 1; transform: translateX(0); }
         }
       `}</style>
     </section>
