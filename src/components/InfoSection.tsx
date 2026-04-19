@@ -18,11 +18,11 @@ const InfoSection = () => {
           decoding="sync"
           loading="eager"
           fetchPriority="high"
-          className="h-full w-full object-cover object-center md:object-top"
+          className="h-full w-full object-contain md:object-contain object-center"
           style={{
             minHeight: '100vh',
             contentVisibility: 'auto',
-            opacity: imgLoaded ? 0.9 : 0,
+            opacity: imgLoaded ? 0.95 : 0,
             transition: 'opacity 0.8s ease-out',
           }}
           onLoad={() => setImgLoaded(true)}
