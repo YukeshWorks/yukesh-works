@@ -18,7 +18,7 @@ const InfoSection = () => {
           decoding="sync"
           loading="eager"
           fetchPriority="high"
-          className="h-full w-full md:w-1/2 object-contain object-right"
+          className="h-full w-full md:w-[60%] object-contain object-right"
           style={{
             minHeight: '100vh',
             contentVisibility: 'auto',
@@ -28,7 +28,7 @@ const InfoSection = () => {
           onLoad={() => setImgLoaded(true)}
         />
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: `linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 35%, transparent 55%)`
+          background: `linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 35%, hsl(var(--background) / 0.82) 52%, hsl(var(--background) / 0.45) 66%, transparent 82%)`
         }} />
       </div>
 
