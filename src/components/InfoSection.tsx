@@ -11,14 +11,14 @@ const InfoSection = () => {
   return (
     <section className="min-h-screen flex flex-col relative overflow-hidden page-transition bg-background">
       {/* Full-screen photo background */}
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-end">
         <img
           src={profileHero}
           alt="Yukesh"
           decoding="sync"
           loading="eager"
           fetchPriority="high"
-          className="h-full w-full object-contain md:object-contain object-center"
+          className="h-full w-full md:w-1/2 object-contain object-right"
           style={{
             minHeight: '100vh',
             contentVisibility: 'auto',
@@ -27,11 +27,8 @@ const InfoSection = () => {
           }}
           onLoad={() => setImgLoaded(true)}
         />
-        <div className="absolute inset-0" style={{
-          background: `
-            linear-gradient(to right, hsl(var(--background) / 0.7) 0%, transparent 30%, transparent 70%, hsl(var(--background) / 0.7) 100%),
-            linear-gradient(to bottom, hsl(var(--background) / 0.3) 0%, transparent 20%, transparent 70%, hsl(var(--background) / 0.8) 100%)
-          `
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: `linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background) / 0.95) 35%, hsl(var(--background) / 0.5) 50%, transparent 70%)`
         }} />
       </div>
 
