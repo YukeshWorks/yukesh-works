@@ -167,6 +167,14 @@ const InfoSection = () => {
           0% { transform: translateX(-100%); }
           50%, 100% { transform: translateX(100%); }
         }
+        @keyframes thatsMeFloat {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(-6px) translateX(-3px); }
+        }
+        @keyframes fadeInRight {
+          0% { opacity: 0; transform: translateX(20px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
       `}</style>
     </section>
   );
