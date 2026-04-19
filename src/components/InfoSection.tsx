@@ -28,7 +28,7 @@ const InfoSection = () => {
           onLoad={() => setImgLoaded(true)}
         />
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: `linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 28%, hsl(var(--background) / 0.75) 40%, transparent 55%)`
+          background: `linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 23%, hsl(var(--background) / 0.75) 35%, transparent 50%)`
         }} />
       </div>
 
