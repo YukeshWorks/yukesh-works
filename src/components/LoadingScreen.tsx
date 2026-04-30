@@ -3,6 +3,8 @@ import homeBg from "@/assets/home-bg.jpg";
 import mobileBg from "@/assets/mobile-bg.jpg";
 import profileImg from "@/assets/profile.jpg";
 import profileHero from "@/assets/profile-hero.webp";
+import profileHeroPng from "@/assets/profile-hero.png";
+import projectsFolder from "@/assets/projects-folder.jpg";
 import loadingSpy from "@/assets/loading-spy.gif";
 import offlineCloud from "@/assets/offline-cloud.gif";
 import loadingCar from "@/assets/loading-car.gif";
@@ -11,9 +13,15 @@ import artHand from "@/assets/art-hand.gif";
 import artNoir from "@/assets/art-noir.gif";
 import artSpy from "@/assets/art-spy.gif";
 import pixelEyes from "@/assets/pixel-eyes.gif";
+import navLogo from "@/assets/nav-logo.gif";
+import redEyes from "@/assets/red-eyes.gif";
+import skeletonRed from "@/assets/skeleton-red.gif";
+import vaultLamp from "@/assets/vault-lamp.gif";
 import ambientVideo from "@/assets/ambient-bg.mp4";
 import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
+import ethernetVideo from "@/assets/ethernet-video.mp4";
+import wrongPasscodeVideo from "@/assets/wrong-passcode.mp4";
 
 interface LoadingScreenProps {
   onLoadComplete: () => void;
@@ -32,14 +40,23 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
     const allImages = [
       priorityBg,
       isMobile ? homeBg : mobileBg,
-      profileImg, profileHero, offlineCloud, loadingCar,
+      profileImg, profileHero, profileHeroPng, projectsFolder,
+      offlineCloud, loadingCar,
       artFlame, artHand, artNoir, artSpy, pixelEyes,
+      navLogo, redEyes, skeletonRed, vaultLamp,
+    ];
+
+    const allVideos = [
+      ambientVideo,
+      isMobile ? mobileBgVideo : desktopBgVideo,
+      isMobile ? desktopBgVideo : mobileBgVideo,
+      ethernetVideo,
+      wrongPasscodeVideo,
     ];
 
     let loaded = 0;
-    // +3 for videos (ambient + desktop bg + mobile bg), +1 for fonts
-    const total = allImages.length + 4;
-    const startTime = Date.now();
+    // +1 for fonts
+    const total = allImages.length + allVideos.length + 1;
 
     const tick = () => {
       loaded++;
@@ -71,9 +88,7 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       // Load rest in parallel
       await Promise.all([
         ...allImages.slice(1).map(loadImage),
-        loadVideo(ambientVideo),
-        loadVideo(isMobile ? mobileBgVideo : desktopBgVideo),
-        loadVideo(isMobile ? desktopBgVideo : mobileBgVideo),
+        ...allVideos.map(loadVideo),
         document.fonts?.ready.then(tick),
       ]);
 
