@@ -1,6 +1,9 @@
 import { useState, useRef } from "react";
 import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
+import homeBg from "@/assets/home-bg.jpg";
+import mobileBg from "@/assets/mobile-bg.jpg";
+import { useNetworkSpeed } from "@/hooks/useNetworkSpeed";
 
 interface VideoBackgroundProps {
   beatIntensity?: number;
@@ -11,11 +14,40 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
   const [isMobile] = useState(() => window.innerWidth < 768);
   const [ready, setReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { isSlow } = useNetworkSpeed();
+
+  const poster = isMobile ? mobileBg : homeBg;
 
   const handleReady = () => {
     setReady(true);
     onLoaded?.();
   };
+
+  // On very slow networks: show poster image only — no video download
+  if (isSlow) {
+    // Trigger ready immediately so content fades in
+    if (!ready) {
+      requestAnimationFrame(handleReady);
+    }
+    return (
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src={poster}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'brightness(0.65)', transform: 'translateZ(0)' }}
+        />
+        <div className="absolute inset-0" style={{
+          background: isMobile
+            ? 'linear-gradient(to bottom, hsl(var(--background) / 0.6), hsl(var(--background) / 0.4), hsl(var(--background) / 0.7))'
+            : 'linear-gradient(to right, hsl(var(--background) / 0.85), hsl(var(--background) / 0.5), transparent)',
+        }} />
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse at center, transparent 40%, hsl(var(--background) / 0.5) 100%)',
+        }} />
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -23,6 +55,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
         <video
           ref={videoRef}
           src={mobileBgVideo}
+          poster={poster}
           autoPlay
           loop
           muted
@@ -40,6 +73,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
         <video
           ref={videoRef}
           src={desktopBgVideo}
+          poster={poster}
           autoPlay
           loop
           muted

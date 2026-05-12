@@ -105,18 +105,36 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       setFadeOut(true);
       setTimeout(onLoadComplete, 200);
 
-      // Background-prefetch below-the-fold assets (non-blocking)
+      // Background-prefetch below-the-fold assets via <link rel="prefetch">.
+      // Browser stores these in the HTTP disk cache, so they persist across
+      // navigations and reloads (instant on next visit). Skipped on slow
+      // networks / Save-Data to avoid hogging the user's bandwidth.
+      const conn = (navigator as any).connection;
+      const isSlow =
+        conn?.saveData ||
+        conn?.effectiveType === "2g" ||
+        conn?.effectiveType === "slow-2g";
+
       const prefetch = () => {
-        lazyImages.forEach(src => { const i = new Image(); i.src = src; });
-        lazyVideos.forEach(src => {
-          const v = document.createElement("video");
-          v.preload = "auto"; v.muted = true; v.src = src;
-        });
+        if (isSlow) return;
+        const head = document.head;
+        const add = (href: string, as: "image" | "video") => {
+          if (document.querySelector(`link[rel="prefetch"][href="${href}"]`)) return;
+          const link = document.createElement("link");
+          link.rel = "prefetch";
+          link.as = as;
+          link.href = href;
+          // 'low' priority — never competes with current-page work
+          (link as any).fetchPriority = "low";
+          head.appendChild(link);
+        };
+        lazyImages.forEach(src => add(src, "image"));
+        lazyVideos.forEach(src => add(src, "video"));
       };
       if ("requestIdleCallback" in window) {
-        (window as any).requestIdleCallback(prefetch, { timeout: 2000 });
+        (window as any).requestIdleCallback(prefetch, { timeout: 3000 });
       } else {
-        setTimeout(prefetch, 500);
+        setTimeout(prefetch, 800);
       }
     };
     run();
