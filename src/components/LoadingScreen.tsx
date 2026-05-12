@@ -100,10 +100,24 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
         document.fonts?.ready.then(tick),
       ]);
 
-      // No artificial delay — go immediately
+      // Done — let user in immediately
       setReady(true);
       setFadeOut(true);
       setTimeout(onLoadComplete, 200);
+
+      // Background-prefetch below-the-fold assets (non-blocking)
+      const prefetch = () => {
+        lazyImages.forEach(src => { const i = new Image(); i.src = src; });
+        lazyVideos.forEach(src => {
+          const v = document.createElement("video");
+          v.preload = "auto"; v.muted = true; v.src = src;
+        });
+      };
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(prefetch, { timeout: 2000 });
+      } else {
+        setTimeout(prefetch, 500);
+      }
     };
     run();
   }, [onLoadComplete]);
