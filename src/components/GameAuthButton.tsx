@@ -19,7 +19,7 @@ const GameAuthButton = () => {
           className="w-9 h-9 rounded-full border border-white/20 bg-black/60 backdrop-blur-sm overflow-hidden flex items-center justify-center hover:border-white/40 transition-all"
         >
           {avatar ? (
-            <img src={avatar} alt="" className="w-full h-full object-cover" />
+            <img src={avatar} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
           ) : (
             <User size={14} className="text-white/60" />
           )}
