@@ -16,7 +16,7 @@ const FloatingArtGallery = () => (
       <div className="absolute inset-0 flex items-center art-ticker">
         {[...artworks, ...artworks, ...artworks].map((art, i) => (
           <div key={i} className="flex-shrink-0 mx-6 md:mx-10 opacity-40 hover:opacity-80 transition-opacity duration-300 pointer-events-auto cursor-pointer">
-            <img src={art.src} alt={art.alt} className="h-8 md:h-12 w-auto rounded-lg grayscale hover:grayscale-0 transition-all duration-500" />
+            <img src={art.src} alt={art.alt} loading="lazy" decoding="async" className="h-8 md:h-12 w-auto rounded-lg grayscale hover:grayscale-0 transition-all duration-500" />
           </div>
         ))}
       </div>

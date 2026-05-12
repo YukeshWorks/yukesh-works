@@ -36,19 +36,27 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
     const isMobile = window.innerWidth < 768;
     const priorityBg = isMobile ? mobileBg : homeBg;
 
-    // ALL image assets used across every page
+    // Critical above-the-fold assets only — others lazy-load on demand
     const allImages = [
       priorityBg,
-      isMobile ? homeBg : mobileBg,
-      profileImg, profileHero, profileHeroPng, projectsFolder,
-      offlineCloud, loadingCar,
-      artFlame, artHand, artNoir, artSpy, pixelEyes,
-      navLogo, redEyes, skeletonRed, vaultLamp,
+      profileImg,
+      navLogo,
     ];
 
     const allVideos = [
-      ambientVideo,
       isMobile ? mobileBgVideo : desktopBgVideo,
+    ];
+
+    // Below-the-fold assets — preload in background after main load (non-blocking)
+    const lazyImages = [
+      isMobile ? homeBg : mobileBg,
+      profileHero, profileHeroPng, projectsFolder,
+      offlineCloud, loadingCar,
+      artFlame, artHand, artNoir, artSpy, pixelEyes,
+      redEyes, skeletonRed, vaultLamp,
+    ];
+    const lazyVideos = [
+      ambientVideo,
       isMobile ? desktopBgVideo : mobileBgVideo,
       ethernetVideo,
       wrongPasscodeVideo,
@@ -92,10 +100,24 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
         document.fonts?.ready.then(tick),
       ]);
 
-      // No artificial delay — go immediately
+      // Done — let user in immediately
       setReady(true);
       setFadeOut(true);
       setTimeout(onLoadComplete, 200);
+
+      // Background-prefetch below-the-fold assets (non-blocking)
+      const prefetch = () => {
+        lazyImages.forEach(src => { const i = new Image(); i.src = src; });
+        lazyVideos.forEach(src => {
+          const v = document.createElement("video");
+          v.preload = "auto"; v.muted = true; v.src = src;
+        });
+      };
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(prefetch, { timeout: 2000 });
+      } else {
+        setTimeout(prefetch, 500);
+      }
     };
     run();
   }, [onLoadComplete]);
