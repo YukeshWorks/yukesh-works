@@ -77,7 +77,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
       ) : (
         <video
           ref={videoRef}
-          src={desktopBgVideo}
+          src={desktopSrc}
           poster={poster}
           autoPlay
           loop
