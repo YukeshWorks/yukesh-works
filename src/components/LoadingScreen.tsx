@@ -3,7 +3,6 @@ import homeBg from "@/assets/home-bg.jpg";
 import mobileBg from "@/assets/mobile-bg.jpg";
 import profileImg from "@/assets/profile.jpg";
 import profileHero from "@/assets/profile-hero.webp";
-import profileHeroPng from "@/assets/profile-hero.png";
 import projectsFolder from "@/assets/projects-folder.jpg";
 import loadingSpy from "@/assets/loading-spy.gif";
 import offlineCloud from "@/assets/offline-cloud.gif";
@@ -22,6 +21,10 @@ import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
 import wrongPasscodeVideo from "@/assets/wrong-passcode.mp4";
+import ambientVideoHi from "@/assets/ambient-bg-hi.mp4?url";
+import desktopBgVideoHi from "@/assets/desktop-bg-video-hi.mp4?url";
+import mobileBgVideoHi from "@/assets/mobile-bg-video-hi.mp4?url";
+import profileHi from "@/assets/profile-hi.jpg?url";
 
 interface LoadingScreenProps {
   onLoadComplete: () => void;
@@ -50,7 +53,7 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
     // Below-the-fold assets — preload in background after main load (non-blocking)
     const lazyImages = [
       isMobile ? homeBg : mobileBg,
-      profileHero, profileHeroPng, projectsFolder,
+      profileHero, projectsFolder,
       offlineCloud, loadingCar,
       artFlame, artHand, artNoir, artSpy, pixelEyes,
       redEyes, skeletonRed, vaultLamp,
@@ -110,10 +113,11 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       // navigations and reloads (instant on next visit). Skipped on slow
       // networks / Save-Data to avoid hogging the user's bandwidth.
       const conn = (navigator as any).connection;
-      const isSlow =
-        conn?.saveData ||
-        conn?.effectiveType === "2g" ||
-        conn?.effectiveType === "slow-2g";
+      const effType = conn?.effectiveType;
+      const saveData = !!conn?.saveData;
+      const downlink = typeof conn?.downlink === "number" ? conn.downlink : 0;
+      const isSlow = saveData || effType === "2g" || effType === "slow-2g";
+      const isFast = !saveData && effType === "4g" && (downlink === 0 || downlink >= 5);
 
       const prefetch = () => {
         if (isSlow) return;
@@ -124,12 +128,18 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
           link.rel = "prefetch";
           link.as = as;
           link.href = href;
-          // 'low' priority — never competes with current-page work
           (link as any).fetchPriority = "low";
           head.appendChild(link);
         };
         lazyImages.forEach(src => add(src, "image"));
         lazyVideos.forEach(src => add(src, "video"));
+        // On fast networks, also prefetch hi-res variants so they're warm
+        // in the HTTP cache when VideoBackground swaps to them.
+        if (isFast) {
+          add(profileHi, "image");
+          add(ambientVideoHi, "video");
+          add(isMobile ? mobileBgVideoHi : desktopBgVideoHi, "video");
+        }
       };
       if ("requestIdleCallback" in window) {
         (window as any).requestIdleCallback(prefetch, { timeout: 3000 });

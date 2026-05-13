@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
+import desktopBgVideoHi from "@/assets/desktop-bg-video-hi.mp4";
+import mobileBgVideoHi from "@/assets/mobile-bg-video-hi.mp4";
 import homeBg from "@/assets/home-bg.jpg";
 import mobileBg from "@/assets/mobile-bg.jpg";
 import { useNetworkSpeed } from "@/hooks/useNetworkSpeed";
@@ -14,9 +16,12 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
   const [isMobile] = useState(() => window.innerWidth < 768);
   const [ready, setReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isSlow } = useNetworkSpeed();
+  const { isSlow, isFast } = useNetworkSpeed();
 
   const poster = isMobile ? mobileBg : homeBg;
+  // On fast networks, swap to higher-bitrate hi-res video
+  const mobileSrc = isFast ? mobileBgVideoHi : mobileBgVideo;
+  const desktopSrc = isFast ? desktopBgVideoHi : desktopBgVideo;
 
   const handleReady = () => {
     setReady(true);
@@ -54,7 +59,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
       {isMobile ? (
         <video
           ref={videoRef}
-          src={mobileBgVideo}
+          src={mobileSrc}
           poster={poster}
           autoPlay
           loop
@@ -72,7 +77,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
       ) : (
         <video
           ref={videoRef}
-          src={desktopBgVideo}
+          src={desktopSrc}
           poster={poster}
           autoPlay
           loop
