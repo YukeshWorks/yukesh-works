@@ -16,9 +16,12 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
   const [isMobile] = useState(() => window.innerWidth < 768);
   const [ready, setReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isSlow } = useNetworkSpeed();
+  const { isSlow, isFast } = useNetworkSpeed();
 
   const poster = isMobile ? mobileBg : homeBg;
+  // On fast networks, swap to higher-bitrate hi-res video
+  const mobileSrc = isFast ? mobileBgVideoHi : mobileBgVideo;
+  const desktopSrc = isFast ? desktopBgVideoHi : desktopBgVideo;
 
   const handleReady = () => {
     setReady(true);
