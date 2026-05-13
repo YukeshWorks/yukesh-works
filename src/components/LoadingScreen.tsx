@@ -21,6 +21,10 @@ import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
 import wrongPasscodeVideo from "@/assets/wrong-passcode.mp4";
+import ambientVideoHi from "@/assets/ambient-bg-hi.mp4?url";
+import desktopBgVideoHi from "@/assets/desktop-bg-video-hi.mp4?url";
+import mobileBgVideoHi from "@/assets/mobile-bg-video-hi.mp4?url";
+import profileHi from "@/assets/profile-hi.jpg?url";
 
 interface LoadingScreenProps {
   onLoadComplete: () => void;
