@@ -49,7 +49,7 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
     // Below-the-fold assets — preload in background after main load (non-blocking)
     const lazyImages = [
       isMobile ? homeBg : mobileBg,
-      profileHero, profileHeroPng, projectsFolder,
+      profileHero, projectsFolder,
       offlineCloud, loadingCar,
       artFlame, artHand, artNoir, artSpy, pixelEyes,
       redEyes, skeletonRed, vaultLamp,
