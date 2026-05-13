@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
+import desktopBgVideoHi from "@/assets/desktop-bg-video-hi.mp4";
+import mobileBgVideoHi from "@/assets/mobile-bg-video-hi.mp4";
 import homeBg from "@/assets/home-bg.jpg";
 import mobileBg from "@/assets/mobile-bg.jpg";
 import { useNetworkSpeed } from "@/hooks/useNetworkSpeed";
