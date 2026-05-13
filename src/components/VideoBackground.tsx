@@ -59,7 +59,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
       {isMobile ? (
         <video
           ref={videoRef}
-          src={mobileBgVideo}
+          src={mobileSrc}
           poster={poster}
           autoPlay
           loop
