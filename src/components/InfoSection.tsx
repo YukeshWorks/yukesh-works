@@ -9,27 +9,46 @@ const InfoSection = () => {
   const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
-    <section className="min-h-screen flex flex-col relative overflow-hidden page-transition bg-background">
-      {/* Full-screen photo background */}
-      <div className="absolute inset-0 flex items-center justify-end">
+    <section className="min-h-[100svh] flex flex-col relative overflow-hidden page-transition bg-background">
+      {/* Full-bleed portrait: cover removes the empty letterbox bands on mobile. */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <img
           src={profileHero}
-          alt="Yukesh"
-          decoding="sync"
+          alt="Portrait of Yukesh"
+          decoding="async"
           loading="eager"
           fetchPriority="high"
-          className="h-full w-full md:w-[60%] object-contain object-right"
+          className="absolute inset-0 h-full w-full object-cover object-[68%_42%] md:object-[72%_center]"
           style={{
-            minHeight: '100vh',
-            contentVisibility: 'auto',
-            opacity: imgLoaded ? 0.95 : 0,
-            transition: 'opacity 0.8s ease-out',
+            opacity: imgLoaded ? 1 : 0,
+            filter: "brightness(1.28) contrast(1.04) saturate(1.08)",
+            transform: "scale(1.025)",
+            transformOrigin: "68% 42%",
+            transition: "opacity 1.1s ease-out, transform 1.8s cubic-bezier(0.2, 0.7, 0.2, 1), filter 1.1s ease-out",
           }}
           onLoad={() => setImgLoaded(true)}
         />
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: `linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 35%, hsl(var(--background) / 0.82) 52%, hsl(var(--background) / 0.45) 66%, transparent 82%)`
-        }} />
+
+        {/* Soft multi-directional fades tie the portrait into the page instead of
+            leaving it as a separate rectangular image. Keep the face area clear. */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: [
+              "linear-gradient(90deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.94) 10%, hsl(var(--background) / 0.76) 25%, hsl(var(--background) / 0.30) 46%, transparent 72%)",
+              "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.32) 12%, transparent 30%, transparent 70%, hsl(var(--background) / 0.72) 91%, hsl(var(--background)) 100%)",
+              "radial-gradient(ellipse at 70% 38%, transparent 24%, hsl(var(--background) / 0.12) 78%)",
+            ].join(", "),
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "radial-gradient(ellipse at 82% 30%, hsl(var(--primary) / 0.10), transparent 38%)",
+            mixBlendMode: "screen",
+            opacity: 0.7,
+          }}
+        />
       </div>
 
       {/* About Me button — bottom-left, compact, animated */}
