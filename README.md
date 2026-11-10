@@ -1,73 +1,63 @@
-# Welcome to your Lovable project
+# Yukeshworks
 
-## Project info
+The existing personal website built with Lovable.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Website
 
-## How can I edit this code?
+**Live website:** https://yukeshworks.lovable.app
 
-There are several ways of editing your application.
+## Project editing workflow
 
-**Use Lovable**
+### Lovable
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Open your existing project from the [Lovable dashboard](https://lovable.dev/projects). Use Lovable for visual editing, prompt-based changes, and publishing. This repository has recent commits from the Lovable GitHub integration.
 
-Changes made via Lovable will be committed automatically to this repo.
+### GitHub
 
-**Use your preferred IDE**
+**Source repository:** https://github.com/YukeshWorks/yukesh-works
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Use feature branches for changes, review pull requests, and merge into `main` only after validation. Keep credentials and private keys out of Git.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### GitHub Codespaces
 
-Follow these steps:
+[Open the prepared Codespace on the setup branch](https://codespaces.new/YukeshWorks/yukesh-works/tree/setup/codespaces).
+
+The Codespaces configuration uses Node.js 22, installs dependencies with `npm ci`, starts the Vite development server when the Codespace attaches, and forwards port 8080 for the browser preview.
+
+### Local development
+
+Requirements: Node.js 22 and npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm ci
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Useful checks:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run lint
+npm test
+npm run build
+```
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
+## Stack
 
 - Vite
-- TypeScript
 - React
-- shadcn-ui
+- TypeScript
+- shadcn/ui
 - Tailwind CSS
+- Supabase client integration
 
-## How can I deploy this project?
+## Publishing
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Use the existing Lovable project to publish website changes. Do not create a duplicate Lovable project or replace its deployment setup unless explicitly intended.
 
-## Can I connect a custom domain to my Lovable project?
+## Working agreement
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- ChatGPT: plan, inspect, implement scoped changes, review diffs, debug, and document results.
+- GitHub: source control and pull-request review.
+- Codespaces: interactive editing and preview/testing environment.
+- Lovable: existing visual builder and publishing workflow.
+- Notion: durable requirements, decisions, changelog, issues, and verification records.
