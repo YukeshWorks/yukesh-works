@@ -4,9 +4,15 @@ import skeletonGif from "@/assets/skeleton-red.gif";
 import redEyesGif from "@/assets/red-eyes.gif";
 import wrongPasscodeVideo from "@/assets/wrong-passcode.mp4";
 
+const getAudioContext = (): AudioContext | null => {
+  const AudioContextClass = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  return AudioContextClass ? new AudioContextClass() : null;
+};
+
 const playClickSound = (pitch = 1) => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -17,12 +23,15 @@ const playClickSound = (pitch = 1) => {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
     osc.start();
     osc.stop(ctx.currentTime + 0.06);
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 const playUnlockSound = () => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     const notes = [523.25, 659.25, 783.99, 1046.5];
     notes.forEach((freq, i) => {
       const osc = ctx.createOscillator();
@@ -38,12 +47,15 @@ const playUnlockSound = () => {
       osc.start(start);
       osc.stop(start + 0.5);
     });
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 const playErrorSound = () => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     [200, 160].forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -57,12 +69,15 @@ const playErrorSound = () => {
       osc.start(start);
       osc.stop(start + 0.2);
     });
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 const playFailureSound = () => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     // Deep doom impact
     const impact = ctx.createOscillator();
     const impactGain = ctx.createGain();
@@ -102,12 +117,15 @@ const playFailureSound = () => {
     ng.gain.setValueAtTime(0.06, ctx.currentTime + 0.1);
     ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
     ns.start(ctx.currentTime + 0.1);
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 const playIntroSound = () => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
 
     // Deep rumble
     const rumbleOsc = ctx.createOscillator();
@@ -166,7 +184,9 @@ const playIntroSound = () => {
     impactGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
     impactOsc.start();
     impactOsc.stop(ctx.currentTime + 0.4);
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 interface PasswordLockPageProps {
@@ -244,7 +264,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     } else {
       setActiveIndex(activeIndex + 1);
     }
-  }, [digits, activeIndex, status, onUnlock]);
+  }, [digits, activeIndex, status, attempts, onUnlock]);
 
   const handleDelete = useCallback(() => {
     if (status === "success") return;
