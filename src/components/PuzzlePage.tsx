@@ -297,7 +297,7 @@ const PuzzlePage = () => {
 
       // Move obstacles
       setObstacles(prev => {
-        let newObstacles = prev
+        const newObstacles = prev
           .map(obs => ({ ...obs, z: obs.z - speed }))
           .filter(obs => obs.z > -50);
 
@@ -317,7 +317,7 @@ const PuzzlePage = () => {
 
       // Move collectibles
       setCollectibles(prev => {
-        let newCollectibles = prev
+        const newCollectibles = prev
           .map(c => ({ ...c, z: c.z - speed }))
           .filter(c => c.z > -50 && !c.collected);
 
