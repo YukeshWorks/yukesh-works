@@ -174,7 +174,8 @@ interface PasswordLockPageProps {
   onUnlock: () => void;
 }
 
-const correctPassword = "0001";
+// This client-side code is intentionally an Easter egg, not real authentication.
+const demoCode = "0001";
 
 const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [showIntro, setShowIntro] = useState(true);
@@ -210,7 +211,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     if (activeIndex === 3) {
       const code = newDigits.join("");
       setTimeout(() => {
-        if (code === correctPassword) {
+        if (code === demoCode) {
           setStatus("success");
           playUnlockSound();
           setSuccessPhase(1);
@@ -405,14 +406,18 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
         {/* Title */}
         <h2 className={`font-display text-xl tracking-[0.15em] uppercase text-foreground mb-1 transition-all duration-500 ${successPhase >= 2 ? "opacity-0 -translate-y-4" : ""}`}>
-          {status === "success" ? "Access Granted" : "Enter Passcode"}
+          {status === "success" ? "Demo Unlocked" : "Enter Demo Code"}
         </h2>
         <p className={`text-muted-foreground text-xs mb-8 tracking-wider transition-all duration-500 ${successPhase >= 2 ? "opacity-0 -translate-y-4" : ""}`}>
           {status === "success"
-            ? "Welcome back, agent."
+            ? "Demo sequence complete."
             : status === "error"
             ? `Wrong code · Attempt ${attempts}`
-            : "4-digit passcode required"}
+            : "Enter the 4-digit demo code"}
+        </p>
+
+        <p className="max-w-xs text-center text-[10px] leading-relaxed text-muted-foreground/60 mb-5">
+          This is a visual Easter egg only. It does not protect private content or account data.
         </p>
 
         {/* Dot indicators */}
@@ -449,10 +454,10 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
               </div>
               <div className="flex flex-col items-center gap-1.5">
                 <span className="text-primary text-lg font-display tracking-[0.3em] uppercase font-bold">
-                  Verified
+                  Unlocked
                 </span>
                 <span className="text-muted-foreground text-xs tracking-widest">
-                  Identity confirmed
+                  Demo screen unlocked
                 </span>
               </div>
               {/* Animated line */}
@@ -489,7 +494,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
       {/* Bottom text */}
       <div className={`absolute bottom-8 text-center text-[10px] text-muted-foreground/20 tracking-widest uppercase transition-opacity duration-500 ${successPhase >= 2 ? "opacity-0" : ""}`}>
-        <p>Secure Access Terminal</p>
+        <p>Interactive Easter Egg · Not a Security Boundary</p>
       </div>
 
       <style>{`
