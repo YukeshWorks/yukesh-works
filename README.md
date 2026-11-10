@@ -16,7 +16,8 @@ A personal portfolio and interactive playground for Yukesh Kumar.
 
 The independent hosting target is Vercel, connected to this GitHub repository. `vercel.json` defines the Vite static build and SPA fallback. GitLab Pages configuration is included as an additional option after the repo has been imported into GitLab.
 
-- Current legacy URL (Lovable-hosted): https://yukeshworks.lovable.app
+- **Production website:** https://your-profile-showcase.vercel.app
+- Legacy rollback copy (Lovable-hosted): https://yukeshworks.lovable.app
 - Source repository: https://github.com/YukeshWorks/yukesh-works
 - Development branch for migration work: `migration/gitlab-pages`
 
