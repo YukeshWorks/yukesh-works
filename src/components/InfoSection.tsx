@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Instagram, Facebook, Linkedin } from "lucide-react";
-import profileHero from "@/assets/profile-hero.webp";
+import profileHero from "@/assets/profile.jpg";
 import pixelEyes from "@/assets/pixel-eyes.gif";
 
 const InfoSection = () => {
@@ -21,31 +21,12 @@ const InfoSection = () => {
           className="absolute inset-0 h-full w-full object-cover object-[68%_42%] md:object-[72%_center]"
           style={{
             opacity: imgLoaded ? 1 : 0,
-            filter: "brightness(1.62) contrast(1.00) saturate(1.08)",
+            filter: "brightness(1.18) contrast(1.04) saturate(1.06)",
             transform: "scale(1.025)",
             transformOrigin: "68% 42%",
             transition: "opacity 1.1s ease-out, transform 1.8s cubic-bezier(0.2, 0.7, 0.2, 1), filter 1.1s ease-out",
           }}
           onLoad={() => setImgLoaded(true)}
-        />
-
-        {/* A softly masked screen-blend duplicate lifts facial detail without
-            flattening the red rim-light or brightening the whole background. */}
-        <img
-          src={profileHero}
-          alt=""
-          aria-hidden="true"
-          decoding="async"
-          loading="eager"
-          className="absolute inset-0 h-full w-full object-cover object-[68%_42%] md:object-[72%_center]"
-          style={{
-            opacity: imgLoaded ? 0.62 : 0,
-            filter: "brightness(2.15) contrast(0.96) saturate(1.04)",
-            mixBlendMode: "screen",
-            WebkitMaskImage: "radial-gradient(ellipse 36% 34% at 68% 42%, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.76) 42%, transparent 100%)",
-            maskImage: "radial-gradient(ellipse 36% 34% at 68% 42%, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.76) 42%, transparent 100%)",
-            transition: "opacity 1.1s ease-out",
-          }}
         />
 
         {/* Soft multi-directional fades tie the portrait into the page instead of
@@ -63,7 +44,7 @@ const InfoSection = () => {
         <div
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(ellipse at 68% 40%, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.10) 30%, rgba(255,255,255,0.02) 48%, transparent 64%)",
+            background: "radial-gradient(ellipse at 68% 40%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 30%, transparent 58%)",
             mixBlendMode: "screen",
             opacity: 0.85,
           }}
