@@ -21,7 +21,7 @@ const InfoSection = () => {
           className="absolute inset-0 h-full w-full object-cover object-[68%_42%] md:object-[72%_center]"
           style={{
             opacity: imgLoaded ? 1 : 0,
-            filter: "brightness(1.44) contrast(1.02) saturate(1.08)",
+            filter: "brightness(1.56) contrast(1.00) saturate(1.08)",
             transform: "scale(1.025)",
             transformOrigin: "68% 42%",
             transition: "opacity 1.1s ease-out, transform 1.8s cubic-bezier(0.2, 0.7, 0.2, 1), filter 1.1s ease-out",
@@ -35,8 +35,8 @@ const InfoSection = () => {
           className="absolute inset-0"
           style={{
             background: [
-              "linear-gradient(90deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.94) 10%, hsl(var(--background) / 0.76) 25%, hsl(var(--background) / 0.30) 46%, transparent 72%)",
-              "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.28) 12%, transparent 30%, transparent 74%, hsl(var(--background) / 0.32) 91%, hsl(var(--background) / 0.62) 100%)",
+              "linear-gradient(90deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.92) 8%, hsl(var(--background) / 0.66) 19%, hsl(var(--background) / 0.20) 36%, transparent 57%)",
+              "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.24) 10%, transparent 28%, transparent 76%, hsl(var(--background) / 0.20) 92%, hsl(var(--background) / 0.42) 100%)",
               "radial-gradient(ellipse at 70% 38%, transparent 24%, hsl(var(--background) / 0.12) 78%)",
             ].join(", "),
           }}
@@ -44,7 +44,7 @@ const InfoSection = () => {
         <div
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(ellipse at 68% 40%, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.05) 34%, transparent 60%)",
+            background: "radial-gradient(ellipse at 68% 40%, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.10) 30%, rgba(255,255,255,0.02) 48%, transparent 64%)",
             mixBlendMode: "screen",
             opacity: 0.85,
           }}
@@ -121,7 +121,7 @@ const InfoSection = () => {
 
       {/* Content overlay */}
       {showContent && (
-        <div className="relative z-10 flex-1 flex items-end pb-20 md:items-end md:pb-16 fade-in-up">
+        <div className="relative z-10 flex-1 flex items-end pb-10 md:items-end md:pb-12 fade-in-up">
           <div className="container mx-auto px-6 md:px-12">
             <div className="max-w-sm">
               <div className="fade-in-up opacity-0 delay-200 relative pl-4 border-l-2 border-primary/40">
