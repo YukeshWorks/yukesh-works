@@ -4,9 +4,15 @@ import skeletonGif from "@/assets/skeleton-red.gif";
 import redEyesGif from "@/assets/red-eyes.gif";
 import wrongPasscodeVideo from "@/assets/wrong-passcode.mp4";
 
+const getAudioContext = (): AudioContext | null => {
+  const AudioContextClass = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  return AudioContextClass ? new AudioContextClass() : null;
+};
+
 const playClickSound = (pitch = 1) => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -17,12 +23,15 @@ const playClickSound = (pitch = 1) => {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
     osc.start();
     osc.stop(ctx.currentTime + 0.06);
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 const playUnlockSound = () => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     const notes = [523.25, 659.25, 783.99, 1046.5];
     notes.forEach((freq, i) => {
       const osc = ctx.createOscillator();
@@ -38,12 +47,15 @@ const playUnlockSound = () => {
       osc.start(start);
       osc.stop(start + 0.5);
     });
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 const playErrorSound = () => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     [200, 160].forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -57,12 +69,15 @@ const playErrorSound = () => {
       osc.start(start);
       osc.stop(start + 0.2);
     });
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 const playFailureSound = () => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     // Deep doom impact
     const impact = ctx.createOscillator();
     const impactGain = ctx.createGain();
@@ -102,12 +117,15 @@ const playFailureSound = () => {
     ng.gain.setValueAtTime(0.06, ctx.currentTime + 0.1);
     ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
     ns.start(ctx.currentTime + 0.1);
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 const playIntroSound = () => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
 
     // Deep rumble
     const rumbleOsc = ctx.createOscillator();
@@ -166,7 +184,9 @@ const playIntroSound = () => {
     impactGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
     impactOsc.start();
     impactOsc.stop(ctx.currentTime + 0.4);
-  } catch {}
+  } catch (error) {
+    console.warn("Browser audio is unavailable:", error);
+  }
 };
 
 interface PasswordLockPageProps {
@@ -174,7 +194,8 @@ interface PasswordLockPageProps {
   onUnlock: () => void;
 }
 
-const correctPassword = "0001";
+// This client-side code is intentionally an Easter egg, not real authentication.
+const demoCode = "0001";
 
 const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
   const [showIntro, setShowIntro] = useState(true);
@@ -210,7 +231,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     if (activeIndex === 3) {
       const code = newDigits.join("");
       setTimeout(() => {
-        if (code === correctPassword) {
+        if (code === demoCode) {
           setStatus("success");
           playUnlockSound();
           setSuccessPhase(1);
@@ -243,7 +264,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     } else {
       setActiveIndex(activeIndex + 1);
     }
-  }, [digits, activeIndex, status, onUnlock]);
+  }, [digits, activeIndex, status, attempts, onUnlock]);
 
   const handleDelete = useCallback(() => {
     if (status === "success") return;
@@ -405,14 +426,18 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
         {/* Title */}
         <h2 className={`font-display text-xl tracking-[0.15em] uppercase text-foreground mb-1 transition-all duration-500 ${successPhase >= 2 ? "opacity-0 -translate-y-4" : ""}`}>
-          {status === "success" ? "Access Granted" : "Enter Passcode"}
+          {status === "success" ? "Demo Unlocked" : "Enter Demo Code"}
         </h2>
         <p className={`text-muted-foreground text-xs mb-8 tracking-wider transition-all duration-500 ${successPhase >= 2 ? "opacity-0 -translate-y-4" : ""}`}>
           {status === "success"
-            ? "Welcome back, agent."
+            ? "Demo sequence complete."
             : status === "error"
             ? `Wrong code · Attempt ${attempts}`
-            : "4-digit passcode required"}
+            : "Enter the 4-digit demo code"}
+        </p>
+
+        <p className="max-w-xs text-center text-[10px] leading-relaxed text-muted-foreground/60 mb-5">
+          This is a visual Easter egg only. It does not protect private content or account data.
         </p>
 
         {/* Dot indicators */}
@@ -449,10 +474,10 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
               </div>
               <div className="flex flex-col items-center gap-1.5">
                 <span className="text-primary text-lg font-display tracking-[0.3em] uppercase font-bold">
-                  Verified
+                  Unlocked
                 </span>
                 <span className="text-muted-foreground text-xs tracking-widest">
-                  Identity confirmed
+                  Demo screen unlocked
                 </span>
               </div>
               {/* Animated line */}
@@ -489,7 +514,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
       {/* Bottom text */}
       <div className={`absolute bottom-8 text-center text-[10px] text-muted-foreground/20 tracking-widest uppercase transition-opacity duration-500 ${successPhase >= 2 ? "opacity-0" : ""}`}>
-        <p>Secure Access Terminal</p>
+        <p>Interactive Easter Egg · Not a Security Boundary</p>
       </div>
 
       <style>{`

@@ -22,7 +22,11 @@ const AudioController = ({ onBeat }: AudioControllerProps) => {
 
     try {
       // Create audio context
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextClass) {
+        setIsLoaded(true);
+        return;
+      }
       audioContextRef.current = new AudioContextClass();
       
       // Create analyser

@@ -2,29 +2,10 @@ import { useState, useEffect } from "react";
 import homeBg from "@/assets/home-bg.jpg";
 import mobileBg from "@/assets/mobile-bg.jpg";
 import profileImg from "@/assets/profile.jpg";
-import profileHero from "@/assets/profile-hero.webp";
-import projectsFolder from "@/assets/projects-folder.jpg";
 import loadingSpy from "@/assets/loading-spy.gif";
-import offlineCloud from "@/assets/offline-cloud.gif";
-import loadingCar from "@/assets/loading-car.gif";
-import artFlame from "@/assets/art-flame.gif";
-import artHand from "@/assets/art-hand.gif";
-import artNoir from "@/assets/art-noir.gif";
-import artSpy from "@/assets/art-spy.gif";
-import pixelEyes from "@/assets/pixel-eyes.gif";
 import navLogo from "@/assets/nav-logo.gif";
-import redEyes from "@/assets/red-eyes.gif";
-import skeletonRed from "@/assets/skeleton-red.gif";
-import vaultLamp from "@/assets/vault-lamp.gif";
-import ambientVideo from "@/assets/ambient-bg.mp4";
 import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
-import ethernetVideo from "@/assets/ethernet-video.mp4";
-import wrongPasscodeVideo from "@/assets/wrong-passcode.mp4";
-import ambientVideoHi from "@/assets/ambient-bg-hi.mp4?url";
-import desktopBgVideoHi from "@/assets/desktop-bg-video-hi.mp4?url";
-import mobileBgVideoHi from "@/assets/mobile-bg-video-hi.mp4?url";
-import profileHi from "@/assets/profile-hi.jpg?url";
 
 interface LoadingScreenProps {
   onLoadComplete: () => void;
@@ -36,118 +17,71 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    let loaded = 0;
+    let completionTimer: ReturnType<typeof setTimeout> | undefined;
+
     const isMobile = window.innerWidth < 768;
     const priorityBg = isMobile ? mobileBg : homeBg;
-
-    // Critical above-the-fold assets only — others lazy-load on demand
-    const allImages = [
-      priorityBg,
-      profileImg,
-      navLogo,
-    ];
-
-    const allVideos = [
-      isMobile ? mobileBgVideo : desktopBgVideo,
-    ];
-
-    // Below-the-fold assets — preload in background after main load (non-blocking)
-    const lazyImages = [
-      isMobile ? homeBg : mobileBg,
-      profileHero, projectsFolder,
-      offlineCloud, loadingCar,
-      artFlame, artHand, artNoir, artSpy, pixelEyes,
-      redEyes, skeletonRed, vaultLamp,
-    ];
-    const lazyVideos = [
-      ambientVideo,
-      isMobile ? desktopBgVideo : mobileBgVideo,
-      ethernetVideo,
-      wrongPasscodeVideo,
-    ];
-
-    let loaded = 0;
-    // +1 for fonts
-    const total = allImages.length + allVideos.length + 1;
+    const priorityVideo = isMobile ? mobileBgVideo : desktopBgVideo;
+    const imageSources = [priorityBg, profileImg, navLogo];
+    const total = imageSources.length + 2;
 
     const tick = () => {
-      loaded++;
-      setProgress(Math.round((loaded / total) * 100));
+      loaded = Math.min(total, loaded + 1);
+      if (!cancelled) setProgress(Math.round((loaded / total) * 100));
     };
 
-    const loadImage = (src: string) => new Promise<void>(resolve => {
-      const img = new Image();
-      img.src = src;
-      img.onload = img.onerror = () => { tick(); resolve(); };
+    const loadImage = (src: string) => new Promise<void>((resolve) => {
+      const image = new Image();
+      const done = () => { tick(); resolve(); };
+      image.onload = done;
+      image.onerror = done;
+      image.src = src;
     });
 
-    const loadVideo = (src: string) => new Promise<void>(resolve => {
+    const loadVideoMetadata = (src: string) => new Promise<void>((resolve) => {
       const video = document.createElement("video");
-      video.preload = "auto";
+      let settled = false;
+      const done = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeout);
+        video.onloadedmetadata = null;
+        video.onerror = null;
+        video.removeAttribute("src");
+        video.load();
+        tick();
+        resolve();
+      };
+      const timeout = window.setTimeout(done, 2500);
+      video.preload = "metadata";
       video.muted = true;
-      video.src = src;
-      const done = () => { tick(); resolve(); };
-      video.oncanplaythrough = done;
+      video.onloadedmetadata = done;
       video.onerror = done;
-      // Fallback timeout for slow video
-      setTimeout(done, 3000);
+      video.src = src;
+      video.load();
     });
 
     const run = async () => {
-      // Load priority bg first
-      await loadImage(priorityBg);
-
-      // Load rest in parallel
       await Promise.all([
-        ...allImages.slice(1).map(loadImage),
-        ...allVideos.map(loadVideo),
-        document.fonts?.ready.then(tick),
+        ...imageSources.map(loadImage),
+        loadVideoMetadata(priorityVideo),
+        Promise.resolve(document.fonts?.ready).then(() => tick()).catch(() => tick()),
       ]);
-
-      // Done — let user in immediately
+      if (cancelled) return;
       setReady(true);
       setFadeOut(true);
-      setTimeout(onLoadComplete, 200);
-
-      // Background-prefetch below-the-fold assets via <link rel="prefetch">.
-      // Browser stores these in the HTTP disk cache, so they persist across
-      // navigations and reloads (instant on next visit). Skipped on slow
-      // networks / Save-Data to avoid hogging the user's bandwidth.
-      const conn = (navigator as any).connection;
-      const effType = conn?.effectiveType;
-      const saveData = !!conn?.saveData;
-      const downlink = typeof conn?.downlink === "number" ? conn.downlink : 0;
-      const isSlow = saveData || effType === "2g" || effType === "slow-2g";
-      const isFast = !saveData && effType === "4g" && (downlink === 0 || downlink >= 5);
-
-      const prefetch = () => {
-        if (isSlow) return;
-        const head = document.head;
-        const add = (href: string, as: "image" | "video") => {
-          if (document.querySelector(`link[rel="prefetch"][href="${href}"]`)) return;
-          const link = document.createElement("link");
-          link.rel = "prefetch";
-          link.as = as;
-          link.href = href;
-          (link as any).fetchPriority = "low";
-          head.appendChild(link);
-        };
-        lazyImages.forEach(src => add(src, "image"));
-        lazyVideos.forEach(src => add(src, "video"));
-        // On fast networks, also prefetch hi-res variants so they're warm
-        // in the HTTP cache when VideoBackground swaps to them.
-        if (isFast) {
-          add(profileHi, "image");
-          add(ambientVideoHi, "video");
-          add(isMobile ? mobileBgVideoHi : desktopBgVideoHi, "video");
-        }
-      };
-      if ("requestIdleCallback" in window) {
-        (window as any).requestIdleCallback(prefetch, { timeout: 3000 });
-      } else {
-        setTimeout(prefetch, 800);
-      }
+      completionTimer = window.setTimeout(() => {
+        if (!cancelled) onLoadComplete();
+      }, 200);
     };
-    run();
+
+    void run();
+    return () => {
+      cancelled = true;
+      if (completionTimer) window.clearTimeout(completionTimer);
+    };
   }, [onLoadComplete]);
 
   return (
@@ -158,15 +92,12 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
         <div className="absolute bottom-0 left-0 w-6 h-6 border-l-4 border-b-4 border-black rounded-bl-lg" />
         <div className="absolute bottom-0 right-0 w-6 h-6 border-r-4 border-b-4 border-black rounded-br-lg" />
       </div>
-
       <div className="relative z-10 flex flex-col items-center gap-4">
-        <img src={loadingSpy} alt="Loading" className="w-24 h-24 md:w-32 md:h-32 rounded-2xl"
+        <img src={loadingSpy} alt="Loading Yukeshworks" className="w-24 h-24 md:w-32 md:h-32 rounded-2xl"
           style={{ filter: "drop-shadow(4px 4px 0px rgba(0,0,0,0.3))", border: "3px solid black" }} />
-
         <div className="w-32 md:w-40 h-2 bg-black/20 rounded-full overflow-hidden border-2 border-black">
           <div className="h-full bg-black rounded-full transition-all duration-200 ease-out" style={{ width: `${progress}%` }} />
         </div>
-
         <div className="flex items-center gap-3 mt-2">
           <div className="flex items-center gap-1.5">
             {[0, 1, 2].map(i => (
@@ -180,10 +111,8 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
           </p>
         </div>
       </div>
-
       <div className="absolute inset-0 pointer-events-none"
-        style={{ backgroundColor: "#f5a442", opacity: fadeOut ? 1 : 0, transition: "opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)", transform: 'translateZ(0)' }} />
-
+        style={{ backgroundColor: "#f5a442", opacity: fadeOut ? 1 : 0, transition: "opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)", transform: "translateZ(0)" }} />
       <style>{`
         @keyframes cartoonBounce {
           0%, 100% { transform: translateY(0) scale(1); }

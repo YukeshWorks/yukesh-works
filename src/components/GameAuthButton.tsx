@@ -1,10 +1,20 @@
 import { useState } from "react";
 import { LogIn, LogOut, User } from "lucide-react";
 import { useGameAuth } from "@/hooks/useGameAuth";
+import { toast } from "sonner";
 
 const GameAuthButton = () => {
   const { user, loading, signInWithGoogle, signOut } = useGameAuth();
   const [showMenu, setShowMenu] = useState(false);
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      console.error("Google sign-in failed:", error);
+      toast.error("Google sign-in is unavailable. Check the Supabase OAuth configuration.");
+    }
+  };
 
   if (loading) return null;
 
@@ -43,9 +53,9 @@ const GameAuthButton = () => {
 
   return (
     <button
-      onClick={signInWithGoogle}
+      onClick={() => void handleSignIn()}
       className="fixed top-24 right-4 z-50 w-9 h-9 rounded-full border border-white/20 bg-black/60 backdrop-blur-sm flex items-center justify-center hover:border-white/40 hover:bg-white/10 transition-all group"
-      title="Sign in to save scores"
+      title="Sign in with Google"
     >
       <LogIn size={14} className="text-white/50 group-hover:text-white transition-colors" />
     </button>

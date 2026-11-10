@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import type { User } from "@supabase/supabase-js";
 
 export const useGameAuth = () => {
@@ -8,29 +7,38 @@ export const useGameAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (mounted) {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    });
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (!mounted) return;
+      if (error) console.error("Could not restore Supabase session:", error);
+      setUser(data.session?.user ?? null);
       setLoading(false);
     });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const signInWithGoogle = async () => {
-    await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
     });
-  };
+    if (error) throw error;
+  }, []);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const signOut = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
     setUser(null);
-  };
+  }, []);
 
   return { user, loading, signInWithGoogle, signOut };
 };

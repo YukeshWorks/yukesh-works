@@ -233,7 +233,7 @@ const SnakeGame = () => {
           return prevSnake;
         }
 
-        let newSnake = [newHead, ...prevSnake];
+        const newSnake = [newHead, ...prevSnake];
 
         // Food collision
         if (newHead.x === food.x && newHead.y === food.y) {

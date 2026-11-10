@@ -1,73 +1,63 @@
-# Welcome to your Lovable project
+# Yukeshworks
 
-## Project info
+A personal portfolio and interactive playground for Yukesh Kumar.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Application
 
-## How can I edit this code?
+- Framework: Vite + React + TypeScript
+- Build command: `npm run build`
+- Output directory: `dist`
+- Home: personal introduction, social links and cinematic visual treatment
+- Vault: Snake, Rainbow Scratch, Memory Match and Island Creator
+- About: personal profile and information
+- Secret terminal: visual Easter egg only; it is not a security boundary
 
-There are several ways of editing your application.
+## Hosting
 
-**Use Lovable**
+The independent hosting target is Vercel, connected to this GitHub repository. `vercel.json` defines the Vite static build and SPA fallback. GitLab Pages configuration is included as an additional option after the repo has been imported into GitLab.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- Current legacy URL (Lovable-hosted): https://yukeshworks.lovable.app
+- Source repository: https://github.com/YukeshWorks/yukesh-works
+- Development branch for migration work: `migration/gitlab-pages`
 
-Changes made via Lovable will be committed automatically to this repo.
+The existing Lovable deployment should be retained as a rollback until the new host has been verified and the final domain choice is configured. The independent host will not include the hosting-injected Lovable edit badge.
 
-**Use your preferred IDE**
+## Local development
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Requirements: Node.js 22+ and npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Checks:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run lint
+npm test
+npm run build
+```
 
-**Use GitHub Codespaces**
+## Environment and Supabase
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The browser app uses Supabase URL and publishable key configuration. `.env.production` contains only those public client values for the current project. For local development, copy `.env.example` to `.env.local`.
 
-## What technologies are used for this project?
+Google sign-in now uses Supabase Auth directly rather than Lovable's auth broker. It requires Google OAuth to be enabled in the Supabase project and the independent site's origin to be allowed in Supabase Auth URL configuration. A browser publishable key is public by design; privileged service-role keys and OAuth client secrets must never be placed in `VITE_` variables.
 
-This project is built with:
+The repository contains a `game_scores` SQL migration, but live migration state and RLS policies must be verified in the Supabase project before claiming database features are production-ready. The frontend does not currently persist mini-game scores to that table.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## CI and deployment
 
-## How can I deploy this project?
+- GitHub Actions runs install, lint, unit tests and a production build for pushes and pull requests.
+- Vercel's Git integration provides PR previews and deploys the configured production branch.
+- GitLab Pages can build the static `dist` folder once the source repository has been imported and Pages access is configured.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## Development workflow
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- ChatGPT: implementation planning, code review and debugging support.
+- GitHub: source control and pull-request review.
+- Codespaces: browser-based editor and development environment.
+- Vercel: independent hosting and deployments.
+- GitLab: secondary repository and static-hosting fallback.
+- Notion: durable decisions, release notes, audit findings and verification records.

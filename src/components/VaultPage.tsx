@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft, Joystick } from "lucide-react";
-import GameAuthButton from "./GameAuthButton";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
@@ -51,13 +50,12 @@ const VaultPage = () => {
 
   // Individual game views
   if (activeSection === "snake") {
-    return <div className={transClass}>{backButton("games-menu")}<GameAuthButton /><SnakeGame /></div>;
+    return <div className={transClass}>{backButton("games-menu")}<SnakeGame /></div>;
   }
   if (activeSection === "scratch") {
     return (
       <div className={transClass}>
         {backButton("games-menu")}
-        <GameAuthButton />
         <section className="min-h-[90vh] flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
           <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
           <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-float-slow" />
@@ -76,10 +74,10 @@ const VaultPage = () => {
     );
   }
   if (activeSection === "memory") {
-    return <div className={transClass}>{backButton("games-menu")}<GameAuthButton /><MemoryGame /></div>;
+    return <div className={transClass}>{backButton("games-menu")}<MemoryGame /></div>;
   }
   if (activeSection === "island") {
-    return <div className={transClass}>{backButton("games-menu")}<GameAuthButton /><IslandCreator /></div>;
+    return <div className={transClass}>{backButton("games-menu")}<IslandCreator /></div>;
   }
 
   // Games submenu
@@ -100,7 +98,6 @@ const VaultPage = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none" />
 
         {backButton("main")}
-        <GameAuthButton />
 
         <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm px-4">
           <div className="text-center fade-in-up">
@@ -157,7 +154,7 @@ const VaultPage = () => {
       />
 
       <div
-        className="relative z-10 flex flex-col items-center mt-[50vh] ml-56"
+        className="relative z-10 flex flex-col items-center mt-auto mb-16 md:mt-[50vh] md:mb-0 md:ml-56"
         style={{
           opacity: contentVisible ? 1 : 0,
           transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
