@@ -1,0 +1,26 @@
+image: node:22-alpine
+
+stages:
+  - deploy
+
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+
+pages:
+  stage: deploy
+  script:
+    - npm install
+    - npm run build
+    - mkdir -p public
+    - cp -a dist/. public/
+  pages:
+    publish: public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
