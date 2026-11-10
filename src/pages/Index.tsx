@@ -11,6 +11,11 @@ import ParticleBackground from "@/components/ParticleBackground";
 import CursorLight from "@/components/CursorLight";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
 
+const getAudioContext = (): AudioContext | null => {
+  const AudioContextClass = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  return AudioContextClass ? new AudioContextClass() : null;
+};
+
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"home" | "puzzle" | "info">("home");
@@ -30,7 +35,8 @@ const Index = () => {
 
   const playWarningSound = useCallback(() => {
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const ctx = getAudioContext();
+      if (!ctx) return;
       // Eerie descending tone
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -56,12 +62,15 @@ const Index = () => {
       ng.gain.setValueAtTime(0.1, ctx.currentTime);
       ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
       ns.start();
-    } catch {}
+    } catch (error) {
+      console.warn("Browser audio is unavailable:", error);
+    }
   }, []);
 
   const playVideoEntrySound = useCallback(() => {
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const ctx = getAudioContext();
+      if (!ctx) return;
       // Deep impact
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -87,7 +96,9 @@ const Index = () => {
       ng.gain.setValueAtTime(0.12, ctx.currentTime);
       ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       ns.start();
-    } catch {}
+    } catch (error) {
+      console.warn("Browser audio is unavailable:", error);
+    }
   }, []);
 
   const handle42Click = useCallback(() => {
