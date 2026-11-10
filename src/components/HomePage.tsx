@@ -14,204 +14,133 @@ const HomePage = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [contentVisible, setContentVisible] = useState(false);
 
-  // Assets already preloaded by LoadingScreen — show content immediately
   const handleBgLoaded = useCallback(() => {
-    // Use rAF to batch with next paint instead of setTimeout
     requestAnimationFrame(() => setContentVisible(true));
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Online/offline detection
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
-  // Handle beat from audio controller
   const handleBeat = useCallback((intensity: number) => {
     setBeatIntensity(intensity);
-    setTimeout(() => setBeatIntensity(0), 150);
+    window.setTimeout(() => setBeatIntensity(0), 150);
   }, []);
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    });
-  };
+  const formatTime = (date: Date) => date.toLocaleTimeString("en-US", {
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
+  });
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-    });
-  };
+  const formatDate = (date: Date) => date.toLocaleDateString("en-US", {
+    month: "short", day: "2-digit",
+  });
 
   return (
     <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
-      {/* Cinematic video background */}
       <VideoBackground beatIntensity={beatIntensity} onLoaded={handleBgLoaded} />
-      
-      {/* Audio controller with beat detection */}
       <AudioController onBeat={handleBeat} />
-      
-      {/* Simplified floating icons - fewer, CSS-only animations */}
+
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[15%] left-[10%] animate-float-slow">
-          <Sparkles className="w-4 h-4 text-primary/15" />
-        </div>
-        <div className="absolute top-[60%] right-[12%] animate-float-slow" style={{ animationDelay: '2s' }}>
-          <Circle className="w-3 h-3 text-primary/10" />
-        </div>
-        <div className="absolute top-[75%] left-[8%] animate-float-slow" style={{ animationDelay: '4s' }}>
-          <Triangle className="w-3 h-3 text-primary/10" />
-        </div>
+        <div className="absolute top-[15%] left-[10%] animate-float-slow"><Sparkles className="w-4 h-4 text-primary/15" /></div>
+        <div className="absolute top-[60%] right-[12%] animate-float-slow" style={{ animationDelay: "2s" }}><Circle className="w-3 h-3 text-primary/10" /></div>
+        <div className="absolute top-[75%] left-[8%] animate-float-slow" style={{ animationDelay: "4s" }}><Triangle className="w-3 h-3 text-primary/10" /></div>
       </div>
-      
+
       <div className="container mx-auto px-6 relative z-10 pt-16">
         <div className="max-w-lg">
-          {/* Status badge - slides from left */}
-          <div 
+          <div
             className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-2xl glass text-[10px] font-heading tracking-[0.2em] uppercase border-2 border-foreground/20 transition-all duration-500 ease-out"
-            style={{ 
-              opacity: contentVisible ? 1 : 0,
-              transform: contentVisible ? 'translateX(0)' : 'translateX(-30px)',
-              transitionDelay: '200ms',
-            }}
+            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-30px)", transitionDelay: "200ms" }}
           >
             {!isOnline ? (
-              <>
-                <img src={offlineCloud} alt="Offline" className="w-5 h-5" />
-                <span className="text-muted-foreground">Offline</span>
-              </>
+              <><img src={offlineCloud} alt="Offline" className="w-5 h-5" /><span className="text-muted-foreground">Offline</span></>
             ) : (
-              <>
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-green-400">Online</span>
-              </>
+              <><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /><span className="text-green-400">Online</span></>
             )}
           </div>
-          
-          {/* Name - fades in */}
-          <h1 
+
+          <h1
             className="text-3xl md:text-5xl lg:text-6xl mb-3 tracking-tight transition-all duration-600 ease-out"
-            style={{ 
-              opacity: contentVisible ? 1 : 0,
-              transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
-              transitionDelay: '350ms',
-            }}
+            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateY(0)" : "translateY(20px)", transitionDelay: "350ms" }}
           >
-            <span className="text-foreground/90 font-heading text-2xl md:text-3xl lg:text-4xl tracking-[0.15em] uppercase" style={{ textShadow: '2px 2px 0px hsl(var(--primary) / 0.3)' }}>Hi, I'm</span>
+            <span className="text-foreground/90 font-heading text-2xl md:text-3xl lg:text-4xl tracking-[0.15em] uppercase" style={{ textShadow: "2px 2px 0px hsl(var(--primary) / 0.3)" }}>Hi, I'm</span>
             <br />
-            <span className="gradient-text breathing-glow font-display" style={{ textShadow: '4px 4px 0px rgba(0,0,0,0.3)', fontSize: '110%' }}>Yukesh Kumar</span>
+            <span className="gradient-text breathing-glow font-display" style={{ textShadow: "4px 4px 0px rgba(0,0,0,0.3)", fontSize: "110%" }}>Yukesh Kumar</span>
           </h1>
-          
-          {/* Tagline - slides from left */}
-          <p 
-            className="text-muted-foreground text-sm md:text-base mt-4 max-w-sm leading-relaxed font-medium transition-all duration-500 ease-out font-mono text-base md:text-lg"
-            style={{ 
-              textShadow: '1px 1px 0px rgba(0,0,0,0.1)',
-              opacity: contentVisible ? 1 : 0,
-              transform: contentVisible ? 'translateX(0)' : 'translateX(-20px)',
-              transitionDelay: '500ms',
-              letterSpacing: '0.05em',
-            }}
+
+          <p
+            className="text-muted-foreground text-base md:text-lg mt-4 max-w-sm leading-relaxed font-medium transition-all duration-500 ease-out font-mono"
+            style={{ textShadow: "1px 1px 0px rgba(0,0,0,0.1)", opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-20px)", transitionDelay: "500ms", letterSpacing: "0.05em" }}
           >
             Lost in thoughts, found in creativity.
           </p>
-          
-          {/* CTA buttons - slide from right */}
-          <div 
+
+          <div
             className="flex flex-wrap gap-3 mt-6 transition-all duration-500 ease-out"
-            style={{ 
-              opacity: contentVisible ? 1 : 0,
-              transform: contentVisible ? 'translateX(0)' : 'translateX(30px)',
-              transitionDelay: '650ms',
-            }}
+            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(30px)", transitionDelay: "650ms" }}
           >
-            <button 
+            <button
+              type="button"
               onClick={() => setIsPortfolioOpen(true)}
               className="px-5 py-2.5 rounded-2xl bg-primary text-primary-foreground text-xs font-heading uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-transform duration-200 border-3 border-black"
-              style={{ boxShadow: '3px 3px 0px rgba(0,0,0,0.3)' }}
+              style={{ boxShadow: "3px 3px 0px rgba(0,0,0,0.3)" }}
             >
               View Work
             </button>
-            <a 
+            <button
+              type="button"
+              onClick={() => setIsContactOpen(true)}
+              className="px-5 py-2.5 rounded-2xl glass text-xs font-heading uppercase tracking-[0.2em] hover:bg-primary/10 hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-foreground/30"
+              style={{ boxShadow: "3px 3px 0px rgba(0,0,0,0.1)" }}
+            >
+              Contact
+            </button>
+            <a
               href="https://t.me/Yukesh_tg"
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-2.5 rounded-2xl glass text-xs font-heading uppercase tracking-[0.2em] hover:bg-primary/10 hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-foreground/30 inline-flex items-center justify-center"
-              style={{ boxShadow: '3px 3px 0px rgba(0,0,0,0.1)' }}
             >
               Telegram
             </a>
           </div>
-          
-          {/* Social icons - slide from left */}
-          <div 
+
+          <div
             className="flex items-center gap-3 mt-8 text-muted-foreground transition-all duration-500 ease-out"
-            style={{ 
-              opacity: contentVisible ? 1 : 0,
-              transform: contentVisible ? 'translateX(0)' : 'translateX(-25px)',
-              transitionDelay: '800ms',
-            }}
+            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-25px)", transitionDelay: "800ms" }}
           >
             <span className="text-[10px] font-heading tracking-[0.3em] uppercase opacity-70">Connect</span>
             <div className="w-8 h-0.5 bg-foreground/30 rounded-full" />
             <div className="flex gap-2">
-              <a href="https://www.linkedin.com/in/yukesh-kumar-a01647322" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
-                <Linkedin className="w-4 h-4" />
-              </a>
-              <a href="https://instagram.com/yuk3shh" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
-                <Instagram className="w-4 h-4" />
-              </a>
-              <a href="mailto:mailtoyukesh33@gmail.com" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
-                <Mail className="w-4 h-4" />
-              </a>
-              <a href="https://wa.me/919080861733" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20">
-                <MessageCircle className="w-4 h-4" />
-              </a>
+              <a aria-label="LinkedIn" href="https://www.linkedin.com/in/yukesh-kumar-a01647322" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><Linkedin className="w-4 h-4" /></a>
+              <a aria-label="Instagram" href="https://instagram.com/yuk3shh" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><Instagram className="w-4 h-4" /></a>
+              <a aria-label="Email" href="mailto:mailtoyukesh33@gmail.com" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><Mail className="w-4 h-4" /></a>
+              <a aria-label="WhatsApp" href="https://wa.me/919080861733" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><MessageCircle className="w-4 h-4" /></a>
             </div>
           </div>
         </div>
       </div>
-      
-      {/* Time/Date display */}
+
       <div className="absolute bottom-5 right-5 z-20">
         <div className="flex flex-col items-end gap-0.5">
           <div className="flex items-baseline gap-1 font-mono tabular-nums">
-            {formatTime(currentTime).split('').map((char, i) => (
-              <span
-                key={`${i}-${char}`}
-                className="inline-block text-base md:text-lg text-foreground/60 tracking-[0.15em]"
-                style={{
-                  animation: char !== ':' && char !== ' ' ? `digitFlip 0.5s cubic-bezier(0.16, 1, 0.3, 1)` : 'none',
-                  display: 'inline-block',
-                }}
-              >
-                {char}
-              </span>
+            {formatTime(currentTime).split("").map((char, i) => (
+              <span key={`${i}-${char}`} className="inline-block text-base md:text-lg text-foreground/60 tracking-[0.15em]" style={{ animation: char !== ":" && char !== " " ? "digitFlip 0.5s cubic-bezier(0.16, 1, 0.3, 1)" : "none", display: "inline-block" }}>{char}</span>
             ))}
           </div>
-          <span className="text-[10px] font-heading tracking-[0.3em] uppercase text-muted-foreground/30">
-            {formatDate(currentTime)}
-          </span>
+          <span className="text-[10px] font-heading tracking-[0.3em] uppercase text-muted-foreground/30">{formatDate(currentTime)}</span>
         </div>
         <style>{`
           @keyframes digitFlip {
@@ -222,7 +151,6 @@ const HomePage = () => {
         `}</style>
       </div>
 
-      {/* Modals */}
       <PortfolioModal isOpen={isPortfolioOpen} onClose={() => setIsPortfolioOpen(false)} />
       <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </section>
