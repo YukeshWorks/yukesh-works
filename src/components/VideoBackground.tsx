@@ -73,6 +73,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
             transition: 'opacity 0.8s ease-out',
           }}
           onCanPlay={handleReady}
+          onError={handleReady}
         />
       ) : (
         <video
@@ -99,6 +100,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
             transition: 'opacity 0.8s ease-out',
           }}
           onCanPlay={handleReady}
+          onError={handleReady}
         />
       )}
 
