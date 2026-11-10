@@ -21,12 +21,31 @@ const InfoSection = () => {
           className="absolute inset-0 h-full w-full object-cover object-[68%_42%] md:object-[72%_center]"
           style={{
             opacity: imgLoaded ? 1 : 0,
-            filter: "brightness(1.56) contrast(1.00) saturate(1.08)",
+            filter: "brightness(1.62) contrast(1.00) saturate(1.08)",
             transform: "scale(1.025)",
             transformOrigin: "68% 42%",
             transition: "opacity 1.1s ease-out, transform 1.8s cubic-bezier(0.2, 0.7, 0.2, 1), filter 1.1s ease-out",
           }}
           onLoad={() => setImgLoaded(true)}
+        />
+
+        {/* A softly masked screen-blend duplicate lifts facial detail without
+            flattening the red rim-light or brightening the whole background. */}
+        <img
+          src={profileHero}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          loading="eager"
+          className="absolute inset-0 h-full w-full object-cover object-[68%_42%] md:object-[72%_center]"
+          style={{
+            opacity: imgLoaded ? 0.62 : 0,
+            filter: "brightness(2.15) contrast(0.96) saturate(1.04)",
+            mixBlendMode: "screen",
+            WebkitMaskImage: "radial-gradient(ellipse 36% 34% at 68% 42%, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.76) 42%, transparent 100%)",
+            maskImage: "radial-gradient(ellipse 36% 34% at 68% 42%, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.76) 42%, transparent 100%)",
+            transition: "opacity 1.1s ease-out",
+          }}
         />
 
         {/* Soft multi-directional fades tie the portrait into the page instead of
@@ -35,7 +54,7 @@ const InfoSection = () => {
           className="absolute inset-0"
           style={{
             background: [
-              "linear-gradient(90deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.92) 8%, hsl(var(--background) / 0.66) 19%, hsl(var(--background) / 0.20) 36%, transparent 57%)",
+              "linear-gradient(90deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.84) 8%, hsl(var(--background) / 0.44) 18%, hsl(var(--background) / 0.10) 30%, transparent 43%)",
               "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.24) 10%, transparent 28%, transparent 76%, hsl(var(--background) / 0.20) 92%, hsl(var(--background) / 0.42) 100%)",
               "radial-gradient(ellipse at 70% 38%, transparent 24%, hsl(var(--background) / 0.12) 78%)",
             ].join(", "),
