@@ -21,7 +21,7 @@ const InfoSection = () => {
           className="absolute inset-0 h-full w-full object-cover object-[68%_42%] md:object-[72%_center]"
           style={{
             opacity: imgLoaded ? 1 : 0,
-            filter: "brightness(1.28) contrast(1.04) saturate(1.08)",
+            filter: "brightness(1.44) contrast(1.02) saturate(1.08)",
             transform: "scale(1.025)",
             transformOrigin: "68% 42%",
             transition: "opacity 1.1s ease-out, transform 1.8s cubic-bezier(0.2, 0.7, 0.2, 1), filter 1.1s ease-out",
@@ -36,9 +36,17 @@ const InfoSection = () => {
           style={{
             background: [
               "linear-gradient(90deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.94) 10%, hsl(var(--background) / 0.76) 25%, hsl(var(--background) / 0.30) 46%, transparent 72%)",
-              "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.32) 12%, transparent 30%, transparent 70%, hsl(var(--background) / 0.72) 91%, hsl(var(--background)) 100%)",
+              "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.28) 12%, transparent 30%, transparent 74%, hsl(var(--background) / 0.32) 91%, hsl(var(--background) / 0.62) 100%)",
               "radial-gradient(ellipse at 70% 38%, transparent 24%, hsl(var(--background) / 0.12) 78%)",
             ].join(", "),
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "radial-gradient(ellipse at 68% 40%, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.05) 34%, transparent 60%)",
+            mixBlendMode: "screen",
+            opacity: 0.85,
           }}
         />
         <div
