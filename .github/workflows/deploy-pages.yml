@@ -49,6 +49,14 @@ jobs:
       - name: Add SPA fallback
         run: cp dist/index.html dist/404.html
 
+      # GitHub Pages may return 404 for a clean nested route unless a matching
+      # directory index exists. Keep the SPA fallback, and also publish a real
+      # static entry point for direct visits to /services and /services/.
+      - name: Add direct Services route entry point
+        run: |
+          mkdir -p dist/services
+          cp dist/index.html dist/services/index.html
+
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
 
