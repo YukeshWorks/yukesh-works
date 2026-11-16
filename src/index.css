@@ -414,3 +414,16 @@
     animation: none;
   }
 }
+
+
+/* Keep the floating Services label clear of the row above on phones. */
+@media (max-width: 640px) {
+  .services-cta-wrap {
+    margin-top: 50px;
+  }
+  .services-cta-bubble {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    padding: 5px 9px;
+  }
+}
