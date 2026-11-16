@@ -65,7 +65,7 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
 
         <div className="mt-4 pt-4 border-t border-border/50 text-center space-y-1">
           <p className="text-[10px] text-muted-foreground">Email: <a href="mailto:mailtoyukesh33@gmail.com" className="text-primary hover:underline">mailtoyukesh33@gmail.com</a></p>
-          <p className="text-[10px] text-muted-foreground">WhatsApp: <a href="https://wa.me/919080861733" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">9080861733</a></p>
+          <p className="text-[10px] text-muted-foreground">WhatsApp: <a href="https://wa.me/918189936361" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">8189936361</a></p>
         </div>
       </div>
     </div>
