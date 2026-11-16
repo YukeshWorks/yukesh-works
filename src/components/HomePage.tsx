@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { Linkedin, Instagram, Mail, MessageCircle, Sparkles, Triangle, Circle } from "lucide-react";
 import offlineCloud from "@/assets/offline-cloud.gif";
 import PortfolioModal from "./PortfolioModal";
@@ -115,6 +116,7 @@ const HomePage = () => {
             >
               Telegram
             </a>
+            <Link to="/services" className="px-5 py-2.5 rounded-2xl glass text-xs font-heading uppercase tracking-[0.2em] text-primary hover:bg-primary/10 hover:scale-105 transition-all duration-200 border-2 border-primary/50 inline-flex items-center justify-center">Digital Services</Link>
           </div>
 
           <div
