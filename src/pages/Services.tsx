@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, FileText, Image as ImageIcon, Mail, MessageCircle, QrCode, Smartphone, Sparkles } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
 
-const whatsappUrl = "https://wa.me/919080861733?text=Hi%20YukeshWorks%2C%20I%20want%20to%20enquire%20about%20your%20digital%20services.";
+const whatsappUrl = "https://wa.me/918189936361?text=Hi%20YukeshWorks%2C%20I%20want%20to%20enquire%20about%20your%20digital%20services.";
 
 const sampleAssets = {
   resume: `${import.meta.env.BASE_URL}samples/resume-demo.html`,

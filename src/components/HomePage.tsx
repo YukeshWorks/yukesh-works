@@ -132,7 +132,7 @@ const HomePage = () => {
               <a aria-label="LinkedIn" href="https://www.linkedin.com/in/yukesh-kumar-a01647322" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><Linkedin className="w-4 h-4" /></a>
               <a aria-label="Instagram" href="https://instagram.com/yuk3shh" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><Instagram className="w-4 h-4" /></a>
               <a aria-label="Email" href="mailto:mailtoyukesh33@gmail.com" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><Mail className="w-4 h-4" /></a>
-              <a aria-label="WhatsApp" href="https://wa.me/919080861733" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><MessageCircle className="w-4 h-4" /></a>
+              <a aria-label="WhatsApp" href="https://wa.me/918189936361" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><MessageCircle className="w-4 h-4" /></a>
             </div>
           </div>
         </div>
