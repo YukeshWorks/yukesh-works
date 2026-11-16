@@ -36,7 +36,7 @@ const Services = () => (
           <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Simple starting prices</div>
           <div className="mt-5 space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">Resume formatting</span><b className="text-xl text-emerald-200">₹149</b></div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">Social media poster</span><b className="text-xl text-emerald-200">₹199</b></div>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">Social media poster</span><b className="text-xl text-emerald-200">₹149</b></div>
             <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">QR digital menu</span><b className="text-xl text-emerald-200">₹299</b></div>
             <div className="flex items-center justify-between"><span className="text-sm text-slate-200">One-page website</span><b className="text-xl text-emerald-200">From ₹799</b></div>
           </div>
