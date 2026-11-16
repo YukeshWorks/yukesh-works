@@ -35,10 +35,10 @@ const Services = () => (
         <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/30">
           <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Simple starting prices</div>
           <div className="mt-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">Resume formatting</span><b className="text-xl text-emerald-200">₹199</b></div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">Social media poster</span><b className="text-xl text-emerald-200">₹199</b></div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">QR digital menu</span><b className="text-xl text-emerald-200">₹399</b></div>
-            <div className="flex items-center justify-between"><span className="text-sm text-slate-200">One-page website</span><b className="text-xl text-emerald-200">From ₹999</b></div>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">Resume formatting</span><b className="text-xl text-emerald-200">₹149</b></div>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">Social media poster</span><b className="text-xl text-emerald-200">₹149</b></div>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4"><span className="text-sm text-slate-200">QR digital menu</span><b className="text-xl text-emerald-200">₹299</b></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-slate-200">One-page website</span><b className="text-xl text-emerald-200">From ₹799</b></div>
           </div>
           <p className="mt-5 text-xs leading-6 text-slate-500">Final price depends on agreed content, deadline and scope. Domain registration, paid hosting, stock assets and extra revisions are quoted separately.</p>
         </div>
