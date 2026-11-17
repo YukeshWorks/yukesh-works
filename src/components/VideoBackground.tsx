@@ -38,10 +38,12 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
       <div className="absolute inset-0 overflow-hidden">
         <img
           src={poster}
+          decoding="async"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: 'brightness(0.65)', transform: 'translateZ(0)' }}
+          style={{ transform: 'translateZ(0)' }}
         />
+        <div className="absolute inset-0 bg-black/35" />
         <div className="absolute inset-0" style={{
           background: isMobile
             ? 'linear-gradient(to bottom, hsl(var(--background) / 0.6), hsl(var(--background) / 0.4), hsl(var(--background) / 0.7))'
@@ -62,15 +64,15 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
           src={mobileSrc}
           poster={poster}
           autoPlay
+          preload="auto"
           loop
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
           style={{
-            filter: 'brightness(0.65)',
             transform: 'translateZ(0)',
             opacity: ready ? 1 : 0,
-            transition: 'opacity 0.8s ease-out',
+            transition: 'opacity 0.5s ease-out',
           }}
           onCanPlay={handleReady}
           onError={handleReady}
@@ -81,12 +83,12 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
           src={desktopSrc}
           poster={poster}
           autoPlay
+          preload="auto"
           loop
           muted
           playsInline
           className="absolute"
           style={{
-            filter: 'brightness(0.65)',
             transform: 'rotate(-90deg) translateZ(0)',
             transformOrigin: 'center center',
             width: '100vh',
@@ -97,13 +99,14 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
             marginLeft: 'calc(-50vh)',
             objectFit: 'cover',
             opacity: ready ? 1 : 0,
-            transition: 'opacity 0.8s ease-out',
+            transition: 'opacity 0.5s ease-out',
           }}
           onCanPlay={handleReady}
           onError={handleReady}
         />
       )}
 
+      <div className="absolute inset-0 bg-black/35" />
       <div className="absolute inset-0" style={{
         background: isMobile
           ? 'linear-gradient(to bottom, hsl(var(--background) / 0.6), hsl(var(--background) / 0.4), hsl(var(--background) / 0.7))'

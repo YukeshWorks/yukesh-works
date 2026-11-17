@@ -6,6 +6,9 @@ import loadingSpy from "@/assets/loading-spy.gif";
 import navLogo from "@/assets/nav-logo.gif";
 import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
+import desktopBgVideoHi from "@/assets/desktop-bg-video-hi.mp4";
+import mobileBgVideoHi from "@/assets/mobile-bg-video-hi.mp4";
+import { useNetworkSpeed } from "@/hooks/useNetworkSpeed";
 
 interface LoadingScreenProps {
   onLoadComplete: () => void;
@@ -15,15 +18,19 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const { isFast, isSlow } = useNetworkSpeed();
 
   useEffect(() => {
     let cancelled = false;
     let loaded = 0;
-    let completionTimer: ReturnType<typeof setTimeout> | undefined;
+    let completionTimer: number | undefined;
 
     const isMobile = window.innerWidth < 768;
     const priorityBg = isMobile ? mobileBg : homeBg;
-    const priorityVideo = isMobile ? mobileBgVideo : desktopBgVideo;
+    // Must match the source VideoBackground picks, or the warm-up is wasted.
+    const priorityVideo = isSlow ? null : isMobile
+      ? (isFast ? mobileBgVideoHi : mobileBgVideo)
+      : (isFast ? desktopBgVideoHi : desktopBgVideo);
     const imageSources = [priorityBg, profileImg, navLogo];
     const total = imageSources.length + 2;
 
@@ -49,13 +56,11 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
         window.clearTimeout(timeout);
         video.onloadedmetadata = null;
         video.onerror = null;
-        video.removeAttribute("src");
-        video.load();
         tick();
         resolve();
       };
-      const timeout = window.setTimeout(done, 2500);
-      video.preload = "metadata";
+      const timeout = window.setTimeout(done, 1200);
+      video.preload = "auto";
       video.muted = true;
       video.onloadedmetadata = done;
       video.onerror = done;
@@ -66,7 +71,7 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
     const run = async () => {
       await Promise.all([
         ...imageSources.map(loadImage),
-        loadVideoMetadata(priorityVideo),
+        priorityVideo ? loadVideoMetadata(priorityVideo) : Promise.resolve(tick()),
         Promise.resolve(document.fonts?.ready).then(() => tick()).catch(() => tick()),
       ]);
       if (cancelled) return;
@@ -82,6 +87,7 @@ const LoadingScreen = ({ onLoadComplete }: LoadingScreenProps) => {
       cancelled = true;
       if (completionTimer) window.clearTimeout(completionTimer);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onLoadComplete]);
 
   return (

@@ -1,15 +1,20 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import HomePage from "@/components/HomePage";
-import VaultPage from "@/components/VaultPage";
-import InfoSection from "@/components/InfoSection";
-import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import OfflinePage from "@/components/OfflinePage";
-import WelcomePage from "@/components/WelcomePage";
 import ParticleBackground from "@/components/ParticleBackground";
 import CursorLight from "@/components/CursorLight";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
+
+const loadVault = () => import("@/components/VaultPage");
+const loadInfo = () => import("@/components/InfoSection");
+const loadLock = () => import("@/components/PasswordLockPage");
+const loadWelcome = () => import("@/components/WelcomePage");
+const VaultPage = lazy(loadVault);
+const InfoSection = lazy(loadInfo);
+const PasswordLockPage = lazy(loadLock);
+const WelcomePage = lazy(loadWelcome);
 
 const getAudioContext = (): AudioContext | null => {
   const AudioContextClass = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -22,7 +27,6 @@ const Index = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<"next" | "prev">("next");
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isIdle, setIsIdle] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showOfflinePage, setShowOfflinePage] = useState(!navigator.onLine);
   const [showPasswordLock, setShowPasswordLock] = useState(false);
@@ -138,7 +142,14 @@ const Index = () => {
     }
   }, [activeTab]);
 
-  const idleTimerRef = useRef<NodeJS.Timeout>();
+  // Prefetch the other tabs once the home page is idle so switching is instant.
+  useEffect(() => {
+    if (isLoading) return;
+    const prefetch = () => { void loadVault(); void loadInfo(); void loadLock(); void loadWelcome(); };
+    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
+    if (w.requestIdleCallback) w.requestIdleCallback(prefetch);
+    else setTimeout(prefetch, 1500);
+  }, [isLoading]);
 
   // Online/offline detection
   useEffect(() => {
@@ -151,25 +162,9 @@ const Index = () => {
 
   const tabOrder = ["home", "puzzle", "info"] as const;
 
-  const resetIdleTimer = () => {
-    setIsIdle(false);
-    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    idleTimerRef.current = setTimeout(() => setIsIdle(true), 3000);
-  };
-
-  useEffect(() => {
-    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
-    events.forEach(event => window.addEventListener(event, resetIdleTimer));
-    resetIdleTimer();
-    return () => {
-      events.forEach(event => window.removeEventListener(event, resetIdleTimer));
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    };
-  }, []);
-
   const handleLoadComplete = () => {
     setIsLoading(false);
-    setTimeout(() => setIsLoaded(true), 50);
+    requestAnimationFrame(() => setIsLoaded(true));
   };
 
   const handleTabChange = (tab: "home" | "puzzle" | "info") => {
@@ -180,13 +175,13 @@ const Index = () => {
     setShowPasswordLock(false);
     setShowWelcomePage(false);
     setIsTransitioning(true);
-    setTimeout(() => { setActiveTab(tab); setTimeout(() => setIsTransitioning(false), 50); }, 200);
+    setTimeout(() => { setActiveTab(tab); setTimeout(() => setIsTransitioning(false), 50); }, 120);
   };
 
   const handleLockClick = () => {
     setTransitionDirection("next");
     setIsTransitioning(true);
-    setTimeout(() => { setShowPasswordLock(true); setTimeout(() => setIsTransitioning(false), 50); }, 200);
+    setTimeout(() => { setShowPasswordLock(true); setTimeout(() => setIsTransitioning(false), 50); }, 120);
   };
 
   const handlePasswordUnlock = () => {
@@ -196,19 +191,19 @@ const Index = () => {
       setShowPasswordLock(false);
       setShowWelcomePage(true);
       setTimeout(() => setIsTransitioning(false), 50);
-    }, 200);
+    }, 120);
   };
 
   const handlePasswordBack = () => {
     setTransitionDirection("prev");
     setIsTransitioning(true);
-    setTimeout(() => { setShowPasswordLock(false); setTimeout(() => setIsTransitioning(false), 50); }, 200);
+    setTimeout(() => { setShowPasswordLock(false); setTimeout(() => setIsTransitioning(false), 50); }, 120);
   };
 
   const handleWelcomeBack = () => {
     setTransitionDirection("prev");
     setIsTransitioning(true);
-    setTimeout(() => { setShowWelcomePage(false); setTimeout(() => setIsTransitioning(false), 50); }, 200);
+    setTimeout(() => { setShowWelcomePage(false); setTimeout(() => setIsTransitioning(false), 50); }, 120);
   };
 
   const renderPage = () => {
@@ -237,13 +232,15 @@ const Index = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
+    <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
       <ParticleBackground />
       <CursorLight />
       <Navbar activeTab={activeTab} onTabChange={handleTabChange} onLockClick={handleLockClick} on42Click={handle42Click} />
       <div className="page-container" style={{ perspective: '1500px' }}>
         <div className={getTransitionClasses()}>
-          {renderPage()}
+          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            {renderPage()}
+          </Suspense>
         </div>
       </div>
 

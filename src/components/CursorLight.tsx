@@ -10,20 +10,25 @@ const CursorLight = () => {
     // Only on non-touch devices
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
-    const onMove = (e: MouseEvent) => {
-      target.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener("mousemove", onMove);
-
+    let running = false;
     const animate = () => {
-      pos.current.x += (target.current.x - pos.current.x) * 0.15;
-      pos.current.y += (target.current.y - pos.current.y) * 0.15;
+      const dx = target.current.x - pos.current.x;
+      const dy = target.current.y - pos.current.y;
+      pos.current.x += dx * 0.18;
+      pos.current.y += dy * 0.18;
       if (lightRef.current) {
-        lightRef.current.style.transform = `translate(${pos.current.x - 150}px, ${pos.current.y - 150}px)`;
+        lightRef.current.style.transform = `translate3d(${pos.current.x - 150}px, ${pos.current.y - 150}px, 0)`;
       }
+      // Sleep once the light has caught up with the cursor.
+      if (Math.abs(dx) < 0.3 && Math.abs(dy) < 0.3) { running = false; return; }
       raf.current = requestAnimationFrame(animate);
     };
-    animate();
+
+    const onMove = (e: MouseEvent) => {
+      target.current = { x: e.clientX, y: e.clientY };
+      if (!running) { running = true; raf.current = requestAnimationFrame(animate); }
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
 
     return () => {
       cancelAnimationFrame(raf.current);

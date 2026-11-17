@@ -15,8 +15,10 @@ const HomePage = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [contentVisible, setContentVisible] = useState(false);
 
-  const handleBgLoaded = useCallback(() => {
-    requestAnimationFrame(() => setContentVisible(true));
+  // Reveal text right away; the video fades in on its own when ready.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setContentVisible(true));
+    return () => cancelAnimationFrame(id);
   }, []);
 
   useEffect(() => {
@@ -50,7 +52,7 @@ const HomePage = () => {
 
   return (
     <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
-      <VideoBackground beatIntensity={beatIntensity} onLoaded={handleBgLoaded} />
+      <VideoBackground beatIntensity={beatIntensity} />
       <AudioController onBeat={handleBeat} />
 
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -62,8 +64,8 @@ const HomePage = () => {
       <div className="container mx-auto px-6 relative z-10 pt-16">
         <div className="max-w-lg">
           <div
-            className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-2xl glass text-[10px] font-heading tracking-[0.2em] uppercase border-2 border-foreground/20 transition-all duration-500 ease-out"
-            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-30px)", transitionDelay: "200ms" }}
+            className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-2xl glass text-[10px] font-heading tracking-[0.2em] uppercase border-2 border-foreground/20 transition-[opacity,transform] duration-300 ease-out"
+            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-30px)", transitionDelay: "40ms" }}
           >
             {!isOnline ? (
               <><img src={offlineCloud} alt="Offline" className="w-5 h-5" /><span className="text-muted-foreground">Offline</span></>
@@ -73,8 +75,8 @@ const HomePage = () => {
           </div>
 
           <h1
-            className="text-3xl md:text-5xl lg:text-6xl mb-3 tracking-tight transition-all duration-600 ease-out"
-            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateY(0)" : "translateY(20px)", transitionDelay: "350ms" }}
+            className="text-3xl md:text-5xl lg:text-6xl mb-3 tracking-tight transition-[opacity,transform] duration-300 ease-out"
+            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateY(0)" : "translateY(20px)", transitionDelay: "90ms" }}
           >
             <span className="text-foreground/90 font-heading text-2xl md:text-3xl lg:text-4xl tracking-[0.15em] uppercase" style={{ textShadow: "2px 2px 0px hsl(var(--primary) / 0.3)" }}>Hi, I'm</span>
             <br />
@@ -82,15 +84,15 @@ const HomePage = () => {
           </h1>
 
           <p
-            className="text-muted-foreground text-base md:text-lg mt-4 max-w-sm leading-relaxed font-medium transition-all duration-500 ease-out font-mono"
-            style={{ textShadow: "1px 1px 0px rgba(0,0,0,0.1)", opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-20px)", transitionDelay: "500ms", letterSpacing: "0.05em" }}
+            className="text-muted-foreground text-base md:text-lg mt-4 max-w-sm leading-relaxed font-medium transition-[opacity,transform] duration-300 ease-out font-mono"
+            style={{ textShadow: "1px 1px 0px rgba(0,0,0,0.1)", opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-20px)", transitionDelay: "140ms", letterSpacing: "0.05em" }}
           >
             Lost in thoughts, found in creativity.
           </p>
 
           <div
-            className="flex flex-wrap gap-3 mt-6 transition-all duration-500 ease-out"
-            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(30px)", transitionDelay: "650ms" }}
+            className="flex flex-wrap gap-3 mt-6 transition-[opacity,transform] duration-300 ease-out"
+            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(30px)", transitionDelay: "190ms" }}
           >
             <button
               type="button"
@@ -123,8 +125,8 @@ const HomePage = () => {
           </div>
 
           <div
-            className="flex items-center gap-3 mt-8 text-muted-foreground transition-all duration-500 ease-out"
-            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-25px)", transitionDelay: "800ms" }}
+            className="flex items-center gap-3 mt-8 text-muted-foreground transition-[opacity,transform] duration-300 ease-out"
+            style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-25px)", transitionDelay: "240ms" }}
           >
             <span className="text-[10px] font-heading tracking-[0.3em] uppercase opacity-70">Connect</span>
             <div className="w-8 h-0.5 bg-foreground/30 rounded-full" />
