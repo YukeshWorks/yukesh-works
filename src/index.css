@@ -427,3 +427,30 @@
     padding: 5px 9px;
   }
 }
+
+/* ---------------------------------------------------------------
+   Accessibility baseline (claude-pro-workflow)
+   - One visible, on-brand focus ring for keyboard users everywhere.
+   - Global reduced-motion rule. The same rule existed in App.css,
+     but App.css is not imported anywhere, so it never applied.
+---------------------------------------------------------------- */
+@layer base {
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+  .services-page :focus-visible {
+    outline-color: #6ee7b7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

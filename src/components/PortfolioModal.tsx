@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, ExternalLink, Github, Folder, FlaskConical, LockKeyhole } from "lucide-react";
+import { useDialog } from "@/hooks/useDialog";
 
 interface PortfolioModalProps {
   isOpen: boolean;
@@ -34,21 +35,22 @@ const projects = [
 
 const PortfolioModal = ({ isOpen, onClose }: PortfolioModalProps) => {
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
+  const dialogRef = useDialog(isOpen, onClose);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-fade-in" />
-      <div className="relative w-full max-w-2xl max-h-[80vh] overflow-auto glass rounded-2xl p-6 animate-scale-in" onClick={(e) => e.stopPropagation()}>
-        <button aria-label="Close projects" onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-all duration-200">
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-fade-in" aria-hidden="true" />
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="portfolio-title" className="relative w-full max-w-2xl max-h-[80vh] overflow-auto glass rounded-2xl p-6 animate-scale-in" onClick={(e) => e.stopPropagation()}>
+        <button type="button" aria-label="Close projects" onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-all duration-200">
           <X className="w-4 h-4" />
         </button>
 
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Folder className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-bold gradient-text">My Work</h2>
+            <h2 id="portfolio-title" className="text-xl font-bold gradient-text">My Work</h2>
           </div>
           <p className="text-xs text-muted-foreground">Selected software and biotechnology projects</p>
         </div>
@@ -75,8 +77,8 @@ const PortfolioModal = ({ isOpen, onClose }: PortfolioModalProps) => {
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  {project.github && <a aria-label={`GitHub source for ${project.title}`} href={project.github} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-all duration-200"><Github className="w-3.5 h-3.5" /></a>}
-                  {project.link && <a aria-label={`Open ${project.title}`} href={project.link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-all duration-200"><ExternalLink className="w-3.5 h-3.5" /></a>}
+                  {project.github && <a aria-label={`GitHub source for ${project.title}`} href={project.github} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-all duration-200"><Github className="w-3.5 h-3.5" /></a>}
+                  {project.link && <a aria-label={`Open ${project.title}`} href={project.link} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-all duration-200"><ExternalLink className="w-3.5 h-3.5" /></a>}
                 </div>
               </div>
             </article>
