@@ -10,6 +10,7 @@ import WelcomePage from "@/components/WelcomePage";
 import ParticleBackground from "@/components/ParticleBackground";
 import CursorLight from "@/components/CursorLight";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
+import { usePrefersReducedMotion } from "@/hooks/use-reduced-motion";
 
 const getAudioContext = (): AudioContext | null => {
   const AudioContextClass = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -32,6 +33,7 @@ const Index = () => {
   const tapped42Ref = useRef(false);
   const prevThemeRef = useRef<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const playWarningSound = useCallback(() => {
     try {
@@ -237,9 +239,10 @@ const Index = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
-      <ParticleBackground />
-      <CursorLight />
+    <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle && !prefersReducedMotion ? 'idle-breathing' : ''}`}>
+      {/* Decorative motion layers are skipped when the OS asks for reduced motion. */}
+      {!prefersReducedMotion && <ParticleBackground />}
+      {!prefersReducedMotion && <CursorLight />}
       <Navbar activeTab={activeTab} onTabChange={handleTabChange} onLockClick={handleLockClick} on42Click={handle42Click} />
       <div className="page-container" style={{ perspective: '1500px' }}>
         <div className={getTransitionClasses()}>

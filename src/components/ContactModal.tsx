@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, Mail, Send } from "lucide-react";
+import { useDialog } from "@/hooks/useDialog";
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ContactModalProps {
 const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<"idle" | "opening">("idle");
+  const dialogRef = useDialog(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -22,18 +24,18 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-fade-in" />
-      <div className="relative w-full max-w-md glass rounded-2xl p-6 animate-scale-in" onClick={(e) => e.stopPropagation()}>
-        <button aria-label="Close contact form" onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-all duration-200">
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-fade-in" aria-hidden="true" />
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="contact-title" aria-describedby="contact-desc" className="relative w-full max-w-md max-h-[90vh] overflow-auto glass rounded-2xl p-6 animate-scale-in" onClick={(e) => e.stopPropagation()}>
+        <button type="button" aria-label="Close contact form" onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-all duration-200">
           <X className="w-4 h-4" />
         </button>
 
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Mail className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-bold gradient-text">Get in Touch</h2>
+            <h2 id="contact-title" className="text-xl font-bold gradient-text">Get in Touch</h2>
           </div>
-          <p className="text-xs text-muted-foreground">Prepare an email message to send directly to me.</p>
+          <p id="contact-desc" className="text-xs text-muted-foreground">Prepare an email message to send directly to me.</p>
         </div>
 
         {status === "opening" ? (
@@ -47,17 +49,17 @@ const ContactModal = ({ isOpen, onClose }: ContactModalProps) => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="contact-name" className="text-xs font-medium text-muted-foreground mb-1.5 block">Name</label>
-              <input id="contact-name" type="text" required maxLength={120} value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full px-4 py-2.5 rounded-lg glass bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200" placeholder="Your name" />
+              <input id="contact-name" data-autofocus type="text" autoComplete="name" required maxLength={120} value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full px-4 py-2.5 rounded-lg glass bg-background/50 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:ring-2 focus:ring-primary/70 transition-all duration-200" placeholder="Your name" />
             </div>
             <div>
               <label htmlFor="contact-email" className="text-xs font-medium text-muted-foreground mb-1.5 block">Email</label>
-              <input id="contact-email" type="email" required maxLength={254} value={formData.email} onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full px-4 py-2.5 rounded-lg glass bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200" placeholder="your@email.com" />
+              <input id="contact-email" type="email" autoComplete="email" required maxLength={254} value={formData.email} onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full px-4 py-2.5 rounded-lg glass bg-background/50 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:ring-2 focus:ring-primary/70 transition-all duration-200" placeholder="your@email.com" />
             </div>
             <div>
               <label htmlFor="contact-message" className="text-xs font-medium text-muted-foreground mb-1.5 block">Message</label>
-              <textarea id="contact-message" required minLength={5} maxLength={5000} rows={4} value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} className="w-full px-4 py-2.5 rounded-lg glass bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-200 resize-none" placeholder="What would you like to say?" />
+              <textarea id="contact-message" required minLength={5} maxLength={5000} rows={4} value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} className="w-full px-4 py-2.5 rounded-lg glass bg-background/50 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:ring-2 focus:ring-primary/70 transition-all duration-200 resize-none" placeholder="What would you like to say?" />
             </div>
-            <button type="submit" className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-200">
+            <button type="submit" className="w-full min-h-[44px] py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all duration-200">
               <Send className="w-4 h-4" /> Open email app
             </button>
           </form>
