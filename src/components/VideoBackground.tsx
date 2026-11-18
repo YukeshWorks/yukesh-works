@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import desktopBgVideo from "@/assets/desktop-bg-video.mp4";
 import mobileBgVideo from "@/assets/mobile-bg-video.mp4";
 import desktopBgVideoHi from "@/assets/desktop-bg-video-hi.mp4";
@@ -16,6 +16,7 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
   const [isMobile] = useState(() => window.innerWidth < 768);
   const [ready, setReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const readyRef = useRef(false);
   const { isSlow, isFast } = useNetworkSpeed();
 
   const poster = isMobile ? mobileBg : homeBg;
@@ -24,24 +25,41 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
   const desktopSrc = isFast ? desktopBgVideoHi : desktopBgVideo;
 
   const handleReady = () => {
+    if (readyRef.current) return;
+    readyRef.current = true;
     setReady(true);
     onLoaded?.();
   };
 
+  // Slow networks get the poster only, so reveal content straight away.
+  useEffect(() => {
+    if (isSlow) handleReady();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSlow]);
+
+  // Pause decoding while the tab is hidden; resume when visible.
+  useEffect(() => {
+    const onVis = () => {
+      const v = videoRef.current;
+      if (!v) return;
+      if (document.hidden) v.pause();
+      else void v.play().catch(() => {});
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
   // On very slow networks: show poster image only — no video download
   if (isSlow) {
-    // Trigger ready immediately so content fades in
-    if (!ready) {
-      requestAnimationFrame(handleReady);
-    }
     return (
       <div className="absolute inset-0 overflow-hidden">
         <img
           src={poster}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: 'brightness(0.65)', transform: 'translateZ(0)' }}
+          style={{ transform: 'translateZ(0)' }}
         />
+      <div className="absolute inset-0 bg-black/35 pointer-events-none" />
         <div className="absolute inset-0" style={{
           background: isMobile
             ? 'linear-gradient(to bottom, hsl(var(--background) / 0.6), hsl(var(--background) / 0.4), hsl(var(--background) / 0.7))'
@@ -67,12 +85,11 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
           style={{
-            filter: 'brightness(0.65)',
             transform: 'translateZ(0)',
             opacity: ready ? 1 : 0,
             transition: 'opacity 0.8s ease-out',
           }}
-          onCanPlay={handleReady}
+          onLoadedData={handleReady}
           onError={handleReady}
         />
       ) : (
@@ -86,7 +103,6 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
           playsInline
           className="absolute"
           style={{
-            filter: 'brightness(0.65)',
             transform: 'rotate(-90deg) translateZ(0)',
             transformOrigin: 'center center',
             width: '100vh',
@@ -99,11 +115,12 @@ const VideoBackground = ({ beatIntensity = 0, onLoaded }: VideoBackgroundProps) 
             opacity: ready ? 1 : 0,
             transition: 'opacity 0.8s ease-out',
           }}
-          onCanPlay={handleReady}
+          onLoadedData={handleReady}
           onError={handleReady}
         />
       )}
 
+      <div className="absolute inset-0 bg-black/35 pointer-events-none" />
       <div className="absolute inset-0" style={{
         background: isMobile
           ? 'linear-gradient(to bottom, hsl(var(--background) / 0.6), hsl(var(--background) / 0.4), hsl(var(--background) / 0.7))'

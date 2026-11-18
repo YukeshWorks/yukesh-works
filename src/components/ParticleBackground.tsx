@@ -28,8 +28,15 @@ const ParticleBackground = () => {
 
     let w = 0, h = 0;
     const resize = () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
+      // Sharp on retina, capped at 2x to keep fill cost low.
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       init(w, h);
     };
     resize();
@@ -44,17 +51,26 @@ const ParticleBackground = () => {
     const parts = primary.split(" ").map(v => parseFloat(v));
     if (parts.length === 3) { hslRef.current = { h: parts[0], s: parts[1], l: parts[2] }; }
 
-    const draw = () => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let last = 0;
+
+    const draw = (t = 0) => {
+      // Scale movement by elapsed time so 60/90/120/144Hz screens all drift at the same speed.
+      const step = last ? Math.min((t - last) / 16.67, 3) : 1;
+      last = t;
       ctx.clearRect(0, 0, w, h);
       const { h: ch, s: cs, l: cl } = hslRef.current;
+      ctx.fillStyle = `hsl(${ch}, ${cs}%, ${cl}%)`;
       const particles = particlesRef.current;
       const mx = mouseRef.current.x;
       const my = mouseRef.current.y;
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
+        if (!reduceMotion) {
+          p.x += p.vx * step;
+          p.y += p.vy * step;
+        }
         if (p.x < 0) p.x = w; else if (p.x > w) p.x = 0;
         if (p.y < 0) p.y = h; else if (p.y > h) p.y = 0;
 
@@ -63,7 +79,6 @@ const ParticleBackground = () => {
         const glow = distSq < 22500 ? (1 - Math.sqrt(distSq) / 150) * 0.3 : 0;
 
         ctx.globalAlpha = p.opacity + glow;
-        ctx.fillStyle = `hsl(${ch}, ${cs}%, ${cl}%)`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, 6.283);
         ctx.fill();
@@ -71,7 +86,7 @@ const ParticleBackground = () => {
       ctx.globalAlpha = 1;
       rafRef.current = requestAnimationFrame(draw);
     };
-    draw();
+    rafRef.current = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(rafRef.current);

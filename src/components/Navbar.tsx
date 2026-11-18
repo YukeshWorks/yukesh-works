@@ -20,13 +20,14 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
   const [pressedTab, setPressedTab] = useState<string | null>(null);
   const [morphX, setMorphX] = useState(0);
   const [morphW, setMorphW] = useState(0);
-  const [sparks, setSparks] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [sparks, setSparks] = useState<{ id: number; x: number; y: number; dx: number; dy: number }[]>([]);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const sparkId = useRef(0);
 
   useEffect(() => {
-    setTimeout(() => setEntered(true), 150);
+    const t = setTimeout(() => setEntered(true), 150);
+    return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {
@@ -43,11 +44,17 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
     const rect = el.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-    const newSparks = Array.from({ length: 6 }, (_, i) => ({
-      id: ++sparkId.current,
-      x: cx,
-      y: cy,
-    }));
+    const newSparks = Array.from({ length: 6 }, (_, i) => {
+      const rad = ((i * 60 + Math.random() * 30) * Math.PI) / 180;
+      const dist = 20 + Math.random() * 25;
+      return {
+        id: ++sparkId.current,
+        x: cx,
+        y: cy,
+        dx: Math.cos(rad) * dist,
+        dy: Math.sin(rad) * dist - 15,
+      };
+    });
     setSparks(prev => [...prev, ...newSparks]);
     setTimeout(() => {
       setSparks(prev => prev.filter(s => !newSparks.find(ns => ns.id === s.id)));
@@ -71,10 +78,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
     <>
       {/* Spark particles (portal to body level) */}
       <div className="fixed inset-0 pointer-events-none z-[60]">
-        {sparks.map((s, i) => {
-          const angle = (i % 6) * 60 + Math.random() * 30;
-          const dist = 20 + Math.random() * 25;
-          const rad = (angle * Math.PI) / 180;
+        {sparks.map((s) => {
           return (
             <div
               key={s.id}
@@ -85,8 +89,8 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
                 background: "hsl(var(--primary))",
                 boxShadow: `0 0 6px hsl(var(--primary) / 0.8), 0 0 12px hsl(var(--primary) / 0.4)`,
                 animation: "navSparkFly 0.6s ease-out forwards",
-                "--spark-dx": `${Math.cos(rad) * dist}px`,
-                "--spark-dy": `${Math.sin(rad) * dist - 15}px`,
+                "--spark-dx": `${s.dx}px`,
+                "--spark-dy": `${s.dy}px`,
               } as React.CSSProperties}
             />
           );
@@ -98,7 +102,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
         style={{
           opacity: entered ? 1 : 0,
           transform: entered ? "translateY(0) scale(1)" : "translateY(-30px) scale(0.95)",
-          transition: "all 1s cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: "opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         <div
@@ -218,7 +222,6 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
             className="absolute -inset-px rounded-full pointer-events-none"
             style={{
               background: "conic-gradient(from 180deg, transparent, hsl(var(--primary) / 0.06), transparent 40%)",
-              animation: "navAmbientRotate 8s linear infinite",
               mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
               maskComposite: "exclude",
               WebkitMaskComposite: "xor",
@@ -243,15 +246,6 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
         @keyframes navRingPulse {
           0%, 100% { transform: scale(1); opacity: 0.4; }
           50% { transform: scale(1.5); opacity: 0; }
-        }
-        @keyframes navAmbientRotate {
-          from { --nav-conic: 0deg; }
-          to { --nav-conic: 360deg; }
-        }
-        @property --nav-conic {
-          syntax: "<angle>";
-          inherits: false;
-          initial-value: 0deg;
         }
       `}</style>
     </>

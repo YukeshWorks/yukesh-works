@@ -10,20 +10,37 @@ const CursorLight = () => {
     // Only on non-touch devices
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
-    const onMove = (e: MouseEvent) => {
-      target.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener("mousemove", onMove);
+    let running = false;
 
-    const animate = () => {
-      pos.current.x += (target.current.x - pos.current.x) * 0.15;
-      pos.current.y += (target.current.y - pos.current.y) * 0.15;
+    // Frame-rate independent easing; the loop sleeps once the light catches up.
+    let last = 0;
+    const animate = (t: number) => {
+      const dt = last ? Math.min(t - last, 64) : 16;
+      last = t;
+      const k = 1 - Math.pow(0.85, dt / 16.67);
+      const dx = target.current.x - pos.current.x;
+      const dy = target.current.y - pos.current.y;
+      pos.current.x += dx * k;
+      pos.current.y += dy * k;
       if (lightRef.current) {
-        lightRef.current.style.transform = `translate(${pos.current.x - 150}px, ${pos.current.y - 150}px)`;
+        lightRef.current.style.transform = `translate3d(${pos.current.x - 150}px, ${pos.current.y - 150}px, 0)`;
+      }
+      if (Math.abs(dx) < 0.3 && Math.abs(dy) < 0.3) {
+        running = false;
+        last = 0;
+        return;
       }
       raf.current = requestAnimationFrame(animate);
     };
-    animate();
+
+    const onMove = (e: MouseEvent) => {
+      target.current = { x: e.clientX, y: e.clientY };
+      if (!running) {
+        running = true;
+        raf.current = requestAnimationFrame(animate);
+      }
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
 
     return () => {
       cancelAnimationFrame(raf.current);

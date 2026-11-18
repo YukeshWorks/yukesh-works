@@ -1,15 +1,24 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import HomePage from "@/components/HomePage";
-import VaultPage from "@/components/VaultPage";
-import InfoSection from "@/components/InfoSection";
-import PasswordLockPage from "@/components/PasswordLockPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import OfflinePage from "@/components/OfflinePage";
-import WelcomePage from "@/components/WelcomePage";
 import ParticleBackground from "@/components/ParticleBackground";
 import CursorLight from "@/components/CursorLight";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
+
+const VaultPage = lazy(() => import("@/components/VaultPage"));
+const InfoSection = lazy(() => import("@/components/InfoSection"));
+const PasswordLockPage = lazy(() => import("@/components/PasswordLockPage"));
+const WelcomePage = lazy(() => import("@/components/WelcomePage"));
+
+// Warm the lazy chunks once the home screen is idle so tab switches stay instant.
+const prefetchPages = () => {
+  void import("@/components/VaultPage");
+  void import("@/components/InfoSection");
+  void import("@/components/PasswordLockPage");
+  void import("@/components/WelcomePage");
+};
 
 const getAudioContext = (): AudioContext | null => {
   const AudioContextClass = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -22,7 +31,6 @@ const Index = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<"next" | "prev">("next");
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isIdle, setIsIdle] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showOfflinePage, setShowOfflinePage] = useState(!navigator.onLine);
   const [showPasswordLock, setShowPasswordLock] = useState(false);
@@ -138,8 +146,6 @@ const Index = () => {
     }
   }, [activeTab]);
 
-  const idleTimerRef = useRef<NodeJS.Timeout>();
-
   // Online/offline detection
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -151,26 +157,17 @@ const Index = () => {
 
   const tabOrder = ["home", "puzzle", "info"] as const;
 
-  const resetIdleTimer = () => {
-    setIsIdle(false);
-    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    idleTimerRef.current = setTimeout(() => setIsIdle(true), 3000);
-  };
-
   useEffect(() => {
-    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
-    events.forEach(event => window.addEventListener(event, resetIdleTimer));
-    resetIdleTimer();
-    return () => {
-      events.forEach(event => window.removeEventListener(event, resetIdleTimer));
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    };
-  }, []);
+    if (isLoading) return;
+    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
+    if (w.requestIdleCallback) w.requestIdleCallback(prefetchPages);
+    else window.setTimeout(prefetchPages, 1500);
+  }, [isLoading]);
 
-  const handleLoadComplete = () => {
+  const handleLoadComplete = useCallback(() => {
     setIsLoading(false);
-    setTimeout(() => setIsLoaded(true), 50);
-  };
+    requestAnimationFrame(() => requestAnimationFrame(() => setIsLoaded(true)));
+  }, []);
 
   const handleTabChange = (tab: "home" | "puzzle" | "info") => {
     if (tab === activeTab && !showPasswordLock && !showWelcomePage) return;
@@ -237,13 +234,15 @@ const Index = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isIdle ? 'idle-breathing' : ''}`}>
+    <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
       <ParticleBackground />
       <CursorLight />
       <Navbar activeTab={activeTab} onTabChange={handleTabChange} onLockClick={handleLockClick} on42Click={handle42Click} />
       <div className="page-container" style={{ perspective: '1500px' }}>
         <div className={getTransitionClasses()}>
-          {renderPage()}
+          <Suspense fallback={<div className="min-h-screen" />}>
+            {renderPage()}
+          </Suspense>
         </div>
       </div>
 

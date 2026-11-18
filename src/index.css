@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Urbanist:wght@300;400;500&family=Bebas+Neue&family=Fira+Code:wght@400;500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -107,7 +105,7 @@
 @layer components {
   .glass {
     @apply bg-card/40 backdrop-blur-xl border border-white/10;
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glow-text {
@@ -148,7 +146,7 @@
   /* Glow hover for glass elements */
   .glass-glow-hover {
     @apply relative;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .glass-glow-hover:hover {
     box-shadow: 0 0 24px hsl(var(--primary) / 0.15), 0 8px 32px hsl(var(--primary) / 0.08);
@@ -181,19 +179,19 @@
 
   .animate-shake { animation: shake 0.5s ease-in-out; }
 
-  .page-fade-enter { animation: pageFadeIn 0.4s ease-out forwards; }
-  .page-fade-exit { animation: pageFadeOut 0.2s ease-in forwards; }
-  .page-fade-enter, .page-fade-exit { will-change: opacity; }
+  .page-fade-enter { animation: pageFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .page-fade-exit { animation: pageFadeOut 0.2s cubic-bezier(0.4, 0, 1, 1) both; }
+  .page-fade-exit { will-change: opacity, transform; }
 }
 
 /* Keyframes */
 @keyframes pageEnter {
-  from { opacity: 0; transform: translateY(20px) scale(0.99); filter: blur(8px); }
-  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  from { opacity: 0; transform: translate3d(0, 16px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translate3d(0, 24px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 @keyframes timePulse {
   0%, 100% { opacity: 0.7; }
@@ -210,8 +208,8 @@
   60% { transform: translateX(-10px); }
   80% { transform: translateX(10px); }
 }
-@keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes pageFadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes pageFadeIn { from { opacity: 0; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: none; } }
+@keyframes pageFadeOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translate3d(0, -6px, 0); } }
 @keyframes breatheGlow {
   0%, 100% { box-shadow: 0 0 10px rgba(255,255,255,0.05); }
   50% { box-shadow: 0 0 25px rgba(255,255,255,0.12), 0 0 50px rgba(255,255,255,0.05); }
@@ -227,8 +225,8 @@
 /* Navbar */
 .navbar-entrance { animation: navbarSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 @keyframes navbarSlideIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.95); filter: blur(4px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); filter: blur(0); }
+  from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 .navbar-glow { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .navbar-glow:hover {
@@ -282,15 +280,20 @@
 @keyframes chibiRun { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 @keyframes armWave { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
 
-/* Idle breathing */
-.idle-breathing { animation: idleBreathe 4s ease-in-out infinite; }
-@keyframes idleBreathe {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.02); }
+/* Smooth theme transitions — scoped to themed surfaces instead of every node (incl. canvas/video/svg). */
+:where(div, section, nav, header, footer, main, aside, button, a, span, p, li, input, textarea) {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Smooth theme transitions */
-* { transition: background-color 0.3s ease, border-color 0.3s ease; }
+/* Respect users who prefer less motion. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 /* Hide cursor on desktop */
 @media (min-width: 768px) {
@@ -303,7 +306,8 @@
   position: relative;
   display: inline-flex;
   isolation: isolate;
-  margin-top: 8px;
+  /* The hero button row always wraps this CTA onto its own line; leave room for the bubble. */
+  margin-top: 46px;
 }
 .services-cta-link {
   position: relative;
@@ -418,9 +422,6 @@
 
 /* Keep the floating Services label clear of the row above on phones. */
 @media (max-width: 640px) {
-  .services-cta-wrap {
-    margin-top: 50px;
-  }
   .services-cta-bubble {
     font-size: 8px;
     letter-spacing: 0.1em;

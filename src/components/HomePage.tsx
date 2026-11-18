@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { Linkedin, Instagram, Mail, MessageCircle, Sparkles, Triangle, Circle } from "lucide-react";
 import offlineCloud from "@/assets/offline-cloud.gif";
@@ -7,8 +7,51 @@ import ContactModal from "./ContactModal";
 import VideoBackground from "./VideoBackground";
 import AudioController from "./AudioController";
 
+const formatTime = (date: Date) => date.toLocaleTimeString("en-US", {
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
+});
+
+const formatDate = (date: Date) => date.toLocaleDateString("en-US", {
+  month: "short", day: "2-digit",
+});
+
+// Isolated so the per-second tick only re-renders the clock, not the whole hero.
+const Clock = memo(() => {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    let timer: number;
+    const tick = () => {
+      setNow(new Date());
+      // Align to the next whole second so digits flip on time without drift.
+      timer = window.setTimeout(tick, 1000 - (Date.now() % 1000));
+    };
+    timer = window.setTimeout(tick, 1000 - (Date.now() % 1000));
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="absolute bottom-5 right-5 z-20">
+      <div className="flex flex-col items-end gap-0.5">
+        <div className="flex items-baseline gap-1 font-mono tabular-nums">
+          {formatTime(now).split("").map((char, i) => (
+            <span key={`${i}-${char}`} className="inline-block text-base md:text-lg text-foreground/60 tracking-[0.15em]" style={{ animation: char !== ":" && char !== " " ? "digitFlip 0.45s cubic-bezier(0.16, 1, 0.3, 1)" : "none" }}>{char}</span>
+          ))}
+        </div>
+        <span className="text-[10px] font-heading tracking-[0.3em] uppercase text-muted-foreground/30">{formatDate(now)}</span>
+      </div>
+      <style>{`
+        @keyframes digitFlip {
+          0% { transform: translateY(-40%); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+});
+Clock.displayName = "Clock";
+
 const HomePage = () => {
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [isPortfolioOpen, setIsPortfolioOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [beatIntensity, setBeatIntensity] = useState(0);
@@ -17,11 +60,6 @@ const HomePage = () => {
 
   const handleBgLoaded = useCallback(() => {
     requestAnimationFrame(() => setContentVisible(true));
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -39,14 +77,6 @@ const HomePage = () => {
     setBeatIntensity(intensity);
     window.setTimeout(() => setBeatIntensity(0), 150);
   }, []);
-
-  const formatTime = (date: Date) => date.toLocaleTimeString("en-US", {
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
-  });
-
-  const formatDate = (date: Date) => date.toLocaleDateString("en-US", {
-    month: "short", day: "2-digit",
-  });
 
   return (
     <section className="min-h-screen flex items-center relative overflow-hidden page-transition">
@@ -138,23 +168,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      <div className="absolute bottom-5 right-5 z-20">
-        <div className="flex flex-col items-end gap-0.5">
-          <div className="flex items-baseline gap-1 font-mono tabular-nums">
-            {formatTime(currentTime).split("").map((char, i) => (
-              <span key={`${i}-${char}`} className="inline-block text-base md:text-lg text-foreground/60 tracking-[0.15em]" style={{ animation: char !== ":" && char !== " " ? "digitFlip 0.5s cubic-bezier(0.16, 1, 0.3, 1)" : "none", display: "inline-block" }}>{char}</span>
-            ))}
-          </div>
-          <span className="text-[10px] font-heading tracking-[0.3em] uppercase text-muted-foreground/30">{formatDate(currentTime)}</span>
-        </div>
-        <style>{`
-          @keyframes digitFlip {
-            0% { transform: rotateX(90deg) scale(0.8); opacity: 0; filter: blur(2px); }
-            40% { transform: rotateX(-10deg) scale(1.05); opacity: 1; filter: blur(0); }
-            100% { transform: rotateX(0) scale(1); opacity: 1; filter: blur(0); }
-          }
-        `}</style>
-      </div>
+      <Clock />
 
       <PortfolioModal isOpen={isPortfolioOpen} onClose={() => setIsPortfolioOpen(false)} />
       <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
