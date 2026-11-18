@@ -122,6 +122,9 @@ function initialize() {
     cumulative_velocity = new Velocity(0, 0);
     game_over = false;
     game_score = 0;
+    game_score_step = 0;
+    dino_current_thrust = new Velocity(0, 0);
+    dino_ready_to_jump = true;
     last_milestone = 0;
     is_jump_held = false;
     jump_hold_frames_remaining = 0;
@@ -199,9 +202,11 @@ function event_loop() {
     canvas_ctx.fillRect(0, 232, canvas.width, CELL_SIZE * 0.2);
 
     // score card update
-    canvas_ctx.font = "20px Arcade";
+    canvas_ctx.font = canvas.width < 600 ? "10px Arcade" : "20px Arcade";
     canvas_ctx.fillStyle = current_theme.score_text;
-    canvas_ctx.fillText(`H I     ${Math.floor(game_hi_score).toString().padStart(4, '0').split('').join(" ")}     ${game_score.toString().padStart(4, '0').split('').join(" ")}`, canvas.width - 200, 20);
+    canvas_ctx.textAlign = "right";
+    canvas_ctx.fillText(`H I     ${Math.floor(game_hi_score).toString().padStart(4, '0').split('').join(" ")}     ${game_score.toString().padStart(4, '0').split('').join(" ")}`, canvas.width - 10, 20);
+    canvas_ctx.textAlign = "left";
 
     // first time
     if (is_first_time) {
@@ -209,7 +214,7 @@ function event_loop() {
 
         canvas_ctx.textBaseline = 'middle';
         canvas_ctx.textAlign = 'center';
-        canvas_ctx.font = "25px Arcade";
+        canvas_ctx.font = canvas.width < 600 ? "11px Arcade" : "25px Arcade";
         canvas_ctx.fillStyle = current_theme.info_text;
         canvas_ctx.fillText("J     U     M     P             T     O             S     T     A     R     T", canvas.width / 2, (canvas.height / 2) - 50);
         return;
@@ -278,7 +283,7 @@ function event_loop() {
         if (isCollided(dino_current_position.get()[0], dino_current_position.get()[1], dino_current_layout.length, dino_current_layout[0].length, HARMFUL_CHARACTER_POSITION.get()[0], HARMFUL_CHARACTER_POSITION.get()[1], HARMFUL_CHARACTER_LAYOUT.length, HARMFUL_CHARACTER_LAYOUT[0].length)) {
             canvas_ctx.textBaseline = 'middle';
             canvas_ctx.textAlign = 'center';
-            canvas_ctx.font = "25px Arcade";
+            canvas_ctx.font = canvas.width < 600 ? "11px Arcade" : "25px Arcade";
             canvas_ctx.fillStyle = current_theme.info_text;
             canvas_ctx.fillText("G     A     M     E             O     V     E     R", canvas.width / 2, (canvas.height / 2) - 50);
             paint_layout(retry_layout, new Position((canvas.height / 2) - retry_layout.length, (canvas.width / 2) - retry_layout[0].length).get());
