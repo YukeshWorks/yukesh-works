@@ -1,0 +1,24 @@
+* { box-sizing: border-box; }
+html, body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #fff;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#container {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(96vw, 1000px);
+}
+#board {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}

@@ -8,7 +8,8 @@ A personal portfolio and interactive playground for Yukesh Kumar.
 - Build command: `npm run build`
 - Output directory: `dist`
 - Home: personal introduction, social links and cinematic visual treatment
-- Vault: Snake, Rainbow Scratch, Memory Match and Island Creator
+- Vault: Snake, Chrome Dino, Rainbow Scratch, Memory Match and Island Creator
+- Chrome Dino is self-hosted under `public/dino-game/`; its original MIT license and attribution are included beside the game.
 - About: personal profile and information
 - Secret terminal: visual Easter egg only; it is not a security boundary
 

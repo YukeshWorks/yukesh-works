@@ -4,15 +4,17 @@ import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
 import IslandCreator from "./IslandCreator";
+import DinoGame from "./DinoGame";
 import vaultLamp from "@/assets/vault-lamp.gif";
 
-type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island";
+type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island" | "dino";
 
 const VAULT_ITEMS: { id: VaultSection; icon: typeof Gamepad2; title: string; subtitle: string; delay: string }[] = [
   { id: "snake", icon: Gamepad2, title: "Snake Game", subtitle: "Classic arcade vibes", delay: "delay-100" },
   { id: "scratch", icon: Sparkles, title: "Rainbow Scratch", subtitle: "Reveal hidden colors", delay: "delay-200" },
   { id: "memory", icon: Brain, title: "Memory Match", subtitle: "Find all the pairs", delay: "delay-300" },
   { id: "island", icon: TreePalm, title: "Island Creator", subtitle: "Build your paradise", delay: "delay-400" },
+  { id: "dino", icon: Gamepad2, title: "Chrome Dino", subtitle: "Jump the cactus", delay: "delay-500" },
 ];
 
 const VaultPage = () => {
@@ -78,6 +80,9 @@ const VaultPage = () => {
   }
   if (activeSection === "island") {
     return <div className={transClass}>{backButton("games-menu")}<IslandCreator /></div>;
+  }
+  if (activeSection === "dino") {
+    return <div className={transClass}>{backButton("games-menu")}<DinoGame /></div>;
   }
 
   // Games submenu
