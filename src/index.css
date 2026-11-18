@@ -431,7 +431,9 @@
 
 
 /* About portrait: phones keep the full-bleed crop; wide screens show the whole
-   2:3 portrait at full height on the right so the face is never cut off. */
+   2:3 portrait at full height on the right so the face is never cut off.
+   .about-portrait-frame is an empty box with the same geometry, for overlays. */
+.about-portrait-frame { position: absolute; top: 0; bottom: 0; right: max(0px, calc(50% - 760px)); aspect-ratio: 2 / 3; }
 @media (min-width: 768px) {
   .about-portrait {
     left: auto;
@@ -484,3 +486,48 @@
   0% { transform: translateX(-120%); }
   55%, 100% { transform: translateX(120%); }
 }
+
+
+/* Vault game cards: glass card, cursor spotlight and accent glow. */
+.vault-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s, box-shadow 0.4s, background-color 0.4s;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.vault-card:hover {
+  border-color: rgba(var(--accent), 0.45);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 40px rgba(var(--accent), 0.18), 0 0 0 1px rgba(var(--accent), 0.15);
+}
+.vault-card:active { transform: scale(0.96) !important; }
+.vault-card-spot {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(160px circle at var(--mx, 50%) var(--my, 0%), rgba(var(--accent), 0.22), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.vault-card:hover .vault-card-spot { opacity: 1; }
+@keyframes vaultCardIn {
+  0% { opacity: 0; transform: perspective(700px) translateY(30px) rotateX(-35deg) scale(0.92); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes vaultJoy {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(12deg); }
+}
+
+
+/* Rotating amber border around the embedded Dino game. */
+.dino-frame {
+  background: conic-gradient(from var(--dino-angle, 0deg), rgba(251, 191, 36, 0.7), rgba(251, 191, 36, 0.05) 30%, rgba(251, 146, 60, 0.6) 55%, rgba(251, 191, 36, 0.05) 80%, rgba(251, 191, 36, 0.7));
+  box-shadow: 0 0 40px rgba(251, 191, 36, 0.12);
+  animation: dinoSpin 6s linear infinite;
+}
+@property --dino-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes dinoSpin { to { --dino-angle: 360deg; } }

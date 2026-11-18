@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { Gamepad2, Sparkles, Brain, TreePalm, ArrowLeft, Joystick } from "lucide-react";
+import { useState, useCallback, useRef } from "react";
+import { Sparkles, Brain, TreePalm, ArrowLeft, Joystick, Worm, Footprints } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
@@ -9,13 +9,57 @@ import LampScene from "./LampScene";
 
 type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island" | "dino";
 
-const VAULT_ITEMS: { id: VaultSection; icon: typeof Gamepad2; title: string; subtitle: string; delay: string }[] = [
-  { id: "snake", icon: Gamepad2, title: "Snake Game", subtitle: "Classic arcade vibes", delay: "delay-100" },
-  { id: "scratch", icon: Sparkles, title: "Rainbow Scratch", subtitle: "Reveal hidden colors", delay: "delay-200" },
-  { id: "memory", icon: Brain, title: "Memory Match", subtitle: "Find all the pairs", delay: "delay-300" },
-  { id: "island", icon: TreePalm, title: "Island Creator", subtitle: "Build your paradise", delay: "delay-400" },
-  { id: "dino", icon: Gamepad2, title: "Chrome Dino", subtitle: "Jump the cactus", delay: "delay-500" },
+const VAULT_ITEMS: { id: VaultSection; icon: typeof Worm; title: string; subtitle: string; accent: string }[] = [
+  { id: "snake", icon: Worm, title: "Snake Glide", subtitle: "Eat, grow, don't crash", accent: "45, 212, 191" },
+  { id: "scratch", icon: Sparkles, title: "Rainbow Scratch", subtitle: "Reveal hidden colors", accent: "232, 121, 249" },
+  { id: "memory", icon: Brain, title: "Memory Match", subtitle: "Find all the pairs", accent: "167, 139, 250" },
+  { id: "island", icon: TreePalm, title: "Island Creator", subtitle: "Build your paradise", accent: "56, 189, 248" },
+  { id: "dino", icon: Footprints, title: "Chrome Dino", subtitle: "Jump the cactus", accent: "251, 191, 36" },
 ];
+
+// Card that tilts toward the cursor and carries a spotlight under it.
+const TiltCard = ({ item, index, onOpen }: { item: (typeof VAULT_ITEMS)[number]; index: number; onOpen: () => void }) => {
+  const ref = useRef<HTMLButtonElement>(null);
+  const onMove = (e: React.PointerEvent) => {
+    const el = ref.current;
+    if (!el || e.pointerType === "touch") return;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    el.style.setProperty("--mx", `${px * 100}%`);
+    el.style.setProperty("--my", `${py * 100}%`);
+    el.style.transform = `perspective(700px) rotateX(${(0.5 - py) * 14}deg) rotateY(${(px - 0.5) * 16}deg) translateZ(6px)`;
+  };
+  const onLeave = () => { if (ref.current) ref.current.style.transform = ""; };
+  const Icon = item.icon;
+  const isLastOdd = index === VAULT_ITEMS.length - 1 && VAULT_ITEMS.length % 2 === 1;
+  return (
+    <div className={isLastOdd ? "col-span-2 flex justify-center" : ""} style={{ animation: `vaultCardIn 0.7s cubic-bezier(0.16,1,0.3,1) ${0.15 + index * 0.08}s both` }}>
+      <button
+        ref={ref}
+        type="button"
+        onClick={onOpen}
+        onPointerMove={onMove}
+        onPointerLeave={onLeave}
+        className={`vault-card group relative overflow-hidden rounded-2xl p-4 flex flex-col items-center gap-2.5 text-center cursor-pointer ${isLastOdd ? "w-[calc(50%-0.375rem)]" : "w-full"}`}
+        style={{ ["--accent" as string]: item.accent }}
+      >
+        <span className="vault-card-spot" aria-hidden="true" />
+        <div className="relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6"
+          style={{ background: `rgba(${item.accent}, 0.12)`, boxShadow: `0 0 0 1px rgba(${item.accent}, 0.25)` }}>
+          <Icon size={19} style={{ color: `rgb(${item.accent})` }} className="transition-transform duration-500 group-hover:scale-110" />
+        </div>
+        <div className="relative">
+          <h3 className="font-display text-xs font-bold text-white/85 group-hover:text-white transition-colors duration-300">{item.title}</h3>
+          <p className="text-white/35 text-[10px] mt-0.5 group-hover:text-white/55 transition-colors duration-300">{item.subtitle}</p>
+        </div>
+        <span className="relative text-[9px] font-bold uppercase tracking-[0.2em] opacity-0 -translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300" style={{ color: `rgb(${item.accent})` }}>
+          Play →
+        </span>
+      </button>
+    </div>
+  );
+};
 
 const VaultPage = () => {
   const [activeSection, setActiveSection] = useState<VaultSection>("main");
@@ -55,16 +99,17 @@ const VaultPage = () => {
     return (
       <div className={transClass}>
         {backButton("games-menu")}
-        <section className="min-h-[90vh] flex flex-col items-center justify-center relative overflow-hidden pt-16 page-transition">
-          <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
-          <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-float-slow" />
-          <div className="relative z-10 flex flex-col items-center gap-4">
-            <div className="text-center mb-1">
-              <h2 className="font-display text-2xl md:text-3xl font-bold">
+        <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-28 md:pt-16 page-transition">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,#2b0f3a_0%,#06050a_60%)]" />
+          <div className="absolute top-1/4 right-1/5 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl animate-float-slow" />
+          <div className="absolute bottom-1/4 left-1/5 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl animate-float-slow" style={{ animationDelay: "3s" }} />
+          <div className="relative z-10 flex flex-col items-center gap-4 pt-8 pb-10">
+            <div className="text-center mb-1 fade-in-up">
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold tracking-tight">
                 <span className="text-white">Rainbow</span>
-                <span className="text-white/50 ml-2">Scratch</span>
+                <span className="ml-2 bg-gradient-to-r from-rose-400 via-amber-300 to-sky-400 bg-clip-text text-transparent">Scratch</span>
               </h2>
-              <p className="text-white/40 text-xs mt-1">Scratch to reveal the hidden rainbow</p>
+              <p className="text-white/40 text-xs mt-1">Scratch the foil. Something colourful is hiding.</p>
             </div>
             <RainbowScratch />
           </div>
@@ -94,7 +139,7 @@ const VaultPage = () => {
 
         <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-sm px-4">
           <div className="text-center fade-in-up">
-            <Joystick className="mx-auto mb-3 text-white/70" size={28} />
+            <Joystick className="mx-auto mb-3 text-white/70" size={28} style={{ animation: "vaultJoy 2.8s ease-in-out infinite" }} />
             <h2 className="font-display text-2xl font-bold text-white tracking-wider">
               Games
             </h2>
@@ -102,28 +147,8 @@ const VaultPage = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-3 w-full">
-            {VAULT_ITEMS.map(item => (
-              <button
-                key={item.id}
-                onClick={() => navigateTo(item.id)}
-                className={`group bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-xl p-4 flex flex-col items-center gap-2 text-center
-                           hover:bg-white/[0.08] hover:border-white/20 hover:scale-[1.03] active:scale-[0.97]
-                           transition-all duration-500 cursor-pointer
-                           fade-in-up ${item.delay}`}
-                style={{ opacity: 0 }}
-              >
-                <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center
-                                group-hover:bg-white/[0.12] transition-all duration-500
-                                group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                  <item.icon className="text-white/60 group-hover:text-white transition-colors duration-300" size={18} />
-                </div>
-                <div>
-                  <h3 className="font-display text-xs font-bold text-white/80 group-hover:text-white transition-colors duration-300">
-                    {item.title}
-                  </h3>
-                  <p className="text-white/30 text-[9px] mt-0.5">{item.subtitle}</p>
-                </div>
-              </button>
+            {VAULT_ITEMS.map((item, i) => (
+              <TiltCard key={item.id} item={item} index={i} onOpen={() => navigateTo(item.id)} />
             ))}
           </div>
         </div>

@@ -130,7 +130,14 @@ const InfoSection = () => {
               <div className="fade-in-up opacity-0 delay-200 relative pl-4 border-l-2 border-primary/40">
                 <h1 className="text-2xl md:text-3xl text-foreground font-display leading-tight">
                   The Guy You'll<br />
-                  <span className="gradient-text">Vibe With</span>
+                  <span
+                    className="bg-clip-text text-transparent"
+                    style={{
+                      backgroundImage: "linear-gradient(110deg, hsl(var(--gradient-start)) 35%, hsl(0 0% 100%) 50%, hsl(var(--gradient-end)) 65%)",
+                      backgroundSize: "200% 100%",
+                      animation: "aboutShine 4s linear 1s infinite",
+                    }}
+                  >Vibe With</span>
                 </h1>
               </div>
 
@@ -147,7 +154,7 @@ const InfoSection = () => {
               </div>
 
               <div className="fade-in-up opacity-0 delay-500 mt-4">
-                <img src={pixelEyes} alt="Pixel eyes" className="w-10 h-10 rounded-lg" />
+                <img src={pixelEyes} alt="Pixel eyes" className="w-10 h-10 rounded-lg transition-transform duration-300 hover:scale-125 hover:-rotate-6" style={{ animation: "aboutBlink 4s ease-in-out infinite" }} />
               </div>
 
               <div className="fade-in-up opacity-0 delay-600 mt-4">
@@ -174,17 +181,18 @@ const InfoSection = () => {
         </div>
       )}
 
-      {/* "That's Me" label */}
+      {/* "That's Me" pointer — positioned inside a box that matches the portrait, so it
+          always points at the face beside it instead of covering it. */}
       {showContent && (
-        <div className="absolute right-6 md:right-16 top-1/3 z-10 fade-in-up opacity-0 delay-500 hidden md:flex items-center gap-0">
-          <div className="px-3 py-1.5 rounded-l-full glass border border-primary/20 border-r-0">
-            <span className="text-[9px] font-heading uppercase tracking-[0.3em] text-primary whitespace-nowrap">That's Me</span>
+        <div className="about-portrait-frame pointer-events-none hidden md:block z-10" aria-hidden="true">
+          <div className="absolute flex items-center" style={{ right: "62%", top: "34%" }}>
+            <div className="fade-in-up opacity-0 delay-500 px-3 py-1.5 rounded-full glass border border-primary/30" style={{ boxShadow: "0 0 18px hsl(var(--primary) / 0.2)" }}>
+              <span className="text-[9px] font-heading uppercase tracking-[0.3em] text-primary whitespace-nowrap">That's Me</span>
+            </div>
+            <div className="relative h-px w-16 origin-left bg-gradient-to-r from-primary/70 to-primary/10" style={{ animation: "aboutLine 0.7s cubic-bezier(0.16,1,0.3,1) 0.9s both" }}>
+              <span className="absolute -right-1 -top-[3px] w-[7px] h-[7px] rounded-full bg-primary" style={{ animation: "aboutDot 1.8s ease-in-out 1.6s infinite both" }} />
+            </div>
           </div>
-          <div className="w-0 h-0" style={{
-            borderTop: '6px solid transparent',
-            borderBottom: '6px solid transparent',
-            borderLeft: '8px solid hsl(var(--primary) / 0.3)',
-          }} />
         </div>
       )}
 
@@ -193,6 +201,10 @@ const InfoSection = () => {
           0%, 100% { transform: scale(1); opacity: 0.4; }
           50% { transform: scale(1.08); opacity: 0; }
         }
+        @keyframes aboutLine { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+        @keyframes aboutDot { 0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.6); } 50% { box-shadow: 0 0 0 7px hsl(var(--primary) / 0); } }
+        @keyframes aboutBlink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+        @keyframes aboutShine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         @keyframes aboutSweep {
           0% { transform: translateX(-100%); }
           50%, 100% { transform: translateX(100%); }
