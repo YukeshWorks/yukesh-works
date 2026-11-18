@@ -451,3 +451,36 @@
     mask-composite: intersect;
   }
 }
+
+
+/* Vault "Games" button: glass pill lit by the street lamp, with a slow light sweep. */
+.vault-games-btn {
+  background: rgba(255, 244, 225, 0.05);
+  border: 1px solid rgba(255, 240, 215, 0.16);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 22px rgba(255, 236, 205, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  animation: vaultBtnGlow 3.2s ease-in-out infinite;
+}
+.vault-games-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 240, 215, 0.16) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: vaultBtnSweep 4s ease-in-out infinite 1s;
+  pointer-events: none;
+}
+.vault-games-btn:hover {
+  background: rgba(255, 244, 225, 0.1);
+  border-color: rgba(255, 240, 215, 0.32);
+  box-shadow: 0 0 36px rgba(255, 236, 205, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+@keyframes vaultBtnGlow {
+  0%, 100% { box-shadow: 0 0 18px rgba(255, 236, 205, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.06); }
+  50% { box-shadow: 0 0 34px rgba(255, 236, 205, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+}
+@keyframes vaultBtnSweep {
+  0% { transform: translateX(-120%); }
+  55%, 100% { transform: translateX(120%); }
+}

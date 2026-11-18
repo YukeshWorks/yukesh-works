@@ -5,7 +5,7 @@ import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
 import IslandCreator from "./IslandCreator";
 import DinoGame from "./DinoGame";
-import vaultLamp from "@/assets/vault-lamp.gif";
+import LampScene from "./LampScene";
 
 type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island" | "dino";
 
@@ -20,13 +20,10 @@ const VAULT_ITEMS: { id: VaultSection; icon: typeof Gamepad2; title: string; sub
 const VaultPage = () => {
   const [activeSection, setActiveSection] = useState<VaultSection>("main");
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
   const [contentVisible, setContentVisible] = useState(false);
 
-  const handleImgLoad = useCallback(() => {
-    setImgLoaded(true);
-    setTimeout(() => setContentVisible(true), 400);
-  }, []);
+  // The Games button appears once the lamp has flickered on.
+  const handleLampReady = useCallback(() => setContentVisible(true), []);
 
   const navigateTo = (section: VaultSection) => {
     setIsTransitioning(true);
@@ -90,16 +87,7 @@ const VaultPage = () => {
     return (
       <section className={`min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : 'page-transition'}`}>
         <div className="absolute inset-0 bg-black" />
-        <img
-          src={vaultLamp}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{
-            opacity: imgLoaded ? 0.3 : 0,
-            transition: 'opacity 0.8s ease-out',
-          }}
-          onLoad={handleImgLoad}
-        />
+        <LampScene instant opacity={0.35} />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none" />
 
         {backButton("main")}
@@ -147,39 +135,26 @@ const VaultPage = () => {
   return (
     <section className={`min-h-screen flex flex-col items-center relative overflow-hidden page-transition ${isTransitioning ? 'animate-[pageFadeOut_0.3s_ease-in_forwards]' : ''}`}>
       <div className="absolute inset-0 bg-black" />
-      <img
-        src={vaultLamp}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        style={{
-          opacity: imgLoaded ? 1 : 0,
-          transition: 'opacity 0.8s ease-out',
-        }}
-        onLoad={handleImgLoad}
-      />
-
-      <div
-        className="relative z-10 flex flex-col items-center mt-auto mb-16 md:mt-[50vh] md:mb-0 md:ml-56"
-        style={{
-          opacity: contentVisible ? 1 : 0,
-          transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-      >
-        <button
-          onClick={() => navigateTo("games-menu")}
-          className="group relative bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-xl px-8 py-3 flex items-center gap-3
-                     hover:bg-white/[0.1] hover:border-white/20 hover:scale-[1.05] active:scale-[0.95]
-                     transition-all duration-500 cursor-pointer
-                     hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]
-                     animate-[breatheGlow_3s_ease-in-out_infinite]"
+      <LampScene onReady={handleLampReady}>
+        <div
+          style={{
+            opacity: contentVisible ? 1 : 0,
+            transform: contentVisible ? "translateY(0) scale(1)" : "translateY(16px) scale(0.96)",
+            transition: "opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
         >
-          <Joystick className="text-white/60 group-hover:text-white transition-colors duration-300" size={18} />
-          <span className="font-display text-sm font-bold text-white/80 group-hover:text-white transition-colors duration-300 tracking-widest uppercase">
-            Games
-          </span>
-        </button>
-      </div>
+          <button
+            onClick={() => navigateTo("games-menu")}
+            className="vault-games-btn group relative rounded-xl px-8 py-3 flex items-center gap-3 cursor-pointer
+                       hover:scale-[1.05] active:scale-[0.95] transition-transform duration-300"
+          >
+            <Joystick className="relative text-white/70 group-hover:text-white transition-colors duration-300 group-hover:-rotate-12" size={18} />
+            <span className="relative font-display text-sm font-bold text-white/85 group-hover:text-white transition-colors duration-300 tracking-widest uppercase">
+              Games
+            </span>
+          </button>
+        </div>
+      </LampScene>
     </section>
   );
 };
