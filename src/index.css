@@ -428,3 +428,26 @@
     padding: 5px 9px;
   }
 }
+
+
+/* About portrait: phones keep the full-bleed crop; wide screens show the whole
+   2:3 portrait at full height on the right so the face is never cut off. */
+@media (min-width: 768px) {
+  .about-portrait {
+    left: auto;
+    right: max(0px, calc(50% - 760px));
+    width: auto;
+    max-width: none;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    object-position: center top;
+    -webkit-mask-image:
+      linear-gradient(to right, transparent 0%, #000 22%, #000 88%, transparent 100%),
+      linear-gradient(to bottom, #000 78%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to right, transparent 0%, #000 22%, #000 88%, transparent 100%),
+      linear-gradient(to bottom, #000 78%, transparent 100%);
+    mask-composite: intersect;
+  }
+}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Instagram, Facebook, Linkedin } from "lucide-react";
 import profileHero from "@/assets/profile.jpg";
+import profileHeroHi from "@/assets/profile-hi.jpg";
 import pixelEyes from "@/assets/pixel-eyes.gif";
 
 const InfoSection = () => {
@@ -14,11 +15,13 @@ const InfoSection = () => {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <img
           src={profileHero}
+          srcSet={`${profileHero} 800w, ${profileHeroHi} 1024w`}
+          sizes="(min-width: 768px) 67vh, 100vw"
           alt="Portrait of Yukesh"
           decoding="async"
           loading="eager"
           fetchPriority="high"
-          className="absolute inset-0 h-full w-full object-cover object-[68%_42%] md:object-[72%_center]"
+          className="about-portrait absolute inset-0 h-full w-full object-cover object-[68%_42%]"
           style={{
             opacity: imgLoaded ? 1 : 0,
             filter: "brightness(1.18) contrast(1.04) saturate(1.06)",
