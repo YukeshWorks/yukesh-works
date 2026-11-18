@@ -7,17 +7,79 @@ import ParticleBackground from "@/components/ParticleBackground";
 import CursorLight from "@/components/CursorLight";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
 
-const VaultPage = lazy(() => import("@/components/VaultPage"));
-const InfoSection = lazy(() => import("@/components/InfoSection"));
-const PasswordLockPage = lazy(() => import("@/components/PasswordLockPage"));
-const WelcomePage = lazy(() => import("@/components/WelcomePage"));
+/*
+ * Each deploy renames the code chunks. A browser (Instagram's in-app browser in particular)
+ * that cached the old page asks for chunk names that no longer exist, so a lazy page never
+ * loads. When that happens, reload once with a cache-busting query to get the fresh site;
+ * if it still fails, show a tap-to-reload message instead of a blank screen.
+ */
+const RELOAD_KEY = "yw-chunk-reload";
+const freshReload = () => {
+  try {
+    if (sessionStorage.getItem(RELOAD_KEY)) return false;
+    sessionStorage.setItem(RELOAD_KEY, "1");
+  } catch { /* storage blocked: still try once */ }
+  const url = new URL(window.location.href);
+  url.searchParams.set("v", Date.now().toString(36));
+  window.location.replace(url.toString());
+  return true;
+};
+
+const LoadFailed = () => (
+  <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center">
+    <p className="text-white/70 text-sm">This page didn't load — the site was just updated.</p>
+    <button
+      type="button"
+      onClick={() => {
+        try { sessionStorage.removeItem(RELOAD_KEY); } catch { /* ignore */ }
+        freshReload();
+      }}
+      className="px-4 py-2 rounded-xl border border-white/20 bg-white/[0.06] text-sm text-white"
+    >
+      Tap to reload
+    </button>
+  </div>
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const lazyPage = <T extends React.ComponentType<any>>(load: () => Promise<{ default: T }>) =>
+  lazy(() =>
+    load().catch(() => {
+      // Reloading: keep showing the fallback until the new page arrives.
+      if (freshReload()) return new Promise<{ default: T }>(() => {});
+      return { default: LoadFailed as unknown as T };
+    }),
+  );
+
+if (typeof window !== "undefined") {
+  window.addEventListener("vite:preloadError", (e) => {
+    e.preventDefault();
+    freshReload();
+  });
+  // Tidy the cache-busting tag out of the address bar.
+  const here = new URL(window.location.href);
+  if (here.searchParams.has("v")) {
+    here.searchParams.delete("v");
+    window.history.replaceState(null, "", here.pathname + here.search + here.hash);
+  }
+  // A successful load clears the guard so a future deploy can trigger one reload again.
+  window.addEventListener("load", () => {
+    window.setTimeout(() => { try { sessionStorage.removeItem(RELOAD_KEY); } catch { /* ignore */ } }, 10000);
+  });
+}
+
+const VaultPage = lazyPage(() => import("@/components/VaultPage"));
+const InfoSection = lazyPage(() => import("@/components/InfoSection"));
+const PasswordLockPage = lazyPage(() => import("@/components/PasswordLockPage"));
+const WelcomePage = lazyPage(() => import("@/components/WelcomePage"));
 
 // Warm the lazy chunks once the home screen is idle so tab switches stay instant.
 const prefetchPages = () => {
-  void import("@/components/VaultPage");
-  void import("@/components/InfoSection");
-  void import("@/components/PasswordLockPage");
-  void import("@/components/WelcomePage");
+  const ignore = () => {};
+  import("@/components/VaultPage").catch(ignore);
+  import("@/components/InfoSection").catch(ignore);
+  import("@/components/PasswordLockPage").catch(ignore);
+  import("@/components/WelcomePage").catch(ignore);
 };
 
 const getAudioContext = (): AudioContext | null => {
