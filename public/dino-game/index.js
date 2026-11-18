@@ -91,6 +91,16 @@ let harmful_character_allocator = [
 ]
 
 function handle_input_start() {
+    // The first input starts the game immediately; the initial screen is intentionally idle.
+    if (is_first_time) {
+        is_first_time = false;
+        dino_ready_to_jump = false;
+        dino_current_thrust = DINO_JUMP_INITIAL_THRUST.clone();
+        is_jump_held = true;
+        jump_hold_frames_remaining = DINO_JUMP_MAX_HOLD_FRAMES;
+        requestAnimationFrame(event_loop);
+        return;
+    }
     if (game_over && (Date.now() - game_over) > 1000) {
         main();
         return;
@@ -138,10 +148,13 @@ function initialize() {
     };
 
     document.body.onkeydown = event => {
-        if (event.key === ' ' && !event.repeat) handle_input_start();
+        if ((event.key === ' ' || event.key === 'ArrowUp') && !event.repeat) {
+            event.preventDefault();
+            handle_input_start();
+        }
     };
     document.body.onkeyup = event => {
-        if (event.key === ' ') handle_input_end();
+        if (event.key === ' ' || event.key === 'ArrowUp') handle_input_end();
     };
 }
 
@@ -192,9 +205,7 @@ function event_loop() {
 
     // first time
     if (is_first_time) {
-        is_first_time = false;
         paint_layout(dino_layout.stand, harmful_characters_pool[0].get_position().get());
-        game_over = Date.now();
 
         canvas_ctx.textBaseline = 'middle';
         canvas_ctx.textAlign = 'center';

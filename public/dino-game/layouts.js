@@ -354,7 +354,7 @@ const RETRY = [
     [1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1],
 ];
 
-module.exports = {
+const layouts = {
     dino_layout: {
         stand: DINO_STAND,
         dead: DINO_DEAD,
@@ -410,3 +410,16 @@ module.exports = {
         }
     }
 }
+
+export const {
+    dino_layout,
+    road_layout,
+    cloud_layout,
+    stone_layout,
+    pit_layout,
+    bird_layout,
+    cactus_layout,
+    star_layout,
+    retry_layout,
+    themes
+} = layouts;
