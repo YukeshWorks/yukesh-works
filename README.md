@@ -11,6 +11,7 @@ A personal portfolio and interactive playground for Yukesh Kumar.
 - Vault: Snake, Rainbow Scratch, Memory Match and Island Creator
 - About: personal profile and information
 - Secret terminal: visual Easter egg only; it is not a security boundary
+- Rise (`/muscle/`): standalone story-driven muscle-building course, served from `public/muscle/index.html` (Chapter 1)
 
 ## Hosting
 
