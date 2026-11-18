@@ -354,19 +354,6 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden page-transition bg-background">
       {/* Skeleton GIF background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {/* Red eyes GIF when typing — blend black bg into dark background */}
-        <img
-          src={redEyesGif}
-          alt=""
-          className="absolute w-64 h-40 md:w-80 md:h-52 object-contain"
-          style={{
-            opacity: digits.some(d => d !== "") && status !== "success" ? 1 : 0,
-            transition: "opacity 0.5s ease-in-out",
-            mixBlendMode: "lighten",
-            top: "8%",
-            zIndex: 1,
-          }}
-        />
         <img
           src={skeletonGif}
           alt=""
@@ -422,7 +409,34 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
             </div>
           </div>
         )}
-        {status !== "success" && <div className="mb-6" />}
+        {/* Red eyes sit in their own slot above the title so they never cover the text. */}
+        {status !== "success" && (
+          <div
+            className="mb-3 w-56 md:w-64 overflow-hidden pointer-events-none"
+            aria-hidden="true"
+            style={{
+              // Frame the full blink range of the GIF, and paint the page colour behind it so the
+              // "lighten" blend turns the GIF's black box invisible; feather the edges too.
+              aspectRatio: "500 / 138",
+              background: "hsl(var(--background))",
+              WebkitMaskImage: "radial-gradient(ellipse 50% 50% at center, #000 70%, transparent 100%)",
+              maskImage: "radial-gradient(ellipse 50% 50% at center, #000 70%, transparent 100%)",
+            }}
+          >
+            <img
+              src={redEyesGif}
+              alt=""
+              className="h-full w-full object-cover"
+              style={{
+                objectPosition: "50% 49%",
+                mixBlendMode: "lighten",
+                opacity: digits.some(d => d !== "") ? 1 : 0,
+                transform: digits.some(d => d !== "") ? "scale(1)" : "scale(0.85)",
+                transition: "opacity 0.5s ease-in-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+            />
+          </div>
+        )}
 
         {/* Title */}
         <h2 className={`font-display text-xl tracking-[0.15em] uppercase text-foreground mb-1 transition-all duration-500 ${successPhase >= 2 ? "opacity-0 -translate-y-4" : ""}`}>
