@@ -4,14 +4,6 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/game",
-      "destination": "/game/index.html"
-    },
-    {
-      "source": "/game/",
-      "destination": "/game/index.html"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
