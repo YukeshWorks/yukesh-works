@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Orbit Forge</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: three stacked full-screen canvases (sky/stars, WebGL spheres, foreground).
+   Hangar = header + stats on top, parts tray at bottom. Flight = telemetry top-left, view controls top-right,
+   attitude + rotate bottom-left, stage centre-right, throttle rail right. Map adds a scale-level column on the left. */
+:root{
+  --bg:#05070d; --glass:rgba(11,15,26,.86); --glass-solid:#0d121e; --raise:#182033;
+  --line:rgba(170,195,255,.16); --line-strong:rgba(170,195,255,.34);
+  --ink:#e9eef7; --muted:#8f9bb4; --sun:#ffb454; --sun-ink:#241402; --ice:#7cc7ff; --ok:#7ee0a1; --bad:#ff6b6b;
+  --f-ui:"Saira Semi Condensed","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html{box-sizing:border-box;height:100%}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#app{position:relative;height:100%;overflow:hidden}
+canvas.layer{position:absolute;inset:0;width:100%;height:100%;display:block}
+#bg,#gl{pointer-events:none}
+#fg{touch-action:none}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--glass);color:var(--ink);border-radius:10px;padding:9px 14px;
+  font-weight:600;font-size:15px;letter-spacing:.05em;touch-action:manipulation;
+  transition:border-color .15s,background .15s;-webkit-user-select:none}
+.btn:hover{border-color:var(--line-strong)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible,.card:focus-visible,.rail:focus-visible,.chipbtn:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
+.btn.primary{background:var(--sun);border-color:var(--sun);color:var(--sun-ink)}
+.btn.ghost{background:transparent}
+.btn.warn{border-color:rgba(255,107,107,.5);color:var(--bad)}
+.btn[disabled]{opacity:.38;cursor:default}
+.label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+/* hangar */
+#hangar{position:absolute;inset:0;pointer-events:none}
+#hangar>*{pointer-events:auto}
+.hbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px max(14px,env(safe-area-inset-right,0px)) 6px max(14px,env(safe-area-inset-left,0px))}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none}
+.brand b{display:block;font-size:18px;letter-spacing:.22em;font-weight:700}
+.brand small{display:block;font-size:11px;color:var(--muted);letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbtns{display:flex;gap:8px;flex:none}
+.hbtns .btn{padding:9px 12px}
+.stats{position:absolute;top:60px;left:0;right:0;padding:0 max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:7px}
+.figs{display:flex;gap:18px;flex-wrap:wrap}
+.fig b{display:block;font-family:var(--f-mono);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.fig b.bad{color:var(--bad)} .fig b.ok{color:var(--ok)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.chip{flex:none;font-family:var(--f-mono);font-size:11.5px;padding:4px 8px;border-radius:7px;background:var(--glass);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip b{color:var(--ink);font-weight:600}
+.chip.yes{border-color:rgba(126,224,161,.45);color:var(--ok)}
+.chip.no{opacity:.6}
+.selpanelx{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:158px;width:180px;background:var(--glass);
+  border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;}
+.selpanel h3{margin:0;font-size:16px;letter-spacing:.05em}
+.selpanel p{margin:0;font-family:var(--f-mono);font-size:11.5px;color:var(--muted);line-height:1.5;white-space:pre-line}
+.selrow{display:flex;gap:6px}
+.selrow .btn{flex:1;padding:8px 0;font-size:14px}
+.tray{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(to top,rgba(5,7,13,.97) 72%,rgba(5,7,13,0));padding:18px 0 max(12px,env(safe-area-inset-bottom,0px))}
+.tray-scroll{display:flex;gap:8px;overflow-x:auto;padding:0 max(14px,env(safe-area-inset-right,0px)) 2px max(14px,env(safe-area-inset-left,0px));scrollbar-width:thin}
+.card{flex:none;width:88px;border:1px solid var(--line);background:var(--glass-solid);border-radius:12px;padding:6px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;touch-action:manipulation}
+.card:hover{border-color:var(--line-strong)}
+.card:active{border-color:var(--sun)}
+.card canvas{width:64px;height:62px}
+.card b{font-size:13px;letter-spacing:.03em;text-align:center;line-height:1.1}
+.card span{font-family:var(--f-mono);font-size:9.5px;color:var(--muted);text-align:center;line-height:1.3}
+
+/* flight */
+#flight{position:absolute;inset:0;pointer-events:none}
+#flight>*{pointer-events:auto}
+.tele{position:absolute;top:12px;left:max(12px,env(safe-area-inset-left,0px));background:var(--glass);border:1px solid var(--line);
+  border-radius:12px;padding:9px 11px;min-width:168px;}
+.tele .row{display:flex;justify-content:space-between;gap:14px;font-family:var(--f-mono);font-size:12.5px;line-height:1.6;font-variant-numeric:tabular-nums}
+.tele .row span{color:var(--muted)}
+.tele .body{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sun);font-weight:600}
+.tele .status{font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:3px}
+.tele .met{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);margin-top:4px;border-top:1px solid var(--line);padding-top:4px;line-height:1.5}
+.meter{height:4px;border-radius:3px;background:var(--raise);overflow:hidden;margin-top:4px}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb454,#ff6b6b)}
+.fright{position:absolute;top:12px;right:max(12px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.fright .top{display:flex;gap:8px}
+.warp{display:flex;align-items:center;background:var(--glass);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.warp button{background:none;border:0;padding:8px 13px;font-size:17px;font-weight:700}
+.warp span{font-family:var(--f-mono);font-size:12.5px;min-width:76px;text-align:center;font-variant-numeric:tabular-nums}
+.zoom{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px}
+.zoom .btn{width:44px;height:44px;padding:0;font-size:20px}
+.sas{position:absolute;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 72px);display:flex;gap:6px}
+.chipbtn{border:1px solid var(--line);background:var(--glass);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--muted)}
+.chipbtn.on{color:var(--sun-ink);background:var(--sun);border-color:var(--sun)}
+.rot{position:absolute;left:max(12px,env(safe-area-inset-left,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));display:flex;gap:8px}
+.rot .btn{width:60px;height:60px;padding:0;display:grid;place-items:center;border-radius:16px}
+.rot .btn.on{background:var(--raise);border-color:var(--sun)}
+.fbottom{position:absolute;right:calc(max(12px,env(safe-area-inset-right,0px)) + 68px);bottom:max(16px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.fuel{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
+.fuel .bar{width:84px;height:6px;border-radius:4px;background:var(--raise);overflow:hidden}
+.fuel .bar i{display:block;height:100%;width:100%;background:var(--sun)}
+.fbtns{display:flex;gap:8px}
+.fbtns .btn{min-width:72px;padding:14px 10px}
+.throttle{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:6px}
+.throttle .btn{width:56px;padding:7px 0;font-size:12px}
+.rail{position:relative;width:56px;height:min(30vh,220px);border-radius:14px;background:var(--glass);border:1px solid var(--line);overflow:hidden;touch-action:none}
+.rail .fill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(to top,#ff7a3d,var(--sun))}
+.rail .val{position:absolute;left:0;right:0;top:6px;text-align:center;font-family:var(--f-mono);font-size:12px;font-weight:600;mix-blend-mode:difference;color:#fff}
+.rail .tick{position:absolute;left:9px;right:9px;height:1px;background:rgba(255,255,255,.12)}
+.levels{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:clamp(250px,34vh,300px);bottom:150px;display:flex;flex-direction:column;gap:5px;overflow-y:auto;scrollbar-width:none}
+.levels .chipbtn{text-align:left;font-size:11.5px;letter-spacing:.04em;padding:5px 9px;color:var(--ink);flex:none}
+.info{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:118px;width:min(250px,60vw);background:var(--glass);border:1px solid var(--line);
+  border-radius:12px;padding:11px 12px;display:flex;flex-direction:column;gap:6px}
+.info h3{margin:0;font-size:17px;letter-spacing:.04em;padding-right:20px}
+.info .kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-family:var(--f-mono);font-size:11px}
+.info .kv span{color:var(--muted)} .info .kv b{font-weight:500;text-align:right}
+.info p{margin:0;font-size:12.5px;line-height:1.45;color:var(--muted)}
+.info .x{position:absolute;top:6px;right:8px;background:none;border:0;color:var(--muted);font-size:16px;padding:4px}
+
+#toast{position:absolute;left:50%;top:auto;bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 150px);transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;z-index:5;width:max-content;max-width:min(80%,420px)}
+#toast div{background:var(--glass-solid);border:1px solid var(--line);border-left:3px solid var(--sun);padding:7px 12px;border-radius:9px;font-size:14px;letter-spacing:.02em;animation:tin .25s ease-out}
+@keyframes tin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.overlay{position:absolute;inset:0;background:rgba(3,4,9,.72);display:grid;place-items:center;z-index:10;padding:16px}
+.sheet{width:min(370px,100%);background:var(--glass-solid);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:13px;max-height:100%;overflow:auto}
+.sheet h2{margin:0;font-size:24px;letter-spacing:.06em;text-wrap:balance}
+.sheet p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+.sheet .btn{width:100%;padding:12px}
+.goals{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.goals li{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--muted)}
+.goals li i{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--line-strong);flex:none}
+.goals li.done{color:var(--ink)}
+.goals li.done i{background:var(--ok);border-color:var(--ok)}
+.keys{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);line-height:1.6}
+
+.selinfo{position:absolute;left:50%;transform:translateX(-50%);bottom:178px;background:var(--glass);border:1px solid var(--line);border-radius:9px;padding:5px 10px;font-family:var(--f-mono);font-size:11.5px;white-space:nowrap;max-width:calc(100% - 100px);overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.tools{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-45%);display:flex;flex-direction:column;gap:8px}
+.tools .btn{width:50px;height:50px;padding:0;display:grid;place-items:center;border-radius:13px}
+.cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 max(14px,env(safe-area-inset-right,0px)) 8px max(14px,env(safe-area-inset-left,0px))}
+.cats .chipbtn{flex:none;font-size:12.5px;padding:6px 11px}
+.mhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mhead .btn{padding:6px 10px}
+.mbody{display:flex;flex-direction:column;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid2 .btn{width:100%;padding:11px 8px;font-size:14px}
+.listrow{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.listrow>div{flex:1;min-width:0}
+.listrow b{display:block;font-size:15px}
+.listrow small{display:block;color:var(--muted);font-size:12px;line-height:1.35}
+.listrow .btn{width:auto;padding:8px 12px}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:15px;padding:4px 0}
+.switch{width:46px;height:26px;border-radius:14px;border:1px solid var(--line-strong);background:var(--raise);position:relative;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.switch.on{background:rgba(255,180,84,.25);border-color:var(--sun)}
+.switch.on::after{transform:translateX(20px);background:var(--sun)}
+.field{width:100%;background:var(--raise);border:1px solid var(--line-strong);border-radius:10px;padding:11px 12px;color:var(--ink);font:inherit;font-size:15px}
+.field:focus-visible{outline:2px solid var(--sun);outline-offset:1px}
+.apstat{position:absolute;left:50%;transform:translateX(-50%);top:calc(12px + 0px);margin-top:228px;display:flex;align-items:center;gap:8px;background:var(--glass);border:1px solid rgba(255,180,84,.5);border-radius:10px;padding:6px 8px 6px 10px;font-size:12.5px;max-width:min(92%,420px);}
+.apstat .dot{width:8px;height:8px;border-radius:50%;background:var(--sun);flex:none;animation:pulse 1.4s infinite}
+.apstat button{background:none;border:0;color:var(--muted);padding:2px 4px}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.apstat .dot{animation:none}.switch::after{transition:none}}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg .chipbtn{font-size:13px;padding:7px 12px;color:var(--ink)}
+.seg .chipbtn.on{color:var(--sun-ink)}
+.setcol{display:flex;flex-direction:column;gap:7px;font-size:15px;padding:4px 0}
+.note{font-size:12.5px!important}
+.range{width:52%;accent-color:var(--sun);height:28px}
+#fps{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(max(16px,env(safe-area-inset-bottom,0px)) + 96px);font-family:var(--f-mono);font-size:11px;color:var(--ok);background:rgba(5,7,13,.8);padding:3px 8px;border-radius:6px;pointer-events:none;z-index:6}
+canvas.layer{contain:strict}
+@media (max-width:420px){
+  .brand small{display:none}
+  .fig b{font-size:16px}
+  .figs{gap:13px}
+  .rot .btn{width:56px;height:56px}
+  .fbtns .btn{min-width:64px}
+  .tele{min-width:150px}
+}
+@media (prefers-reduced-motion:reduce){#toast div{animation:none}.btn{transition:none}}
+</style>
+
+</head><body>
+<div id="app">
+  <canvas class="layer" id="bg"></canvas>
+  <canvas class="layer" id="gl"></canvas>
+  <canvas class="layer" id="fg" aria-label="Game view"></canvas>
+
+  <section id="hangar">
+    <header class="hbar">
+      <div class="brand">
+        <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="6" fill="#ffb454"/><ellipse cx="16" cy="16" rx="14" ry="5.5" fill="none" stroke="#7cc7ff" stroke-width="1.3" transform="rotate(-24 16 16)"/><circle cx="28.2" cy="10.6" r="1.8" fill="#e9eef7"/></svg>
+        <div><b>ORBIT FORGE</b><small>Assembly bay · 0.5 m grid</small></div>
+      </div>
+      <div class="hbtns">
+        <button class="btn ghost" id="bUndo" aria-label="Undo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+        <button class="btn ghost" id="bMenuB" aria-label="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <button class="btn primary" id="bLaunch">Launch</button>
+      </div>
+    </header>
+    <div class="stats">
+      <div class="figs" id="figs"></div>
+      <div class="chips" id="chips"></div>
+      <div class="chips" id="dests"></div>
+    </div>
+    <div class="selinfo" id="selInfo" hidden></div>
+    <div class="tools" id="tools" hidden>
+      <button class="btn" id="tDup" aria-label="Duplicate" title="Duplicate"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button>
+      <button class="btn" id="tRot" aria-label="Rotate 90 degrees" title="Rotate"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></button>
+      <button class="btn" id="tFlip" aria-label="Flip" title="Flip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3v18"/><path d="M9 6L3 18h6z"/><path d="M15 6l6 12h-6z" fill="currentColor" fill-opacity=".35"/></svg></button>
+      <button class="btn" id="tMir" aria-label="Add mirrored copy" title="Mirror copy"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20" stroke-dasharray="2 3"/><rect x="3" y="7" width="6" height="10" rx="1"/><rect x="15" y="7" width="6" height="10" rx="1" fill="currentColor" fill-opacity=".35"/></svg></button>
+      <button class="btn warn" id="tDel" aria-label="Delete part" title="Delete"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
+    </div>
+    <footer class="tray"><div class="cats" id="cats"></div><div class="tray-scroll" id="tray"></div></footer>
+  </section>
+
+  <section id="flight" hidden>
+    <div class="tele">
+      <div class="body" id="tBody">Earth</div>
+      <div class="status" id="tStatus">On the pad</div>
+      <div class="row"><span>ALT</span><b id="tAlt">0 m</b></div>
+      <div class="row"><span id="tVelL">VEL</span><b id="tVel">0 m/s</b></div>
+      <div class="row"><span>AP</span><b id="tAp">—</b></div>
+      <div class="row"><span>PE</span><b id="tPe">—</b></div>
+      <div class="row"><span>ΔV</span><b id="tDv">0 m/s</b></div>
+      <div class="row"><span>TWR</span><b id="tTwr">0.00</b></div>
+      <div id="heatWrap" hidden><div class="row"><span>HEAT</span><b id="tHeat">0%</b></div><div class="meter"><i id="heatBar"></i></div></div>
+      <div class="met" id="tMet">T+ 00:00:00</div>
+    </div>
+    <div class="fright">
+      <div class="top">
+        <button class="btn" id="bAuto">Auto</button>
+        <button class="btn" id="bMap">Map</button>
+        <button class="btn" id="bMenu" aria-label="Pause">❚❚</button>
+      </div>
+      <div class="warp" aria-label="Time warp">
+        <button id="wDn" aria-label="Slower">‹</button><span id="wVal">1×</span><button id="wUp" aria-label="Faster">›</button>
+      </div>
+    </div>
+    <div class="apstat" id="apStat" hidden><span class="dot"></span><span id="apMsg"></span><button id="apStop" aria-label="Stop autopilot">✕</button></div>
+    <div class="zoom" id="zoomBox">
+      <button class="btn" id="zIn" aria-label="Zoom in">+</button>
+      <button class="btn" id="zOut" aria-label="Zoom out">−</button>
+    </div>
+    <div class="levels" id="levels" hidden></div>
+    <aside class="info" id="info" hidden>
+      <button class="x" id="infoX" aria-label="Close">✕</button>
+      <h3 id="infoT"></h3>
+      <div class="kv" id="infoKV"></div>
+      <p id="infoP"></p>
+    </aside>
+    <div class="sas" id="sas">
+      <button class="chipbtn on" data-sas="free">FREE</button>
+      <button class="chipbtn" data-sas="pro">PRO</button>
+      <button class="chipbtn" data-sas="retro">RETRO</button>
+    </div>
+    <div class="rot">
+      <button class="btn" id="rL" aria-label="Rotate left"><svg width="28" height="28" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M22 21a9 9 0 1 0-12 1"/><path d="M5 17l5 5 1-7"/></svg></button>
+      <button class="btn" id="rR" aria-label="Rotate right"><svg width="28" height="28" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 21a9 9 0 1 1 12 1"/><path d="M25 17l-5 5-1-7"/></svg></button>
+    </div>
+    <div class="fbottom">
+      <div class="fuel"><span>STAGE <b id="stN">1</b></span><div class="bar"><i id="fuelBar"></i></div></div>
+      <div class="fbtns">
+        <button class="btn" id="bChute">Chute</button>
+        <button class="btn primary" id="bStage">Stage</button>
+      </div>
+    </div>
+    <div class="throttle">
+      <button class="btn" id="thMax">MAX</button>
+      <div class="rail" id="rail" tabindex="0" aria-label="Throttle">
+        <div class="tick" style="bottom:25%"></div><div class="tick" style="bottom:50%"></div><div class="tick" style="bottom:75%"></div>
+        <div class="fill" id="thFill"></div><div class="val" id="thVal">0%</div>
+      </div>
+      <button class="btn" id="thCut">CUT</button>
+    </div>
+  </section>
+
+  <div id="toast" aria-live="polite"></div>
+  <div id="fps" hidden></div>
+
+  <div class="overlay" id="modal" hidden>
+    <div class="sheet">
+      <div class="mhead"><h2 id="mTitle"></h2><button class="btn ghost" id="mClose" aria-label="Close">✕</button></div>
+      <div class="mbody" id="mBody"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="pause" hidden>
+    <div class="sheet">
+      <h2 id="pTitle">Paused</h2>
+      <p id="pText">Mission goals</p>
+      <ul class="goals" id="goals"></ul>
+      <button class="btn primary" id="pResume">Resume</button>
+      <button class="btn" id="pRestart">Restart flight</button>
+      <button class="btn" id="pHangar">Back to assembly</button>
+      <button class="btn ghost" id="pSound">Sound: on</button>
+      <div class="keys">A/D rotate · W/S throttle · Z max · X cut · Space stage · P chute · M map · ,/. warp · +/− zoom</div>
+    </div>
+  </div>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/perf.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/parts.js"></script>
+<script src="js/vessel.js"></script>
+<script src="js/gl.js"></script>
+<script src="js/cosmos.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/autopilot.js"></script>
+<script src="js/render.js"></script>
+<script src="js/render2.js"></script>
+<script src="js/map.js"></script>
+<script src="js/build.js"></script>
+<script src="js/ui.js"></script>
+
+</body></html>
