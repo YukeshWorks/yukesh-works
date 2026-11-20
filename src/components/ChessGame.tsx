@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowUpDown, Bot, Crown, Lightbulb, RotateCcw, Undo2, Users, Volume2, VolumeX } from "lucide-react";
 import {
-  START_FEN, MATE_SCORE, VALUE, evaluate, findKing, inCheck, legalMoves, makeMove, other, outcome, parseFEN,
+  START_FEN, MATE_SCORE, VALUE, attackersOf, evaluate, findKing, inCheck, legalMoves, makeMove, other, outcome, parseFEN,
   positionKey, searchBestMove, toSAN,
   type Color, type Level, type Move, type Outcome, type Piece, type PieceType, type SearchResult, type State,
 } from "@/lib/chess";
@@ -24,7 +25,75 @@ type Snapshot = { state: State; move: Move | null; san: string; key: string };
 type Mode = "ai" | "local";
 type Ghost = { key: string; piece: Piece; v: number; delay: number; fade?: boolean };
 type Spark = { x: number; y: number; vx: number; vy: number; life: number; decay: number; size: number; rot: number; vr: number; color: string; kind: "shard" | "spark" | "ring" | "dust"; g: number };
-type SoundKind = "move" | "capture" | "castle" | "check" | "promote" | "win" | "lose" | "draw" | "select" | "whoosh" | "thud";
+type SoundKind = "move" | "capture" | "castle" | "check" | "promote" | "win" | "lose" | "draw" | "select" | "whoosh" | "thud"
+  | "boom" | "heartbeat" | "charge" | "zap" | "impact" | "crack" | "crown" | "choir" | "soul";
+type Pt = { x: number; y: number };
+type Soul = { key: string; x0: number; y0: number; x1: number; y1: number; color: string };
+/** The checkmate cutscene. phase: 1 freeze · 2 title · 3 charge · 4 strike · 5 impact · 6 aftermath · 7 done */
+type Cine = {
+  phase: number;
+  winner: Color;
+  atkId: number; atkT: PieceType; atkC: Color;
+  kingId: number;
+  aV: number; kV: number;
+  path: Pt[];
+  cam: { s: number; tx: number; ty: number };
+  crown: boolean;
+  kingGone: boolean;
+  fallen: Record<number, { dir: number; delay: number }> | null;
+  san: string;
+  bolts: string[];
+};
+
+const FINISHERS: Record<PieceType, { name: string; tagline: string; glow: string }> = {
+  q: { name: "Royal Judgement", tagline: "The queen passes sentence.", glow: "250, 204, 21" },
+  r: { name: "Siege Breaker", tagline: "The tower comes down on the throne.", glow: "248, 113, 113" },
+  b: { name: "Holy Lance", tagline: "Pierced by a single ray of light.", glow: "125, 211, 252" },
+  n: { name: "Cavalry Charge", tagline: "Out of nowhere, hooves of thunder.", glow: "163, 230, 53" },
+  p: { name: "Pawn's Revenge", tagline: "The smallest soldier topples the crown.", glow: "232, 121, 249" },
+  k: { name: "Regicide", tagline: "", glow: "255, 255, 255" },
+};
+const PIECE_NAME: Record<PieceType, string> = { p: "Pawn", n: "Knight", b: "Bishop", r: "Rook", q: "Queen", k: "King" };
+
+/** Points (in board units, visual orientation) from one square to another; knights take their L. */
+const pathPoints = (a: number, b: number, t: PieceType): Pt[] => {
+  const ax = (a & 7) + 0.5, ay = (a >> 3) + 0.5, bx = (b & 7) + 0.5, by = (b >> 3) + 0.5;
+  if (t !== "n") return [{ x: ax, y: ay }, { x: bx, y: by }];
+  return Math.abs(bx - ax) > Math.abs(by - ay)
+    ? [{ x: ax, y: ay }, { x: bx, y: ay }, { x: bx, y: by }]
+    : [{ x: ax, y: ay }, { x: ax, y: by }, { x: bx, y: by }];
+};
+const ptsAttr = (pts: Pt[]) => pts.map(p => `${p.x.toFixed(3)},${p.y.toFixed(3)}`).join(" ");
+const pathLen = (pts: Pt[]) => pts.slice(1).reduce((n, p, i) => n + Math.hypot(p.x - pts[i].x, p.y - pts[i].y), 0);
+/** A jagged lightning polyline along a path. */
+const boltAlong = (pts: Pt[], jag: number) => {
+  const out: Pt[] = [];
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i];
+    const n = Math.max(4, Math.round(Math.hypot(b.x - a.x, b.y - a.y) * 4));
+    const nx = -(b.y - a.y), ny = b.x - a.x, nl = Math.hypot(nx, ny) || 1;
+    for (let k = 0; k <= n; k++) {
+      const t = k / n, off = k === 0 || k === n ? 0 : (Math.random() * 2 - 1) * jag;
+      out.push({ x: a.x + (b.x - a.x) * t + (nx / nl) * off, y: a.y + (b.y - a.y) * t + (ny / nl) * off });
+    }
+  }
+  return ptsAttr(out);
+};
+const CRACKS = ["M50 18 L46 34 L55 44 L44 58 L52 72 L47 84", "M46 34 L33 41 L28 52", "M55 44 L67 50 L71 62", "M44 58 L35 66", "M52 72 L62 78"];
+
+const CrownSvg = () => (
+  <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
+    <defs>
+      <linearGradient id="chess-crown-g" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#fff3b0" /><stop offset="0.5" stopColor="#f5c542" /><stop offset="1" stopColor="#b7791f" />
+      </linearGradient>
+    </defs>
+    <path d="M14 72 L19 30 L37 52 L50 20 L63 52 L81 30 L86 72 Z" fill="url(#chess-crown-g)" stroke="#6b4206" strokeWidth="3" strokeLinejoin="round" />
+    <rect x="13" y="70" width="74" height="13" rx="3" fill="url(#chess-crown-g)" stroke="#6b4206" strokeWidth="3" />
+    {[[19, 28], [50, 17], [81, 28]].map(([x, y]) => <circle key={x} cx={x} cy={y} r="5" fill="#fff8d6" stroke="#6b4206" strokeWidth="2.5" />)}
+    <circle cx="50" cy="77" r="4" fill="#e11d48" /><circle cx="32" cy="77" r="3" fill="#2563eb" /><circle cx="68" cy="77" r="3" fill="#16a34a" />
+  </svg>
+);
 
 const LEVEL_LABEL: Record<Level, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
 const TAU = Math.PI * 2;
@@ -77,6 +146,20 @@ const useSound = () => {
       case "select": tone(1400, 0.04, "sine", 0.05); break;
       case "whoosh": noise(0.5, 0.25, 0, 500); break;
       case "thud": noise(0.25, 0.9, 0, 300); tone(70, 0.3, "sine", 0.3); break;
+      case "boom": tone(52, 1.4, "sine", 0.4, 0, 38); noise(0.7, 0.55, 0, 180); break;
+      case "heartbeat": tone(62, 0.16, "sine", 0.4); tone(55, 0.2, "sine", 0.32, 0.22); break;
+      case "charge": tone(110, 0.9, "sawtooth", 0.035, 0, 880); tone(220, 0.9, "triangle", 0.05, 0, 1320); noise(0.9, 0.12, 0, 3500); break;
+      case "zap": for (let i = 0; i < 6; i++) noise(0.05, 0.55, i * 0.055, 6500); tone(1800, 0.3, "square", 0.02, 0, 300); break;
+      case "impact": noise(0.7, 1, 0, 1600); tone(48, 0.9, "sine", 0.5, 0, 30); noise(0.1, 0.6, 0.02, 9000); break;
+      case "crack": noise(0.07, 0.6, 0, 9000); noise(0.06, 0.5, 0.08, 7000); noise(0.05, 0.4, 0.15, 8000); break;
+      case "crown": tone(2637, 0.35, "sine", 0.07); tone(3951, 0.25, "sine", 0.035); tone(1975, 0.4, "triangle", 0.03); break;
+      case "soul": tone(1200, 0.25, "sine", 0.04, 0, 2400); break;
+      case "choir": [220, 277.2, 329.6, 440, 554.4].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = i % 2 ? "triangle" : "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(0.045, t0 + 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.6);
+        o.connect(g).connect(ctx.destination); o.start(t0); o.stop(t0 + 2.7);
+      }); break;
     }
   }, []);
   useEffect(() => () => { void ctxRef.current?.close(); }, []);
@@ -190,6 +273,10 @@ const ChessGame = () => {
   const [intro, setIntro] = useState(true);
   const [boardPx, setBoardPx] = useState(480);
   const [dragSq, setDragSq] = useState<number | null>(null);
+  const [cine, setCine] = useState<Cine | null>(null);
+  const [souls, setSouls] = useState<Soul[]>([]);
+  const cameraRef = useRef<HTMLDivElement>(null);
+  const trayRefs = useRef<Record<Color, HTMLDivElement | null>>({ w: null, b: null });
 
   const snap = hist[hist.length - 1];
   const s = snap.state;
@@ -230,6 +317,7 @@ const ChessGame = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const parts = useRef<Spark[]>([]);
   const loopOn = useRef(false);
+  const timeScale = useRef(1); // < 1 = slow motion (checkmate scene)
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
@@ -243,7 +331,7 @@ const ChessGame = () => {
     const frame = (t: number) => {
       const c = canvasRef.current, ctx = c?.getContext("2d");
       if (!c || !ctx) { loopOn.current = false; return; }
-      const dt = Math.min(0.05, (t - prev) / 1000); prev = t;
+      const dt = Math.min(0.05, (t - prev) / 1000) * timeScale.current; prev = t;
       const dpr = c.width / (c.clientWidth || 1);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, c.width, c.height);
@@ -314,6 +402,22 @@ const ChessGame = () => {
       parts.current.push({ x: x + (Math.random() - 0.5) * q * 0.8, y: y + (Math.random() - 0.2) * q * 0.6, vx: (Math.random() - 0.5) * q * 1.5, vy: -q * (1.5 + Math.random() * 4), life: 1, decay: 1 + Math.random() * 0.6, size: 0.8 + Math.random() * q * 0.04, rot: 0, vr: 0, color: Math.random() < 0.6 ? "#ffe9a8" : "#ffffff", kind: "spark", g: -q * 0.8 });
     }
     parts.current.push({ x, y, vx: 0, vy: 0, life: 1, decay: 1.8, size: q * 1.8, rot: 0, vr: 0, color: "rgba(255,230,160,0.9)", kind: "ring", g: 0 });
+    runParticles();
+  }, [center, q, runParticles]);
+
+  const ringAt = useCallback((v: number, color: string, size: number, decay = 2.2) => {
+    if (reduceMotion()) return;
+    const { x, y } = center(v);
+    parts.current.push({ x, y, vx: 0, vy: 0, life: 1, decay, size, rot: 0, vr: 0, color, kind: "ring", g: 0 });
+    runParticles();
+  }, [center, runParticles]);
+  const sparksAt = useCallback((v: number, color: string, n: number, speed = 5, rise = 0) => {
+    if (reduceMotion()) return;
+    const { x, y } = center(v);
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * TAU, sp = q * (1 + Math.random() * speed);
+      parts.current.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - rise * q, life: 1, decay: 1.1 + Math.random() * 0.8, size: 0.7 + Math.random() * q * 0.05, rot: 0, vr: 0, color, kind: "spark", g: q * 2 });
+    }
     runParticles();
   }, [center, q, runParticles]);
 
@@ -403,10 +507,31 @@ const ChessGame = () => {
       const cap = m.captured;
       const key = `cap-${cap.id}-${hist.length}`;
       setGhosts(g => [...g, { key, piece: cap, v: vOf(m.capSq), delay: fly }]);
-      later(() => { shatter(vOf(m.capSq), cap.c, VALUE[cap.t] >= 500); shake(VALUE[cap.t] >= 500 ? 7 : 3); }, fly);
+      later(() => {
+        shatter(vOf(m.capSq), cap.c, VALUE[cap.t] >= 500);
+        shake(VALUE[cap.t] >= 500 ? 7 : 3);
+        // The captured piece's "soul" flies to the capturer's tray.
+        const from = spinRef.current?.querySelector(`[data-sq="${m.capSq}"]`)?.getBoundingClientRect();
+        const tray = trayRefs.current[m.piece.c]?.getBoundingClientRect();
+        if (from && tray && !reduceMotion()) {
+          const n = hist.filter(h => h.move?.captured && h.move.piece.c === m.piece.c).length;
+          const skey = `soul-${key}`;
+          setSouls(list => [...list, {
+            key: skey, x0: from.left + from.width / 2, y0: from.top + from.height / 2,
+            x1: tray.left + 8 + (n - 1) * 10, y1: tray.top + tray.height / 2,
+            color: cap.c === "w" ? "255, 246, 220" : "196, 181, 253",
+          }]);
+          later(() => setSouls(list => list.filter(x => x.key !== skey)), 900);
+          play("soul", 650);
+        }
+      }, fly);
       later(() => setGhosts(g => g.filter(x => x.key !== key)), fly + 700);
     } else {
-      later(() => dust(vTo), fly);
+      later(() => { dust(vTo); ringAt(vTo, "rgba(255,214,140,0.75)", q * 0.85, 2.8); }, fly);
+    }
+    if (m.castle) {
+      const rookTo = vOf(m.castle === "k" ? m.to - 1 : m.to + 1);
+      later(() => { sparksAt(vTo, "#fde68a", 14, 2.5, 1.5); sparksAt(rookTo, "#fde68a", 14, 2.5, 1.5); ringAt(rookTo, "rgba(253,230,138,0.8)", q * 1.1); }, fly + 90);
     }
     if (m.promo) {
       later(() => {
@@ -430,8 +555,26 @@ const ChessGame = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hist]);
 
-  /* ---------- game over sequence ---------- */
+  /* ---------- game over: the checkmate finisher cutscene ---------- */
   const pieceEls = useRef(new Map<number, HTMLDivElement>());
+  const fallenFor = (st: State, loser: Color, kV: number, instant: boolean) => {
+    const out: Record<number, { dir: number; delay: number }> = {};
+    st.board.forEach((p, sq) => {
+      if (!p || p.c !== loser || p.t === "k") return;
+      const v = vOf(sq);
+      const d = Math.hypot((v & 7) - (kV & 7), (v >> 3) - (kV >> 3));
+      out[p.id] = { dir: (v & 7) < (kV & 7) ? -1 : (v & 7) > (kV & 7) ? 1 : Math.random() < 0.5 ? -1 : 1, delay: instant ? 0 : 150 + d * 110 };
+    });
+    return out;
+  };
+  const camTo = (from: string, to: string, ms: number) => {
+    const el = cameraRef.current;
+    if (!el) return;
+    const prev = el.getAnimations();
+    el.animate([{ transform: from }, { transform: to }], { duration: ms, easing: "cubic-bezier(.2,.7,.2,1)", fill: "forwards" });
+    prev.forEach(a => a.cancel());
+  };
+
   useEffect(() => {
     if (!over) return;
     const st = stateRef.current;
@@ -440,35 +583,140 @@ const ChessGame = () => {
       later(() => setShowResult(true), 700);
       return;
     }
-    const loser = other(over.winner);
-    const k = findKing(st.board, loser);
-    const king = st.board[k];
-    const playerWon = mode === "local" || over.winner === playerColor;
-    setSpot(vOf(k));
-    if (!reduceMotion() && king) {
-      const inner = pieceEls.current.get(king.id)?.firstElementChild as HTMLElement | undefined;
-      inner?.animate(
-        [{ transform: "rotate(0deg)" }, { offset: 0.3, transform: "rotate(10deg)" }, { offset: 0.75, transform: "rotate(-98deg) translateY(10%)" }, { transform: "rotate(-90deg) translateY(8%)" }],
-        { duration: 1100, delay: 300, easing: "cubic-bezier(.5,0,.3,1)", fill: "forwards" },
-      );
-      later(() => { shatter(vOf(k), loser, true); shatter(vOf(k), loser, true); shake(10); play("thud"); }, 1400);
-      st.board.forEach((p, sq) => {
-        if (!p || p.c !== over.winner) return;
-        const v = vOf(sq);
-        (pieceEls.current.get(p.id)?.firstElementChild as HTMLElement | undefined)?.animate(
-          [{ transform: "translateY(0)" }, { offset: 0.4, transform: "translateY(-28%) scale(1.1)" }, { offset: 0.7, transform: "translateY(0) scale(1.06,0.94)" }, { transform: "translateY(0)" }],
-          { duration: 650, delay: 1500 + ((v >> 3) + (v & 7)) * 50, easing: "ease-out" },
-        );
-      });
-    }
-    later(() => { if (playerWon) setFireworks(f => f + 1); play(playerWon ? "win" : "lose"); }, 1500);
-    later(() => setShowResult(true), 2100);
-    if (mode === "ai" && over.winner === playerColor) {
+    const winner = over.winner, loser = other(winner);
+    const playerWon = mode === "local" || winner === playerColor;
+    if (mode === "ai" && winner === playerColor) {
       unlock("chess-win");
       if (level === "hard") unlock("grandmaster");
     }
+    const k = findKing(st.board, loser);
+    const king = st.board[k];
+    const atks = attackersOf(st.board, k, winner);
+    const lastTo = hist[hist.length - 1].move?.to ?? -1;
+    // The piece that just moved, if it gives check; otherwise (discovered mate) the strongest checker.
+    const atkSq = atks.includes(lastTo) ? lastTo : [...atks].sort((a, b) => VALUE[st.board[b]!.t] - VALUE[st.board[a]!.t])[0];
+    const atk = atkSq !== undefined ? st.board[atkSq] : null;
+    if (reduceMotion() || !king || !atk) { setShowResult(true); return; }
+
+    const aV = vOf(atkSq), kV = vOf(k);
+    const path = pathPoints(aV, kV, atk.t);
+    const B = boardPx, C = B / 2, Q = B / 8;
+    const ax = ((aV & 7) + 0.5) * Q, ay = ((aV >> 3) + 0.5) * Q, kx = ((kV & 7) + 0.5) * Q, ky = ((kV >> 3) + 0.5) * Q;
+    const dist = Math.hypot((aV & 7) - (kV & 7), (aV >> 3) - (kV >> 3));
+    // Zoom in, but never so far that attacker and king can't both fit between the cinema bars.
+    const sc = Math.max(1.15, Math.min(2, 5.4 / (dist + 1.7), (B * 0.82) / (Math.abs(ax - kx) + Q * 1.2), (B * 0.6) / (Math.abs(ay - ky) + Q * 1.2)));
+    let tx = -sc * ((ax + kx) / 2 - C), ty = -sc * ((ay + ky) / 2 - C);
+    // Nudge the frame so both actors sit inside the safe area (bars cover the top and bottom 10%).
+    for (let pass = 0; pass < 2; pass++) {
+      for (const [px, py] of [[ax, ay], [kx, ky]]) {
+        const sx = C + sc * (px - C) + tx, sy = C + sc * (py - C) + ty;
+        if (sx < B * 0.1) tx += B * 0.1 - sx; else if (sx > B * 0.9) tx -= sx - B * 0.9;
+        if (sy < B * 0.2) ty += B * 0.2 - sy; else if (sy > B * 0.82) ty -= sy - B * 0.82;
+      }
+    }
+    // A sliver past the board edge is fine: it disappears under the bars.
+    const lim = C * (sc - 1) + B * 0.12;
+    const clamp = (v: number) => Math.max(-lim, Math.min(lim, v));
+    tx = clamp(tx); ty = clamp(ty);
+    const tilt = (aV & 7) <= (kV & 7) ? -2.5 : 2.5;
+    const zoomed = `translate(${tx}px, ${ty}px) scale(${sc}) rotate(${tilt}deg)`;
+    const home = "translate(0px, 0px) scale(1) rotate(0deg)";
+    const fin = FINISHERS[atk.t];
+    const ph = (n: number, extra?: Partial<Cine>) => setCine(c => (c ? { ...c, phase: n, ...extra } : c));
+    const inner = (id: number) => pieceEls.current.get(id)?.firstElementChild as HTMLElement | undefined;
+
+    setCine({
+      phase: 1, winner, atkId: atk.id, atkT: atk.t, atkC: atk.c, kingId: king.id, aV, kV, path,
+      cam: { s: sc, tx, ty }, crown: false, kingGone: false, fallen: null, san: hist[hist.length - 1].san,
+      bolts: atk.t === "q" ? [boltAlong(path, 0.22), boltAlong(path, 0.3)] : [],
+    });
+    // 1. Freeze: colour drains, bars slide in, heartbeat.
+    play("boom"); play("heartbeat", 500); play("heartbeat", 1350);
+    // 2. Camera pushes in; the finisher's name card.
+    later(() => camTo(home, zoomed, 1500), 250);
+    later(() => { ph(2); play("whoosh"); }, 950);
+    // 3. Charge: the attacker powers up along the line of attack.
+    later(() => {
+      ph(3); play("charge");
+      sparksAt(aV, `rgb(${fin.glow})`, 26, 2.5, 1.5);
+      ringAt(aV, `rgba(${fin.glow},0.9)`, Q * 1.4, 1.6);
+      if (atk.t === "r") {
+        // Shockwaves pound down the file/rank towards the king.
+        const n = Math.round(dist);
+        for (let i = 1; i <= n; i++) {
+          const v = Math.round(((aV >> 3) + (((kV >> 3) - (aV >> 3)) * i) / n)) * 8 + Math.round((aV & 7) + (((kV & 7) - (aV & 7)) * i) / n);
+          later(() => { ringAt(v, `rgba(${fin.glow},0.85)`, Q * 1.2, 2.4); dust(v, 0.8); play("move"); }, i * 90);
+        }
+      }
+      if (atk.t === "b") for (let i = 1; i <= Math.round(dist); i++) {
+        const v = Math.round(((aV >> 3) + (((kV >> 3) - (aV >> 3)) * i) / Math.round(dist))) * 8 + Math.round((aV & 7) + (((kV & 7) - (aV & 7)) * i) / Math.round(dist));
+        later(() => sparksAt(v, "#e0f2fe", 10, 1.5, 2), i * 70);
+      }
+      if (atk.t === "n") { dust(aV, 2); later(() => dust(aV, 2), 200); }
+    }, 2050);
+    // 4. Strike: a phantom of the attacker dashes into the king.
+    later(() => { ph(4); play(atk.t === "q" || atk.t === "b" ? "zap" : "whoosh"); }, 2850);
+    // 5. Impact: flash, cracks, slow motion.
+    later(() => {
+      ph(5);
+      play("impact"); play("crack", 140);
+      shake(14);
+      timeScale.current = 0.35;
+      ringAt(kV, "rgba(255,255,255,0.95)", Q * 1.8, 2);
+      ringAt(kV, `rgba(${fin.glow},0.9)`, Q * 3.2, 1.3);
+      sparksAt(kV, `rgb(${fin.glow})`, 40, 6, 1);
+      sparksAt(kV, "#ffffff", 20, 4, 1);
+      inner(king.id)?.animate(
+        [{ transform: "translate(0,0)" }, { transform: "translate(-6%,0) rotate(-4deg)" }, { transform: "translate(6%,0) rotate(4deg)" }, { transform: "translate(-4%,0)" }, { transform: "translate(0,0)" }],
+        { duration: 360, iterations: 2 },
+      );
+    }, 3200);
+    // 6. The crown flies off; the king topples, then shatters.
+    later(() => { ph(5, { crown: true }); play("crown", 1150); play("crown", 1450); play("crown", 1620); }, 3550);
+    later(() => {
+      const dir = (kV & 7) >= (aV & 7) ? 1 : -1;
+      inner(king.id)?.animate(
+        [{ transform: "rotate(0deg)" }, { offset: 0.3, transform: `rotate(${-dir * 12}deg)` }, { offset: 0.8, transform: `rotate(${dir * 98}deg) translateY(10%)` }, { transform: `rotate(${dir * 90}deg) translateY(8%)` }],
+        { duration: 1000, easing: "cubic-bezier(.5,0,.3,1)", fill: "forwards" },
+      );
+    }, 3700);
+    later(() => {
+      ph(5, { crown: true, kingGone: true });
+      timeScale.current = 0.55;
+      shatter(kV, loser, true); shatter(kV, loser, true);
+      play("thud"); shake(10);
+    }, 4750);
+    // 7. Aftermath: camera pulls back, the losing army falls like dominoes, winners salute.
+    later(() => {
+      timeScale.current = 1;
+      camTo(zoomed, home, 1200);
+      ph(6, { crown: true, kingGone: true, fallen: fallenFor(stateRef.current, loser, kV, false) });
+      play("choir"); play(playerWon ? "win" : "lose", 300);
+      stateRef.current.board.forEach((p, sq) => {
+        if (!p || p.c !== winner) return;
+        const v = vOf(sq);
+        inner(p.id)?.animate(
+          [{ transform: "translateY(0)", filter: "none" }, { offset: 0.4, transform: "translateY(-30%) scale(1.12)", filter: `drop-shadow(0 0 10px rgba(${fin.glow},0.9))` }, { offset: 0.72, transform: "translateY(0) scale(1.06,0.94)" }, { transform: "translateY(0)", filter: "none" }],
+          { duration: 700, delay: 500 + ((v >> 3) + (v & 7)) * 55, easing: "ease-out" },
+        );
+      });
+    }, 5150);
+    later(() => { if (playerWon) setFireworks(f => f + 1); }, 5600);
+    later(() => { ph(7); setShowResult(true); }, 7600);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [over]);
+
+  const skipCine = () => {
+    if (!cine || cine.phase >= 6) return;
+    clearTimers();
+    cameraRef.current?.getAnimations().forEach(a => a.cancel());
+    timeScale.current = 1;
+    parts.current = [];
+    const playerWon = mode === "local" || cine.winner === playerColor;
+    setCine(c => (c ? { ...c, phase: 7, crown: false, kingGone: true, fallen: fallenFor(stateRef.current, other(c.winner), c.kV, true) } : c));
+    setShowResult(true);
+    if (playerWon) setFireworks(f => f + 1);
+  };
 
   /* ---------- computer opponent ---------- */
   const reqId = useRef(0);
@@ -581,6 +829,9 @@ const ChessGame = () => {
     reqId.current++; hintReq.current++;
     setSelected(null); setPromo(null); setHint(null); setHintBusy(false); setOver(null); setShowResult(false);
     setBanner(null); setBeam(null); setSpot(null); setThinking(false); setAiIntent(null); setGhosts([]);
+    setCine(null); setSouls([]);
+    timeScale.current = 1;
+    cameraRef.current?.getAnimations().forEach(a => a.cancel());
   };
 
   const newGame = (opts?: { player?: Color; mode?: Mode }) => {
@@ -707,10 +958,12 @@ const ChessGame = () => {
     }
     if (d.wasSelected) setSelected(null);
   };
+  const skipRef = useRef(skipCine);
+  skipRef.current = skipCine;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (document.body.dataset.palette === "open") return;
-      if (e.key === "Escape") { setSelected(null); setPromo(null); }
+      if (e.key === "Escape") { setSelected(null); setPromo(null); skipRef.current(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -792,10 +1045,12 @@ const ChessGame = () => {
             {name}
             {tag && <span className="ml-1.5 text-[10px] font-medium text-white/40 uppercase tracking-wider">{tag}</span>}
           </p>
-          <div className="flex items-center h-4 -space-x-1.5">
-            {capturedBy[side].map((t, i) => (
-              <PieceSvg key={i} t={t} c={other(side)} className="w-4 h-4" style={{ animation: "chessPop .45s cubic-bezier(.34,1.56,.64,1) both" }} />
-            ))}
+          <div ref={el => { trayRefs.current[side] = el; }} className="flex items-center h-4 -space-x-1.5">
+            {capturedBy[side].map((t, i) => {
+              const newest = i === capturedBy[side].length - 1 && lastMove?.captured && lastMove.piece.c === side;
+              const delay = newest && lastMove ? flightMs(lastMove.from, lastMove.to, lastMove.piece.t === "n") + 700 : 0;
+              return <PieceSvg key={i} t={t} c={other(side)} className="w-4 h-4" style={{ animation: `chessPop .45s cubic-bezier(.34,1.56,.64,1) ${delay}ms both` }} />;
+            })}
             {diff > 0 && <span className="pl-2.5 text-[10px] font-bold text-emerald-300">+{diff}</span>}
           </div>
         </div>
@@ -855,7 +1110,7 @@ const ChessGame = () => {
                   <div className={intro ? "chess-board-in" : ""}>
                     <div
                       ref={spinRef}
-                      className={`relative select-none touch-none rounded-md ${canMove ? "chess-board-live" : ""}`}
+                      className={`relative select-none touch-none rounded-md ${canMove ? "chess-board-live" : ""} ${cine && cine.phase < 7 ? "overflow-hidden" : ""}`}
                       style={{
                         width: boardPx,
                         height: boardPx,
@@ -868,8 +1123,10 @@ const ChessGame = () => {
                       role="grid"
                       aria-label="Chess board"
                     >
+                      {/* Camera: everything on the board plane; zooms in for the checkmate scene */}
+                      <div ref={cameraRef} className="absolute inset-0" style={{ transformOrigin: "50% 50%" }}>
                       {/* Squares */}
-                      <div className="absolute inset-0 grid grid-cols-8 grid-rows-8 rounded-md overflow-hidden">
+                      <div className="absolute inset-0 grid grid-cols-8 grid-rows-8 rounded-md overflow-hidden" style={{ filter: cine && cine.phase < 6 ? "grayscale(0.75) brightness(0.6)" : "none", transition: "filter .8s ease" }}>
                         {Array.from({ length: 64 }, (_, d) => {
                           const sq = orientation === "w" ? d : 63 - d;
                           const r = sq >> 3, c = sq & 7;
@@ -893,7 +1150,8 @@ const ChessGame = () => {
                               {isLast && <div className="absolute inset-0 bg-amber-300/30 pointer-events-none" style={{ animation: "chessFadeIn .4s ease-out both" }} />}
                               {isHint && <div className="absolute inset-0 bg-emerald-400/30 pointer-events-none" />}
                               {selected === sq && <div className="absolute inset-0 pointer-events-none" style={{ background: "rgba(255,214,102,0.5)", boxShadow: "inset 0 0 0 3px rgba(255,240,190,0.8)" }} />}
-                              {checkSq === sq && <div className="absolute inset-0 pointer-events-none chess-check" />}
+                              {selected === sq && <div className="absolute inset-[6%] rounded-full pointer-events-none chess-sel-ring" />}
+                              {checkSq === sq && !cine && <div className="absolute inset-0 pointer-events-none chess-check" />}
                               {aiIntent === sq && <div className="absolute inset-0 pointer-events-none chess-intent" />}
                               {tgt && !tgt.captured && (
                                 <div className="chess-dot absolute rounded-full pointer-events-none" style={{ inset: "37%", background: "rgba(25,18,10,0.38)", animation: `chessDotIn .3s cubic-bezier(.34,1.56,.64,1) ${dist * 30}ms both` }} />
@@ -931,11 +1189,40 @@ const ChessGame = () => {
                             className="absolute left-0 top-0 w-[12.5%] h-[12.5%] pointer-events-none z-10"
                             style={{ transform: `translate(${(v & 7) * 100}%, ${(v >> 3) * 100}%)` }}
                           >
-                            <div className="w-full h-full" style={{ transformOrigin: "50% 88%", opacity: dragSq === sq ? 0.25 : 1, transition: "opacity .15s" }}>
-                              <div className={`w-full h-full ${lifted && dragSq !== sq ? "chess-lift" : ""} ${aiIntent === sq ? "chess-intent-piece" : ""}`}>
-                                <PieceSvg t={p.t} c={p.c} className="w-full h-full chess-piece-svg" />
-                              </div>
-                            </div>
+                            {(() => {
+                              const fall = cine?.fallen?.[p.id];
+                              const actor = cine && (p.id === cine.atkId || p.id === cine.kingId);
+                              const dim = cine && cine.phase < 6 && !actor;
+                              const gone = cine?.kingGone && p.id === cine.kingId;
+                              return (
+                                <div
+                                  className="w-full h-full"
+                                  style={{
+                                    transformOrigin: "50% 88%",
+                                    opacity: dragSq === sq ? 0.25 : gone ? 0 : fall ? 0.6 : 1,
+                                    transform: fall ? `rotate(${fall.dir * 82}deg) translateY(8%)` : undefined,
+                                    filter: fall ? "grayscale(1) brightness(0.45)" : dim ? "grayscale(0.85) brightness(0.5)" : undefined,
+                                    transition: fall
+                                      ? `transform .9s cubic-bezier(.55,0,.35,1.4) ${fall.delay}ms, filter .9s ${fall.delay}ms, opacity .9s ${fall.delay}ms`
+                                      : "opacity .2s, filter .7s, transform .7s cubic-bezier(.34,1.56,.64,1)",
+                                  }}
+                                >
+                                  <div
+                                    className={`relative w-full h-full ${lifted && dragSq !== sq ? "chess-lift" : ""} ${aiIntent === sq ? "chess-intent-piece" : ""} ${cine && p.id === cine.atkId && cine.phase >= 3 && cine.phase <= 5 ? "chess-aura" : ""}`}
+                                    style={cine && p.id === cine.atkId ? ({ ["--g" as string]: FINISHERS[cine.atkT].glow } as React.CSSProperties) : undefined}
+                                  >
+                                    <PieceSvg t={p.t} c={p.c} className="w-full h-full chess-piece-svg" />
+                                    {cine && p.id === cine.kingId && cine.phase === 5 && !cine.kingGone && (
+                                      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" style={{ filter: "drop-shadow(0 0 3px rgba(255,255,255,0.95)) drop-shadow(0 0 6px rgba(255,80,80,0.8))" }} aria-hidden="true">
+                                        {CRACKS.map((d, i) => (
+                                          <path key={i} d={d} fill="none" stroke="#fff" strokeWidth={i ? 2.2 : 3.2} strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray="1" strokeDashoffset="1" style={{ animation: `chessCrack .28s ease-out ${0.05 + i * 0.09}s forwards` }} />
+                                        ))}
+                                      </svg>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })()}
                           </div>
                         );
                       })}
@@ -981,6 +1268,147 @@ const ChessGame = () => {
                           animation: "chessFadeIn .9s ease-out both",
                         }} />
                       )}
+
+                      {/* Light trail of the last move */}
+                      {lastMove && !cine && (() => {
+                        const pts = pathPoints(vOf(lastMove.from), vOf(lastMove.to), lastMove.piece.t);
+                        const a = pts[0], b = pts[pts.length - 1];
+                        const len = pathLen(pts);
+                        return (
+                          <svg key={`trail-${hist.length}`} viewBox="0 0 8 8" className="absolute inset-0 w-full h-full pointer-events-none z-[6]" aria-hidden="true">
+                            <defs>
+                              <linearGradient id="chess-trail-g" gradientUnits="userSpaceOnUse" x1={a.x} y1={a.y} x2={b.x} y2={b.y}>
+                                <stop offset="0" stopColor="rgba(255,214,102,0)" /><stop offset="1" stopColor="rgba(255,236,170,0.95)" />
+                              </linearGradient>
+                            </defs>
+                            <polyline points={ptsAttr(pts)} fill="none" stroke="url(#chess-trail-g)" strokeWidth="0.2" strokeLinecap="round" strokeLinejoin="round"
+                              strokeDasharray={len} style={{ ["--len" as string]: len, animation: "chessTrail 1.2s ease-out both" } as React.CSSProperties} />
+                          </svg>
+                        );
+                      })()}
+
+                      {/* Check laser: the line of attack onto the king */}
+                      {checkSq !== null && !cine && attackersOf(s.board, checkSq, other(s.turn)).map(a => {
+                        const pts = pathPoints(vOf(a), vOf(checkSq), s.board[a]!.t);
+                        return (
+                          <svg key={`laser-${a}-${hist.length}`} viewBox="0 0 8 8" className="absolute inset-0 w-full h-full pointer-events-none z-[26]" aria-hidden="true"
+                            style={{ filter: "drop-shadow(0 0 4px rgba(255,40,70,0.9))", animation: "chessFadeIn .4s ease-out .45s both" }}>
+                            <polyline points={ptsAttr(pts)} fill="none" stroke="rgba(255,60,80,0.3)" strokeWidth="0.24" strokeLinecap="round" strokeLinejoin="round" />
+                            <polyline points={ptsAttr(pts)} fill="none" stroke="rgba(255,150,160,0.95)" strokeWidth="0.06" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="0.2 0.14" style={{ animation: "chessLaserFlow .5s linear infinite" }} />
+                          </svg>
+                        );
+                      })}
+
+                      {/* Checkmate scene: twin spotlight on attacker and king */}
+                      {cine && cine.phase < 6 && (() => {
+                        const pos = (v: number) => `${((v & 7) + 0.5) * 12.5}% ${((v >> 3) + 0.5) * 12.5}%`;
+                        const m = `radial-gradient(circle at ${pos(cine.aV)}, transparent 0 5.5%, #000 12%), radial-gradient(circle at ${pos(cine.kV)}, transparent 0 5.5%, #000 12%)`;
+                        return <div className="absolute inset-0 pointer-events-none z-[24]" style={{ background: "rgba(0,0,0,0.5)", maskImage: m, WebkitMaskImage: m, maskComposite: "intersect", WebkitMaskComposite: "source-in", animation: "chessFadeIn .8s both" }} />;
+                      })()}
+
+                      {/* Checkmate scene: the line of attack charges up (lightning for the queen, a lance for the bishop) */}
+                      {cine && cine.phase >= 3 && cine.phase <= 5 && (() => {
+                        const fin = FINISHERS[cine.atkT];
+                        const len = pathLen(cine.path);
+                        return (
+                          <svg viewBox="0 0 8 8" className="absolute inset-0 w-full h-full pointer-events-none z-[28]" aria-hidden="true"
+                            style={{ filter: `drop-shadow(0 0 6px rgba(${fin.glow},0.95))`, animation: cine.phase === 5 ? "chessFadeOutQuick .7s ease-out .25s both" : undefined }}>
+                            {cine.atkT === "b" && <polyline points={ptsAttr(cine.path)} fill="none" stroke={`rgba(${fin.glow},0.35)`} strokeWidth="0.6" strokeLinecap="round" style={{ animation: "chessBeamPulse .22s ease-in-out infinite alternate" }} />}
+                            <polyline points={ptsAttr(cine.path)} fill="none" stroke={`rgba(${fin.glow},0.95)`} strokeWidth={cine.atkT === "b" ? 0.16 : 0.08} strokeLinecap="round" strokeLinejoin="round"
+                              strokeDasharray={len} style={{ ["--len" as string]: len, animation: "chessDrawLen .55s ease-out both" } as React.CSSProperties} />
+                            {cine.bolts.map((b, i) => (
+                              <polyline key={i} points={b} fill="none" stroke={i ? "#ffffff" : "#fef08a"} strokeWidth={i ? 0.035 : 0.065} strokeLinejoin="bevel" style={{ animation: `chessBolt .14s steps(2) ${i * 0.07}s infinite` }} />
+                            ))}
+                          </svg>
+                        );
+                      })()}
+
+                      {/* Checkmate scene: a phantom of the attacker strikes the king, with afterimages */}
+                      {cine && cine.phase === 4 && (() => {
+                        const fin = FINISHERS[cine.atkT];
+                        const pts = cine.path, p0 = pts[0], pl = pts[pts.length - 1];
+                        const pm = pts.length === 3 ? pts[1] : { x: (p0.x + pl.x) / 2, y: (p0.y + pl.y) / 2 };
+                        const prev = pts.length === 3 ? pts[1] : p0;
+                        const dl = Math.hypot(pl.x - prev.x, pl.y - prev.y) || 1;
+                        const end = { x: pl.x - ((pl.x - prev.x) / dl) * 0.3, y: pl.y - ((pl.y - prev.y) / dl) * 0.3 };
+                        const pc = (v: number) => `${(v - 0.5) * 100}%`;
+                        const vars = { "--x0": pc(p0.x), "--y0": pc(p0.y), "--xm": pc(pm.x), "--ym": pc(pm.y), "--x1": pc(end.x), "--y1": pc(end.y), "--lift": cine.atkT === "n" ? "-70%" : "-14%" };
+                        return [3, 2, 1, 0].map(i => (
+                          <div key={i} className="absolute left-0 top-0 w-[12.5%] h-[12.5%] pointer-events-none z-[34]"
+                            style={{ ...vars, ["--o" as string]: 1 - i * 0.24, animation: `chessPhantom .36s cubic-bezier(.55,0,.85,.4) ${i * 40}ms both`, filter: `brightness(${1.7 - i * 0.15}) drop-shadow(0 0 ${9 - i * 2}px rgba(${fin.glow},0.95))` } as React.CSSProperties}>
+                            <PieceSvg t={cine.atkT} c={cine.atkC} className="w-full h-full" />
+                          </div>
+                        ));
+                      })()}
+
+                      {/* Checkmate scene: the crown flies off and clatters across the board */}
+                      {cine?.crown && (() => {
+                        const kc = cine.kV & 7;
+                        const dir = kc >= 6 ? -1 : kc <= 1 ? 1 : kc >= (cine.aV & 7) ? 1 : -1;
+                        return (
+                          <div className="absolute left-0 top-0 w-[12.5%] h-[12.5%] pointer-events-none z-[31]" style={{ transform: `translate(${(cine.kV & 7) * 100}%, ${(cine.kV >> 3) * 100}%)` }}>
+                            <div className="absolute" style={{ left: "22%", top: "2%", width: "56%", height: "56%", ["--dir" as string]: dir, animation: "chessCrownFly 1.7s cubic-bezier(.3,.1,.3,1) forwards", filter: "drop-shadow(0 4px 4px rgba(0,0,0,0.6))" } as React.CSSProperties}>
+                              <CrownSvg />
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      </div>
+                      {/* end camera */}
+
+                      {/* Checkmate scene overlays (not zoomed): cinema bars, speed lines, title card, flash */}
+                      {cine && (() => {
+                        const fin = FINISHERS[cine.atkT];
+                        const Q = boardPx / 8, C = boardPx / 2;
+                        const ksx = C + cine.cam.s * (((cine.kV & 7) + 0.5) * Q - C) + cine.cam.tx;
+                        const ksy = C + cine.cam.s * (((cine.kV >> 3) + 0.5) * Q - C) + cine.cam.ty;
+                        const barAnim = cine.phase < 6 ? "chessBarIn .7s cubic-bezier(.7,0,.3,1) both" : "chessBarOut .7s cubic-bezier(.7,0,.3,1) both";
+                        const winnerName = mode === "ai" ? (cine.winner === playerColor ? "You win" : "The computer wins") : `${cine.winner === "w" ? "White" : "Black"} wins`;
+                        return (
+                          <>
+                            {(cine.phase === 3 || cine.phase === 4) && (
+                              <div className="absolute pointer-events-none z-[43]" style={{
+                                left: ksx, top: ksy, width: boardPx * 2.4, height: boardPx * 2.4,
+                                background: `repeating-conic-gradient(from 0deg, rgba(${fin.glow},0.16) 0deg 1.1deg, transparent 1.1deg 6.5deg)`,
+                                maskImage: "radial-gradient(circle, transparent 0 10%, #000 34%)", WebkitMaskImage: "radial-gradient(circle, transparent 0 10%, #000 34%)",
+                                animation: "chessSpeed .24s steps(3) infinite",
+                              }} />
+                            )}
+                            <div className="absolute left-0 right-0 top-0 z-[44] bg-black pointer-events-none" style={{ height: "10%", transformOrigin: "top", animation: barAnim }} />
+                            <div className="absolute left-0 right-0 bottom-0 z-[44] bg-black pointer-events-none flex items-center justify-center" style={{ height: "10%", transformOrigin: "bottom", animation: barAnim }}>
+                              <span className="text-white/70 tracking-[0.25em] uppercase font-semibold" style={{ fontSize: Math.max(9, boardPx * 0.022), animation: "chessFadeIn .6s ease-out .8s both" }}>
+                                {cine.atkC === "w" ? "White" : "Black"} {PIECE_NAME[cine.atkT]} · {cine.san}
+                              </span>
+                            </div>
+                            {cine.phase >= 2 && cine.phase <= 5 && (
+                              <div className="absolute left-0 right-0 z-[46] pointer-events-none flex flex-col items-start" style={{ top: "13%", padding: "0 6%", animation: cine.phase >= 4 ? "chessCardOut .45s cubic-bezier(.7,0,.8,.4) both" : "chessCardIn .6s cubic-bezier(.16,1,.3,1) both" }}>
+                                <span className="font-bold uppercase" style={{ fontSize: Math.max(9, boardPx * 0.02), letterSpacing: "0.5em", color: `rgb(${fin.glow})` }}>Finisher</span>
+                                <span className="font-display font-black italic leading-none" style={{ fontSize: boardPx * 0.085, color: "#fff", textShadow: `0 0 18px rgba(${fin.glow},0.9), 3px 3px 0 rgba(0,0,0,0.6)` }}>{fin.name}</span>
+                                <span className="mt-1 text-white/80" style={{ fontSize: Math.max(11, boardPx * 0.026), textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}>{fin.tagline}</span>
+                                <span className="mt-2 h-[2px] w-3/5" style={{ background: `linear-gradient(90deg, rgb(${fin.glow}), transparent)`, transformOrigin: "left", animation: "chessUnderline .7s ease-out .2s both" }} />
+                              </div>
+                            )}
+                            {cine.phase === 5 && <div className="absolute inset-0 z-[47] pointer-events-none bg-white" style={{ animation: "chessFlash .6s ease-out both" }} />}
+                            {cine.phase === 6 && (
+                              <div className="absolute inset-0 z-[46] flex flex-col items-center justify-center pointer-events-none">
+                                <p className="font-display font-black" style={{ fontSize: boardPx * 0.105, letterSpacing: "0.1em" }}>
+                                  {"CHECKMATE".split("").map((ch, i) => (
+                                    <span key={i} className="inline-block bg-gradient-to-b from-amber-100 to-amber-400 bg-clip-text text-transparent" style={{ animation: `chessLetterSlam .5s cubic-bezier(.2,1.5,.4,1) ${i * 0.06}s both`, filter: "drop-shadow(0 4px 0 rgba(0,0,0,0.6))" }}>{ch}</span>
+                                  ))}
+                                </p>
+                                <p className="text-white font-semibold" style={{ fontSize: Math.max(12, boardPx * 0.032), textShadow: "0 2px 8px rgba(0,0,0,0.9)", animation: "chessFadeIn .6s ease-out .7s both" }}>{winnerName} · {fin.name}</p>
+                              </div>
+                            )}
+                            {cine.phase < 6 && (
+                              <button type="button" onPointerDown={e => e.stopPropagation()} onClick={skipCine}
+                                className="absolute top-1.5 right-2 z-[48] px-2.5 py-1 rounded-md text-[11px] font-semibold text-white/70 hover:text-white bg-white/10 hover:bg-white/20 transition-colors"
+                                style={{ animation: "chessFadeIn .4s ease-out 1s both" }}>
+                                Skip ›
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
 
                       {/* CHECK banner */}
                       {banner !== null && (
@@ -1066,7 +1494,7 @@ const ChessGame = () => {
               {[
                 { label: "New", icon: RotateCcw, run: () => newGame(), disabled: false },
                 { label: "Undo", icon: Undo2, run: undo, disabled: hist.length <= 1 || (mode === "ai" && thinking && hist.length <= 2) },
-                { label: "Flip", icon: ArrowUpDown, run: flip, disabled: false },
+                { label: "Flip", icon: ArrowUpDown, run: flip, disabled: !!cine && cine.phase < 7 },
                 { label: hintBusy ? "…" : "Hint", icon: Lightbulb, run: askHint, disabled: !canMove || hintBusy },
                 { label: soundOn ? "Sound" : "Muted", icon: soundOn ? Volume2 : VolumeX, run: () => setSoundOn(v => !v), disabled: false },
               ].map(b => (
@@ -1101,14 +1529,26 @@ const ChessGame = () => {
         </div>
       </div>
 
-      {/* Piece following the pointer while dragging */}
-      {dragSq !== null && s.board[dragSq] && (
+      {/* Piece following the pointer while dragging (portalled: a transformed ancestor would offset "fixed") */}
+      {dragSq !== null && s.board[dragSq] && createPortal(
         <div ref={ghostRef} className="fixed left-0 top-0 z-[70] pointer-events-none" style={{ width: q * 1.3, height: q * 1.3, transform: `translate(${-9999}px, 0)`, transition: "transform 0.04s linear" }}>
           <PieceSvg t={s.board[dragSq]!.t} c={s.board[dragSq]!.c} className="w-full h-full" style={{ filter: "drop-shadow(0 18px 14px rgba(0,0,0,0.55))" }} />
-        </div>
+        </div>,
+        document.body,
       )}
 
-      <Fireworks run={fireworks} />
+      {createPortal(<Fireworks run={fireworks} />, document.body)}
+      {souls.length > 0 && createPortal(
+        <>
+          {souls.map(sl => (
+            <div key={sl.key} className="fixed left-0 top-0 z-[75] pointer-events-none"
+              style={{ ["--x0" as string]: `${sl.x0}px`, ["--y0" as string]: `${sl.y0}px`, ["--x1" as string]: `${sl.x1}px`, ["--y1" as string]: `${sl.y1}px`, animation: "chessSoul .75s cubic-bezier(.5,0,.3,1) both" } as React.CSSProperties}>
+              <span className="block w-3.5 h-3.5 -ml-[7px] -mt-[7px] rounded-full" style={{ background: `radial-gradient(circle, #fff, rgba(${sl.color},0.95) 45%, rgba(${sl.color},0) 72%)`, boxShadow: `0 0 16px 5px rgba(${sl.color},0.65)` }} />
+            </div>
+          ))}
+        </>,
+        document.body,
+      )}
 
       <style>{`
         .chess-piece-svg { filter: drop-shadow(0 3px 2px rgba(0,0,0,0.45)); }
@@ -1146,6 +1586,47 @@ const ChessGame = () => {
         @keyframes chessCrown { from { opacity: 0; transform: translateY(-30px) rotate(-30deg) scale(0.4); } to { opacity: 1; transform: none; } }
         @keyframes chessLetter { from { opacity: 0; transform: translateY(-24px) scale(1.6); } to { opacity: 1; transform: none; } }
         @keyframes chessTurnRing { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.35); } }
+        .chess-sel-ring { border: 2px solid rgba(255,236,170,0.9); animation: chessSelRing 1.2s ease-out infinite; }
+        @keyframes chessSelRing { 0% { opacity: 0.9; transform: scale(0.7); } 100% { opacity: 0; transform: scale(1.25); } }
+        .chess-aura { animation: chessAura .45s ease-in-out infinite alternate; }
+        @keyframes chessAura { from { filter: drop-shadow(0 0 4px rgba(var(--g),0.8)) brightness(1.1); transform: translateY(-4%) scale(1.06); } to { filter: drop-shadow(0 0 16px rgba(var(--g),1)) brightness(1.4); transform: translateY(-10%) scale(1.14); } }
+        @keyframes chessTrail { 0% { stroke-dashoffset: var(--len); opacity: 0.9; } 35% { stroke-dashoffset: 0; opacity: 0.75; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+        @keyframes chessLaserFlow { to { stroke-dashoffset: -0.34; } }
+        @keyframes chessDrawLen { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+        @keyframes chessBolt { 0% { opacity: 1; } 50% { opacity: 0.15; } 100% { opacity: 1; } }
+        @keyframes chessBeamPulse { from { opacity: 0.5; } to { opacity: 1; } }
+        @keyframes chessFadeOutQuick { to { opacity: 0; } }
+        @keyframes chessPhantom {
+          0% { transform: translate(var(--x0), var(--y0)) translateY(0%) scale(1.05); opacity: var(--o); }
+          55% { transform: translate(var(--xm), var(--ym)) translateY(var(--lift)) scale(1.22); opacity: var(--o); }
+          92% { transform: translate(var(--x1), var(--y1)) translateY(0%) scale(1.32); opacity: var(--o); }
+          100% { transform: translate(var(--x1), var(--y1)) translateY(0%) scale(1.4); opacity: 0; }
+        }
+        @keyframes chessCrack { to { stroke-dashoffset: 0; } }
+        @keyframes chessCrownFly {
+          0% { transform: translate(0, 10%) rotate(0deg) scale(0.7); opacity: 0; }
+          6% { transform: translate(0, -25%) rotate(0deg) scale(1); opacity: 1; }
+          38% { transform: translate(calc(var(--dir) * 90%), -330%) rotate(calc(var(--dir) * 380deg)) scale(1.15); }
+          68% { transform: translate(calc(var(--dir) * 170%), 70%) rotate(calc(var(--dir) * 600deg)) scale(1); }
+          80% { transform: translate(calc(var(--dir) * 200%), 15%) rotate(calc(var(--dir) * 650deg)); }
+          90% { transform: translate(calc(var(--dir) * 222%), 70%) rotate(calc(var(--dir) * 700deg)); }
+          95% { transform: translate(calc(var(--dir) * 229%), 58%) rotate(calc(var(--dir) * 712deg)); }
+          100% { transform: translate(calc(var(--dir) * 233%), 70%) rotate(calc(var(--dir) * 736deg)); opacity: 1; }
+        }
+        @keyframes chessBarIn { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+        @keyframes chessBarOut { from { transform: scaleY(1); } to { transform: scaleY(0); } }
+        @keyframes chessSpeed { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); } 33% { transform: translate(-50%, -50%) rotate(2deg) scale(1.04); } 66% { transform: translate(-50%, -50%) rotate(-1.5deg) scale(0.98); } 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); } }
+        @keyframes chessCardIn { from { opacity: 0; transform: translateX(-60px) skewX(-12deg); } to { opacity: 1; transform: none; } }
+        @keyframes chessCardOut { to { opacity: 0; transform: translateX(80px) skewX(12deg); } }
+        @keyframes chessUnderline { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+        @keyframes chessFlash { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+        @keyframes chessLetterSlam { 0% { opacity: 0; transform: translateY(-40px) scale(2.2); } 100% { opacity: 1; transform: none; } }
+        @keyframes chessSoul {
+          0% { transform: translate(var(--x0), var(--y0)) scale(0.3); opacity: 0; }
+          15% { transform: translate(var(--x0), calc(var(--y0) - 10px)) scale(1.3); opacity: 1; }
+          55% { transform: translate(calc((var(--x0) + var(--x1)) / 2), calc((var(--y0) + var(--y1)) / 2 - 80px)) scale(1); opacity: 1; }
+          100% { transform: translate(var(--x1), var(--y1)) scale(0.5); opacity: 0.2; }
+        }
         @keyframes chessFloat { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-30px) rotate(6deg); } }
       `}</style>
     </section>

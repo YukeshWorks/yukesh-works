@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { START_FEN, legalMoves, makeMove, outcome, parseFEN, perft, positionKey, searchBestMove, sqName, toSAN } from "@/lib/chess";
+import { START_FEN, attackersOf, findKing, legalMoves, makeMove, outcome, parseFEN, perft, positionKey, searchBestMove, sqName, toSAN } from "@/lib/chess";
 
 // Reference node counts from the standard perft suite.
 const CASES: [string, string, number[]][] = [
@@ -32,9 +32,14 @@ const play = (fen: string, sans: string[]) => {
 };
 
 describe("game rules", () => {
-  it("detects fool's mate", () => {
+  it("detects fool's mate and who delivered it", () => {
     const { s, keys } = play(START_FEN, ["f3", "e5", "g4", "Qh4"]);
     expect(outcome(s, keys)).toEqual({ kind: "checkmate", winner: "b" });
+    expect(attackersOf(s.board, findKing(s.board, "w"), "b").map(sqName)).toEqual(["h4"]);
+  });
+  it("finds every checker in a double check", () => {
+    const s = parseFEN("4k3/8/8/8/8/5n2/8/4K2r w - - 0 1"); // rook h1 + knight f3 both hit e1
+    expect(attackersOf(s.board, findKing(s.board, "w"), "b").map(sqName).sort()).toEqual(["f3", "h1"]);
   });
   it("writes SAN with check, mate and castling", () => {
     const s = parseFEN("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");

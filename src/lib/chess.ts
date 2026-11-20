@@ -116,6 +116,40 @@ export function isAttacked(b: (Piece | null)[], sq: number, by: Color): boolean 
   return false;
 }
 
+/** Squares of `by` pieces that attack `sq` (used to find who delivers check or mate). */
+export function attackersOf(b: (Piece | null)[], sq: number, by: Color): number[] {
+  const out: number[] = [];
+  const r = sq >> 3, c = sq & 7;
+  const pr = by === "w" ? r + 1 : r - 1;
+  if (pr >= 0 && pr < 8) {
+    for (const dc of [-1, 1]) {
+      const cc = c + dc;
+      if (cc < 0 || cc > 7) continue;
+      const p = b[pr * 8 + cc];
+      if (p && p.c === by && p.t === "p") out.push(pr * 8 + cc);
+    }
+  }
+  for (const [list, type] of [[KN, "n"], [KG, "k"]] as const) {
+    for (const [dr, dc] of list) {
+      const rr = r + dr, cc = c + dc;
+      if (rr < 0 || rr > 7 || cc < 0 || cc > 7) continue;
+      const p = b[rr * 8 + cc];
+      if (p && p.c === by && p.t === type) out.push(rr * 8 + cc);
+    }
+  }
+  for (const [dirs, kinds] of [[DIAG, "bq"], [ORTH, "rq"]] as const) {
+    for (const [dr, dc] of dirs) {
+      let rr = r + dr, cc = c + dc;
+      while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8) {
+        const p = b[rr * 8 + cc];
+        if (p) { if (p.c === by && kinds.includes(p.t)) out.push(rr * 8 + cc); break; }
+        rr += dr; cc += dc;
+      }
+    }
+  }
+  return out;
+}
+
 export function findKing(b: (Piece | null)[], c: Color): number {
   for (let i = 0; i < 64; i++) { const p = b[i]; if (p && p.t === "k" && p.c === c) return i; }
   return -1;
