@@ -6,6 +6,7 @@ import PortfolioModal from "./PortfolioModal";
 import ContactModal from "./ContactModal";
 import VideoBackground from "./VideoBackground";
 import AudioController from "./AudioController";
+import { Magnetic, PointerTilt, ScrambleText } from "./HeroFx";
 
 const formatTime = (date: Date) => date.toLocaleTimeString("en-US", {
   hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
@@ -90,7 +91,7 @@ const HomePage = () => {
       </div>
 
       <div className="container mx-auto px-6 relative z-10 pt-16">
-        <div className="max-w-lg">
+        <PointerTilt className="max-w-lg">
           <div
             className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-2xl glass text-[10px] font-heading tracking-[0.2em] uppercase border-2 border-foreground/20 transition-all duration-500 ease-out"
             style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(-30px)", transitionDelay: "200ms" }}
@@ -108,7 +109,7 @@ const HomePage = () => {
           >
             <span className="text-foreground/90 font-heading text-2xl md:text-3xl lg:text-4xl tracking-[0.15em] uppercase" style={{ textShadow: "2px 2px 0px hsl(var(--primary) / 0.3)" }}>Hi, I'm</span>
             <br />
-            <span className="gradient-text breathing-glow font-display" style={{ textShadow: "4px 4px 0px rgba(0,0,0,0.3)", fontSize: "110%" }}>Yukesh Kumar</span>
+            <span className="gradient-text breathing-glow font-display" style={{ textShadow: "4px 4px 0px rgba(0,0,0,0.3)", fontSize: "110%" }}><ScrambleText text="Yukesh Kumar" play={contentVisible} /></span>
           </h1>
 
           <p
@@ -119,9 +120,10 @@ const HomePage = () => {
           </p>
 
           <div
-            className="flex flex-wrap gap-3 mt-6 transition-all duration-500 ease-out"
+            className="flex flex-wrap items-start gap-3 mt-6 transition-all duration-500 ease-out"
             style={{ opacity: contentVisible ? 1 : 0, transform: contentVisible ? "translateX(0)" : "translateX(30px)", transitionDelay: "650ms" }}
           >
+            <Magnetic>
             <button
               type="button"
               onClick={() => setIsPortfolioOpen(true)}
@@ -130,6 +132,8 @@ const HomePage = () => {
             >
               View Work
             </button>
+            </Magnetic>
+            <Magnetic>
             <button
               type="button"
               onClick={() => setIsContactOpen(true)}
@@ -138,6 +142,8 @@ const HomePage = () => {
             >
               Contact
             </button>
+            </Magnetic>
+            <Magnetic>
             <a
               href="https://t.me/Yukesh_tg"
               target="_blank"
@@ -146,6 +152,7 @@ const HomePage = () => {
             >
               Telegram
             </a>
+            </Magnetic>
             <div className="services-cta-wrap">
               <span className="services-cta-bubble" aria-hidden="true">NEW · Tap to explore</span>
               <Link to="/services" className="services-cta-link px-5 py-2.5 rounded-2xl glass text-xs font-heading uppercase tracking-[0.2em] text-primary border-2 border-primary/70 inline-flex items-center justify-center">Digital Services</Link>
@@ -165,7 +172,7 @@ const HomePage = () => {
               <a aria-label="WhatsApp" href="https://wa.me/918189936361" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-xl glass flex items-center justify-center hover:scale-110 hover:text-primary transition-all duration-200 border-2 border-foreground/20"><MessageCircle className="w-4 h-4" /></a>
             </div>
           </div>
-        </div>
+        </PointerTilt>
       </div>
 
       <Clock />

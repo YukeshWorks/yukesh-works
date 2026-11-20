@@ -281,6 +281,7 @@ const PasswordLockPage = ({ onBack, onUnlock }: PasswordLockPageProps) => {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
+      if (document.body.dataset.palette === "open") return;
       if (e.key >= "0" && e.key <= "9") handleDigit(e.key);
       else if (e.key === "Backspace") handleDelete();
     };

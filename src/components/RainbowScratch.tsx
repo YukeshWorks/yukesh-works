@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { unlock } from "@/lib/siteEvents";
 import { RotateCcw } from "lucide-react";
 
 /*
@@ -192,6 +193,7 @@ const RainbowScratch = () => {
     if (pct >= REVEAL_AT && !revealedRef.current) {
       revealedRef.current = true;
       setRevealed(true);
+      unlock("treasure");
       const { w, h } = size.current;
       for (let i = 0; i < 6; i++) spark(w * (0.15 + i * 0.14), h * 0.6, 22, 380);
     }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Sparkles, Brain, TreePalm, ArrowLeft, Joystick, Worm, Footprints, Rocket } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
@@ -7,6 +7,7 @@ import IslandCreator from "./IslandCreator";
 import DinoGame from "./DinoGame";
 import OrbitForgeGame from "./OrbitForgeGame";
 import LampScene from "./LampScene";
+import { onNavigate, takePending, clearPending, trackGame, type GameId } from "@/lib/siteEvents";
 
 type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island" | "dino" | "orbit";
 
@@ -64,12 +65,26 @@ const TiltCard = ({ item, index, onOpen }: { item: (typeof VAULT_ITEMS)[number];
 };
 
 const VaultPage = () => {
-  const [activeSection, setActiveSection] = useState<VaultSection>("main");
+  // A game picked in the command palette opens straight away.
+  const [activeSection, setActiveSection] = useState<VaultSection>(() => {
+    const p = takePending(["game", "games-menu"]);
+    return p?.kind === "game" ? p.game : p?.kind === "games-menu" ? "games-menu" : "main";
+  });
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [contentVisible, setContentVisible] = useState(false);
 
   // The Games button appears once the lamp has flickered on.
   const handleLampReady = useCallback(() => setContentVisible(true), []);
+
+  useEffect(() => {
+    if (activeSection !== "main" && activeSection !== "games-menu") trackGame(activeSection as GameId);
+  }, [activeSection]);
+
+  const navigateRef = useRef<(s: VaultSection) => void>(() => {});
+  useEffect(() => onNavigate(req => {
+    if (req.kind === "game") { clearPending(); navigateRef.current(req.game); }
+    if (req.kind === "games-menu") { clearPending(); navigateRef.current("games-menu"); }
+  }), []);
 
   const navigateTo = (section: VaultSection) => {
     setIsTransitioning(true);
@@ -78,6 +93,8 @@ const VaultPage = () => {
       setTimeout(() => setIsTransitioning(false), 50);
     }, 300);
   };
+
+  navigateRef.current = navigateTo;
 
   const transClass = isTransitioning
     ? "animate-[pageFadeOut_0.3s_ease-in_forwards]"

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { unlock } from "@/lib/siteEvents";
 import { RotateCcw, Star, Timer, Trophy } from "lucide-react";
 
 /*
@@ -149,6 +150,7 @@ const MemoryGame = () => {
         setMatches(newMatches);
         if (newMatches === CARD_EMOJIS.length) {
           setGameWon(true);
+          if (starsFor(nextMoves) === 3) unlock("total-recall");
           setWinMsg(pick(starsFor(nextMoves) === 3 ? PERFECT_WIN_MSGS : SAVAGE_WIN_MSGS).replace("{moves}", String(nextMoves)));
           if (!best || nextMoves < best) {
             setBest(nextMoves);
