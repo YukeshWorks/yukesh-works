@@ -329,7 +329,8 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-      <ParticleBackground />
+      {/* Only Home lets the particles show through; elsewhere opaque pages cover them, so skip the work. */}
+      {activeTab === "home" && !showPasswordLock && !showWelcomePage && <ParticleBackground />}
       <CursorLight />
       <Navbar activeTab={activeTab} onTabChange={handleTabChange} onLockClick={handleLockClick} on42Click={handle42Click} />
       {sweep > 0 && (

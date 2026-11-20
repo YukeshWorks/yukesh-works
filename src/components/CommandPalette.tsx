@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home, ShieldHalf, User, Briefcase, Joystick, Worm, Sparkles, Brain, TreePalm, Footprints, Rocket,
-  Palette, KeyRound, Mail, MessageCircle, Send, Instagram, Linkedin, Trophy, Search, Command, CornerDownLeft, Lock,
+  Palette, KeyRound, Crown, Mail, MessageCircle, Send, Instagram, Linkedin, Trophy, Search, Command, CornerDownLeft, Lock,
 } from "lucide-react";
 import { ACHIEVEMENTS, getUnlocked, navigate, onUnlock, trackTheme, unlock, type GameId } from "@/lib/siteEvents";
 
@@ -53,6 +53,7 @@ const CommandPalette = () => {
       { id: "g-scratch", group: "Play", label: "Rainbow Scratch", icon: Sparkles, run: game("scratch") },
       { id: "g-memory", group: "Play", label: "Memory Match", icon: Brain, run: game("memory") },
       { id: "g-island", group: "Play", label: "Island Creator", icon: TreePalm, run: game("island") },
+      { id: "g-chess", group: "Play", label: "Chess Arena", icon: Crown, keywords: "chess checkmate king", run: game("chess") },
       { id: "g-orbit", group: "Play", label: "Orbit Forge", icon: Rocket, keywords: "rocket space", run: game("orbit") },
       { id: "g-dino", group: "Play", label: "Chrome Dino", icon: Footprints, run: game("dino") },
       { id: "t-blue", group: "Theme", label: "Theme: Ice", icon: Palette, keywords: "blue colour color", run: go(() => setTheme("blue")) },
