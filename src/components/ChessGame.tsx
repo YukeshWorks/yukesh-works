@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUpDown, Bot, Crown, Lightbulb, RotateCcw, Undo2, Users, Volume2, VolumeX } from "lucide-react";
+import { ArrowUpDown, Bot, Check, Copy, Crown, Eye, Flag, Globe, Lightbulb, Link2, LogOut, RotateCcw, Share2, Swords, Undo2, Users, Volume2, VolumeX, Wifi, WifiOff } from "lucide-react";
 import {
-  START_FEN, MATE_SCORE, VALUE, attackersOf, evaluate, findKing, inCheck, legalMoves, makeMove, other, outcome, parseFEN,
+  START_FEN, MATE_SCORE, VALUE, attackersOf, evaluate, fromUci, toUci, findKing, inCheck, legalMoves, makeMove, other, outcome, parseFEN,
   positionKey, searchBestMove, toSAN,
   type Color, type Level, type Move, type Outcome, type Piece, type PieceType, type SearchResult, type State,
 } from "@/lib/chess";
 import { ChessDefs, PieceSvg } from "./chessPieces";
+import { PIECE_SETS, PieceSetContext, type PieceSet } from "./chessPieceSet";
+import { useChessNet } from "./useChessNet";
+import { isRoomId } from "@/lib/chessNet";
 import { unlock } from "@/lib/siteEvents";
 
 /*
@@ -22,7 +25,8 @@ import { unlock } from "@/lib/siteEvents";
  */
 
 type Snapshot = { state: State; move: Move | null; san: string; key: string };
-type Mode = "ai" | "local";
+type Mode = "ai" | "local" | "online";
+const EMOTES = ["👍", "😂", "😮", "🔥", "👑", "🤝"];
 type Ghost = { key: string; piece: Piece; v: number; delay: number; fade?: boolean };
 type Spark = { x: number; y: number; vx: number; vy: number; life: number; decay: number; size: number; rot: number; vr: number; color: string; kind: "shard" | "spark" | "ring" | "dust"; g: number };
 type SoundKind = "move" | "capture" | "castle" | "check" | "promote" | "win" | "lose" | "draw" | "select" | "whoosh" | "thud"
@@ -274,6 +278,16 @@ const ChessGame = () => {
   const [boardPx, setBoardPx] = useState(480);
   const [dragSq, setDragSq] = useState<number | null>(null);
   const [cine, setCine] = useState<Cine | null>(null);
+  const [pieceSet, setPieceSet] = useState<PieceSet>(() => {
+    try { const v = localStorage.getItem("yw-chess-pieces"); return v === "classic" || v === "neon" ? v : "royal"; } catch { return "royal"; }
+  });
+  const [resigned, setResigned] = useState<Color | null>(null);
+  const [emotes, setEmotes] = useState<{ key: number; e: string; mine: boolean }[]>([]);
+  const [notice, setNotice] = useState<{ key: number; text: string; tone: "good" | "warn" } | null>(null);
+  const [lobbyColor, setLobbyColor] = useState<Color | "random">("w");
+  const [joinCode, setJoinCode] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [resignArmed, setResignArmed] = useState(false);
   const [souls, setSouls] = useState<Soul[]>([]);
   const cameraRef = useRef<HTMLDivElement>(null);
   const trayRefs = useRef<Record<Color, HTMLDivElement | null>>({ w: null, b: null });
@@ -289,7 +303,12 @@ const ChessGame = () => {
 
   const legal = useMemo(() => legalMoves(s), [s]);
   const outcomeNow = useMemo(() => outcome(s, hist.map(h => h.key)), [s, hist]);
-  const canMove = !outcomeNow && !promo && !thinking && aiIntent === null && (mode === "local" || s.turn === playerColor);
+  // Online: the net hook is declared further down; read it through a ref here.
+  const netRef = useRef<ReturnType<typeof useChessNet> | null>(null);
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const mine = (c: Color) => mode === "local" || (mode === "ai" ? c === playerColor : c === netRef.current?.myColor);
+
   const targets = useMemo(() => (selected === null ? [] : legal.filter(m => m.from === selected)), [legal, selected]);
   const checkSq = useMemo(() => (inCheck(s) ? findKing(s.board, s.turn) : null), [s]);
 
@@ -464,30 +483,39 @@ const ChessGame = () => {
   const lastDragged = useRef<number | null>(null);
   const skipFlipIds = useRef(new Set<number>());
   const hintReq = useRef(0);
+  const histRef = useRef(hist);
+  histRef.current = hist;
   const commit = useCallback((m: Move, dragged = false) => {
     hintReq.current++;
     if (dragged) { skipFlipIds.current.add(m.piece.id); lastDragged.current = m.piece.id; } else lastDragged.current = null;
-    setHist(h => {
-      const cur = h[h.length - 1].state;
-      const next = makeMove(cur, m);
-      return [...h, { state: next, move: m, san: toSAN(cur, m), key: positionKey(next) }];
-    });
+    const h = histRef.current;
+    const cur = h[h.length - 1].state;
+    const next = makeMove(cur, m);
+    const nh = [...h, { state: next, move: m, san: toSAN(cur, m), key: positionKey(next) }];
+    histRef.current = nh;
+    setHist(nh);
     setSelected(null);
     setHint(null);
   }, []);
+  /** A move made on this device: in an online game it is also sent to the opponent. */
+  const playerMove = (m: Move, dragged = false) => {
+    const ply = histRef.current.length - 1;
+    commit(m, dragged);
+    if (modeRef.current === "online") netRef.current?.sendMove(toUci(m), ply);
+  };
 
   const tryMove = (from: number, to: number, dragged = false) => {
     const ms = legal.filter(m => m.from === from && m.to === to);
     if (!ms.length) return false;
     if (ms.length > 1 && ms[0].promo) { setPromo({ from, to, dragged }); return true; }
-    commit(ms[0], dragged);
+    playerMove(ms[0], dragged);
     return true;
   };
   const choosePromo = (t: PieceType) => {
     if (!promo) return;
     const m = legal.find(x => x.from === promo.from && x.to === promo.to && x.promo === t);
     setPromo(null);
-    if (m) commit(m, promo.dragged);
+    if (m) playerMove(m, promo.dragged);
   };
 
   /* ---------- effects of each new move ---------- */
@@ -584,7 +612,7 @@ const ChessGame = () => {
       return;
     }
     const winner = over.winner, loser = other(winner);
-    const playerWon = mode === "local" || winner === playerColor;
+    const playerWon = mine(winner);
     if (mode === "ai" && winner === playerColor) {
       unlock("chess-win");
       if (level === "hard") unlock("grandmaster");
@@ -712,7 +740,7 @@ const ChessGame = () => {
     cameraRef.current?.getAnimations().forEach(a => a.cancel());
     timeScale.current = 1;
     parts.current = [];
-    const playerWon = mode === "local" || cine.winner === playerColor;
+    const playerWon = mine(cine.winner);
     setCine(c => (c ? { ...c, phase: 7, crown: false, kingGone: true, fallen: fallenFor(stateRef.current, other(c.winner), c.kV, true) } : c));
     setShowResult(true);
     if (playerWon) setFireworks(f => f + 1);
@@ -829,16 +857,13 @@ const ChessGame = () => {
     reqId.current++; hintReq.current++;
     setSelected(null); setPromo(null); setHint(null); setHintBusy(false); setOver(null); setShowResult(false);
     setBanner(null); setBeam(null); setSpot(null); setThinking(false); setAiIntent(null); setGhosts([]);
-    setCine(null); setSouls([]);
+    setCine(null); setSouls([]); setResigned(null); setResignArmed(false);
     timeScale.current = 1;
     cameraRef.current?.getAnimations().forEach(a => a.cancel());
   };
 
-  const newGame = (opts?: { player?: Color; mode?: Mode }) => {
-    const player = opts?.player ?? playerColor;
-    const md = opts?.mode ?? mode;
-    resetUi();
-    cancelPieceFx();
+  /** Starting position that reuses the current pieces' ids, so survivors glide home. */
+  const homeBoard = () => {
     // Survivors glide back to their home squares; missing pieces drop in, extras fade out.
     const fresh = parseFEN(START_FEN);
     const pool = s.board.map((p, sq) => (p ? { p, sq } : null)).filter((x): x is { p: Piece; sq: number } => !!x);
@@ -857,16 +882,161 @@ const ChessGame = () => {
       later(() => setGhosts([]), 800);
     }
     glide.current = true;
+    return fresh;
+  };
+
+  const newGame = (opts?: { player?: Color; mode?: Mode }) => {
+    const player = opts?.player ?? playerColor;
+    const md = opts?.mode ?? mode;
+    resetUi();
+    cancelPieceFx();
+    const fresh = homeBoard();
     if (md === "ai") setOrientation(player);
     prevLen.current = 1;
-    setHist([{ state: fresh, move: null, san: "", key: positionKey(fresh) }]);
+    const nh = [{ state: fresh, move: null, san: "", key: positionKey(fresh) }];
+    histRef.current = nh;
+    setHist(nh);
     setEvalScore(0);
     setAiInfo(null);
     play("whoosh");
   };
 
+  /** Replace the game with a move list from the network (join, reconnect or rematch). */
+  const rebuild = (ucis: string[], fresh: boolean) => {
+    resetUi();
+    cancelPieceFx();
+    const base = fresh ? homeBoard() : histRef.current[0].state;
+    const snaps: Snapshot[] = [{ state: base, move: null, san: "", key: positionKey(base) }];
+    for (const u of ucis) {
+      const st = snaps[snaps.length - 1].state;
+      const m = fromUci(st, u);
+      if (!m) break;
+      const nx = makeMove(st, m);
+      snaps.push({ state: nx, move: m, san: toSAN(st, m), key: positionKey(nx) });
+    }
+    prevLen.current = snaps.length;
+    histRef.current = snaps;
+    setHist(snaps);
+    const last = snaps[snaps.length - 1].state;
+    setEvalScore(evaluate(last.board));
+    const res = outcome(last, snaps.map(x => x.key));
+    if (res) later(() => setOver(res), 900);
+  };
+
+  /* ---------- online play ---------- */
+  const flash = (text: string, tone: "good" | "warn" = "good") => {
+    setNotice({ key: Date.now(), text, tone });
+    window.setTimeout(() => setNotice(n => (n && n.text === text ? null : n)), 3200);
+  };
+  const net = useChessNet({
+    getMoves: () => histRef.current.slice(1).map(h => toUci(h.move!)),
+    onSync: (moves, newGame) => rebuild(moves, newGame),
+    onMove: (uci, ply) => {
+      const h = histRef.current;
+      const n = h.length - 1;
+      if (ply < n) return "dup";
+      if (ply > n) return "gap";
+      const m = fromUci(h[n].state, uci);
+      if (!m) return "bad";
+      commit(m);
+      return "ok";
+    },
+    onResign: color => setResigned(color),
+    onRematch: () => { newGame(); flash("Rematch! Sides swapped ⚔️"); },
+    onEmote: (e, mineEmote) => {
+      const key = Date.now() + Math.random();
+      setEmotes(list => [...list.slice(-6), { key, e, mine: mineEmote }]);
+      window.setTimeout(() => setEmotes(list => list.filter(x => x.key !== key)), 2400);
+      if (!mineEmote) play("select");
+    },
+    onJoined: again => {
+      flash(again ? "Your opponent is back" : "Your friend joined — game on! ♟");
+      play("promote");
+      if (!again) unlock("netplay");
+    },
+    onLeft: () => flash("Opponent disconnected — they can rejoin with the same link", "warn"),
+  });
+  netRef.current = net;
+  const onlineSeat = mode === "online" ? net.myColor : null;
+  const onlineReady = mode !== "online" || (!!onlineSeat && !!net.seats?.w && !!net.seats?.b);
+  const myTurn = mode === "local" || (mode === "ai" ? s.turn === playerColor : s.turn === onlineSeat);
+  const canMove = !outcomeNow && !resigned && !promo && !thinking && aiIntent === null && onlineReady && myTurn;
+  const shareUrl = net.room ? `${window.location.origin}${import.meta.env.BASE_URL}?chess=${net.room}` : "";
+
+  // Seated players see the board from their side.
+  useEffect(() => {
+    if (mode === "online" && net.myColor) setOrientation(net.myColor);
+  }, [mode, net.myColor]);
+
+  // Opening a shared link (?chess=ROOM) joins that game.
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("chess");
+    if (!code || !isRoomId(code)) return;
+    setMode("online");
+    const saved = net.join(code);
+    if (saved?.moves?.length) later(() => { if (histRef.current.length - 1 < saved.moves.length) rebuild(saved.moves, false); }, 1600);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => () => netRef.current?.leave(), []);
+
+  // A resignation ends the game for both sides.
+  useEffect(() => {
+    if (!resigned) return;
+    const iWon = mine(other(resigned));
+    play(iWon ? "win" : "lose");
+    if (iWon && mode === "online") setFireworks(f => f + 1);
+    later(() => setShowResult(true), 600);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resigned]);
+
+  // Tab title nudge when it's your move and the tab is in the background.
+  useEffect(() => {
+    if (mode !== "online") return;
+    const base = document.title.replace(/^♟ Your move · /, "");
+    const update = () => { document.title = document.hidden && s.turn === net.myColor && !outcomeNow ? `♟ Your move · ${base}` : base; };
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => { document.removeEventListener("visibilitychange", update); document.title = base; };
+  }, [mode, s, net.myColor, outcomeNow]);
+
+  const createRoom = () => {
+    resetUi();
+    newGame({ mode: "online" });
+    const c = net.create(lobbyColor);
+    setOrientation(c);
+    play("whoosh");
+  };
+  const joinRoom = (code: string) => {
+    const c = code.trim().toLowerCase().replace(/.*[?&]chess=/, "");
+    if (!isRoomId(c)) { flash("That code doesn't look right", "warn"); return; }
+    newGame({ mode: "online" });
+    const saved = net.join(c);
+    if (saved?.moves?.length) later(() => { if (histRef.current.length - 1 < saved.moves.length) rebuild(saved.moves, false); }, 900);
+  };
+  const leaveRoom = () => { net.leave(); newGame({ mode: "online" }); };
+  const copyLink = () => {
+    void navigator.clipboard?.writeText(shareUrl).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); }, () => flash(shareUrl));
+  };
+  const shareLink = () => {
+    if (navigator.share) void navigator.share({ title: "Chess with me", text: "Join my chess game on YukeshWorks ♟", url: shareUrl }).catch(() => {});
+    else copyLink();
+  };
+  const resignNow = () => {
+    if (!net.myColor || outcomeNow || resigned) return;
+    if (!resignArmed) { setResignArmed(true); window.setTimeout(() => setResignArmed(false), 2500); return; }
+    setResignArmed(false);
+    net.resign(net.myColor);
+    setResigned(net.myColor);
+  };
+  const changeMode = (m: Mode) => {
+    if (m === mode) return;
+    if (mode === "online") net.leave();
+    setMode(m);
+    newGame({ mode: m });
+  };
+
   const undo = () => {
-    if (hist.length <= 1) return;
+    if (hist.length <= 1 || mode === "online") return;
     let n = 1;
     const lastMove = hist[hist.length - 1].move;
     if (mode === "ai" && lastMove && lastMove.piece.c !== playerColor && hist.length > 2) n = 2;
@@ -1009,20 +1179,32 @@ const ChessGame = () => {
   const bottom = orientation;
   const top = other(orientation);
 
+  const winnerLine = (w: Color) =>
+    mode === "ai" ? (w === playerColor ? "You win! 👑" : "The computer wins")
+      : mode === "online" && net.myColor ? (w === net.myColor ? "You win! 👑" : "Your opponent wins")
+      : `${w === "w" ? "White" : "Black"} wins`;
   const resultText = (() => {
+    if (resigned) return { title: "RESIGNED", sub: `${resigned === "w" ? "White" : "Black"} resigned · ${winnerLine(other(resigned))}` };
     const o = over;
     if (!o) return null;
-    if (o.kind === "checkmate") {
-      const title = "CHECKMATE";
-      const sub = mode === "ai" ? (o.winner === playerColor ? "You win! 👑" : "The computer wins") : `${o.winner === "w" ? "White" : "Black"} wins`;
-      return { title, sub };
-    }
+    if (o.kind === "checkmate") return { title: "CHECKMATE", sub: winnerLine(o.winner) };
     const why = { stalemate: "Stalemate", fifty: "50-move rule", insufficient: "Not enough material to mate", repetition: "Threefold repetition" }[o.kind];
     return { title: "DRAW", sub: why };
   })();
 
   const status = (() => {
+    if (resigned) return resultText?.sub ?? "Game over";
     if (outcomeNow) return resultText?.sub ?? "Game over";
+    if (mode === "online") {
+      if (!net.room) return "Create a link and send it to a friend";
+      if (net.status === "connecting" && !net.seats) return "Joining the game…";
+      if (!net.seats) return "Waiting for the host to come online…";
+      if (!net.myColor) return `Watching · ${s.turn === "w" ? "White" : "Black"} to move`;
+      if (!net.seats.w || !net.seats.b) return "Waiting for your friend to join…";
+      if (!net.opponentOnline) return "Opponent offline — waiting for them to reconnect";
+      const who = s.turn === net.myColor ? "Your move" : "Opponent's move";
+      return checkSq !== null ? `Check! ${who}` : who;
+    }
     if (thinking) return "Computer is thinking…";
     const who = mode === "ai" ? (s.turn === playerColor ? "Your move" : "Computer's move") : `${s.turn === "w" ? "White" : "Black"} to move`;
     return checkSq !== null ? `Check! ${who}` : who;
@@ -1030,9 +1212,15 @@ const ChessGame = () => {
 
   const strip = (side: Color) => {
     const isAi = mode === "ai" && side !== playerColor;
-    const name = mode === "ai" ? (isAi ? "Computer" : "You") : side === "w" ? "White" : "Black";
-    const tag = mode === "ai" ? (isAi ? LEVEL_LABEL[level] : side === "w" ? "White" : "Black") : "";
-    const active = !outcomeNow && s.turn === side;
+    const online = mode === "online" && !!net.room;
+    const seatTaken = online && !!net.seats?.[side];
+    const isMe = online && net.myColor === side;
+    const name = mode === "ai" ? (isAi ? "Computer" : "You")
+      : online ? (isMe ? "You" : net.myColor ? (seatTaken ? "Opponent" : "Waiting for friend…") : side === "w" ? "White" : "Black")
+      : side === "w" ? "White" : "Black";
+    const tag = mode === "ai" ? (isAi ? LEVEL_LABEL[level] : side === "w" ? "White" : "Black") : online ? (side === "w" ? "White" : "Black") : "";
+    const presence = online && seatTaken ? (isMe ? true : net.myColor ? net.opponentOnline : net.peers.includes(net.seats![side]!)) : null;
+    const active = !outcomeNow && !resigned && s.turn === side;
     const diff = Math.round((material[side] - material[other(side)]) / 100);
     return (
       <div className={`flex items-center gap-3 px-3 py-2 rounded-xl border transition-all duration-500 ${active ? "border-amber-300/50 bg-amber-300/[0.07] shadow-[0_0_24px_rgba(245,200,107,0.15)]" : "border-white/10 bg-white/[0.03]"}`}>
@@ -1044,6 +1232,9 @@ const ChessGame = () => {
           <p className="text-sm font-bold leading-tight">
             {name}
             {tag && <span className="ml-1.5 text-[10px] font-medium text-white/40 uppercase tracking-wider">{tag}</span>}
+            {presence !== null && (
+              <span className={`ml-1.5 inline-block w-2 h-2 rounded-full align-middle ${presence ? "bg-emerald-400" : "bg-white/25"}`} title={presence ? "Online" : "Away"} style={presence ? { boxShadow: "0 0 8px rgba(52,211,153,0.9)", animation: "chessCheck 1.6s ease-in-out infinite" } : undefined} />
+            )}
           </p>
           <div ref={el => { trayRefs.current[side] = el; }} className="flex items-center h-4 -space-x-1.5">
             {capturedBy[side].map((t, i) => {
@@ -1066,6 +1257,7 @@ const ChessGame = () => {
   const targetSet = new Map(targets.map(m => [m.to, m]));
 
   return (
+    <PieceSetContext.Provider value={pieceSet}>
     <section className="relative min-h-screen pt-36 md:pt-24 pb-14 overflow-hidden text-white page-transition">
       <ChessDefs />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,#2a1d0c_0%,#0b0907_55%,#050404_100%)]" />
@@ -1448,6 +1640,45 @@ const ChessGame = () => {
                         </div>
                       )}
 
+                      {/* Online: waiting for a friend (radar) / joining */}
+                      {mode === "online" && net.room && (!net.seats || !net.seats.w || !net.seats.b) && (
+                        <div className="absolute inset-0 z-[55] flex flex-col items-center justify-center rounded-md bg-black/55 backdrop-blur-[2px] text-center px-6" onPointerDown={e => e.stopPropagation()} style={{ animation: "chessFadeIn .5s both" }}>
+                          <div className="relative mb-4" style={{ width: boardPx * 0.34, height: boardPx * 0.34 }}>
+                            {[0, 1, 2].map(i => <span key={i} className="absolute inset-0 rounded-full border border-amber-300/60" style={{ animation: `chessRadar 2.4s ease-out ${i * 0.8}s infinite` }} />)}
+                            <span className="absolute inset-0 rounded-full" style={{ background: "conic-gradient(from 0deg, rgba(245,200,107,0.45), transparent 25%)", animation: "chessSweep 2s linear infinite", maskImage: "radial-gradient(circle, #000 68%, transparent 70%)", WebkitMaskImage: "radial-gradient(circle, #000 68%, transparent 70%)" }} />
+                            <span className="absolute inset-[34%] rounded-full bg-amber-300/15 flex items-center justify-center"><Globe size={boardPx * 0.06} className="text-amber-200" /></span>
+                          </div>
+                          <p className="font-display font-bold text-lg">{!net.seats ? "Joining the game…" : net.myColor ? "Waiting for your friend…" : "Waiting for players…"}</p>
+                          {net.seats && net.myColor && (
+                            <>
+                              <p className="text-white/55 text-xs mt-1 mb-3">Send them the link. They'll drop straight into this board.</p>
+                              <div className="flex gap-2">
+                                <button type="button" onClick={copyLink} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-stone-900 bg-gradient-to-r from-amber-200 to-amber-400 hover:scale-105 active:scale-95 transition-transform">
+                                  {copied ? <Check size={13} /> : <Copy size={13} />} {copied ? "Copied!" : "Copy link"}
+                                </button>
+                                <button type="button" onClick={shareLink} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-white/80 border border-white/20 hover:text-white"><Share2 size={13} /> Share</button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Emoji reactions float up from each player's side */}
+                      {emotes.map(em => (
+                        <span key={em.key} className="absolute z-[58] pointer-events-none select-none" style={{
+                          right: `${8 + (em.key % 7) * 4}%`, [em.mine ? "bottom" : "top"]: "8%", fontSize: boardPx * 0.09,
+                          animation: `${em.mine ? "chessEmoteUp" : "chessEmoteDown"} 2.3s cubic-bezier(.2,.8,.3,1) both`, filter: "drop-shadow(0 6px 10px rgba(0,0,0,0.5))",
+                        } as React.CSSProperties}>{em.e}</span>
+                      ))}
+
+                      {/* Connection notices */}
+                      {notice && (
+                        <div key={notice.key} className="absolute left-1/2 top-3 z-[59] pointer-events-none px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
+                          style={{ transform: "translateX(-50%)", background: notice.tone === "good" ? "rgba(16,185,129,0.9)" : "rgba(244,63,94,0.9)", boxShadow: "0 8px 24px rgba(0,0,0,0.4)", animation: "chessNotice 3.2s ease both" }}>
+                          {notice.text}
+                        </div>
+                      )}
+
                       {/* Result */}
                       {showResult && resultText && (
                         <div className="absolute inset-0 z-[60] flex items-center justify-center rounded-md bg-black/45 backdrop-blur-[2px]" onPointerDown={e => e.stopPropagation()} style={{ animation: "chessFadeIn .5s both" }}>
@@ -1482,7 +1713,61 @@ const ChessGame = () => {
               {aiInfo && mode === "ai" && <p className="text-[10px] text-white/35 mt-0.5">Computer looked {aiInfo.depth} moves ahead · {aiInfo.nodes.toLocaleString()} positions</p>}
             </div>
 
-            <Seg<Mode> value={mode} onChange={m => { setMode(m); newGame({ mode: m }); }} options={[{ v: "ai", label: "vs Computer", icon: Bot }, { v: "local", label: "2 Players", icon: Users }]} />
+            <Seg<Mode> value={mode} onChange={changeMode} options={[{ v: "ai", label: "Computer", icon: Bot }, { v: "local", label: "2 Players", icon: Users }, { v: "online", label: "Online", icon: Globe }]} />
+            {mode === "online" && !net.room && (
+              <div className="rounded-xl border border-amber-300/25 bg-amber-300/[0.05] p-3 flex flex-col gap-2.5" style={{ animation: "chessFadeIn .4s both" }}>
+                <p className="text-sm font-semibold flex items-center gap-2"><Swords size={15} className="text-amber-300" /> Play a friend online</p>
+                <Seg<Color | "random"> value={lobbyColor} onChange={setLobbyColor} options={[{ v: "w", label: "White" }, { v: "b", label: "Black" }, { v: "random", label: "Random" }]} />
+                <button type="button" onClick={() => { ensure(); createRoom(); }} className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-stone-900 bg-gradient-to-r from-amber-200 to-amber-400 hover:scale-[1.02] active:scale-95 transition-transform">
+                  <Link2 size={15} /> Create game link
+                </button>
+                <form className="flex gap-1.5" onSubmit={e => { e.preventDefault(); ensure(); joinRoom(joinCode); }}>
+                  <input value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="Have a code or link? Paste it" className="flex-1 min-w-0 px-2.5 py-2 rounded-lg bg-black/30 border border-white/10 text-xs outline-none focus:border-amber-300/50" aria-label="Game code or link" />
+                  <button type="submit" className="px-3 rounded-lg text-xs font-semibold border border-white/15 text-white/80 hover:text-white">Join</button>
+                </form>
+              </div>
+            )}
+            {mode === "online" && net.room && (
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 flex flex-col gap-2.5" style={{ animation: "chessFadeIn .4s both" }}>
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="flex items-center gap-1.5 font-semibold">
+                    {net.status === "online" ? <Wifi size={13} className="text-emerald-400" /> : net.status === "local" ? <Wifi size={13} className="text-sky-300" /> : <WifiOff size={13} className="text-rose-400" />}
+                    {net.status === "online" ? "Connected" : net.status === "local" ? "Same-device mode" : net.status === "connecting" ? "Connecting…" : "Connection problem"}
+                  </span>
+                  <span className="flex items-center gap-1 text-white/45">{net.spectators > 0 && <><Eye size={12} /> {net.spectators} watching</>}</span>
+                </div>
+                <div className="flex gap-1.5">
+                  <input readOnly value={shareUrl} onFocus={e => e.currentTarget.select()} className="flex-1 min-w-0 px-2.5 py-2 rounded-lg bg-black/30 border border-white/10 text-[11px] text-white/70 outline-none" aria-label="Game link" />
+                  <button type="button" onClick={copyLink} title="Copy link" className="px-2.5 rounded-lg border border-white/15 text-white/80 hover:text-amber-200">{copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}</button>
+                  <button type="button" onClick={shareLink} title="Share" className="px-2.5 rounded-lg border border-white/15 text-white/80 hover:text-amber-200"><Share2 size={14} /></button>
+                </div>
+                {net.myColor && (
+                  <div className="flex justify-between gap-1">
+                    {EMOTES.map(e => (
+                      <button key={e} type="button" onClick={() => net.emote(e)} disabled={!net.opponentOnline} className="flex-1 py-1.5 rounded-lg text-lg bg-white/[0.04] hover:bg-white/10 hover:scale-110 active:scale-90 disabled:opacity-30 transition-transform" aria-label={`Send ${e}`}>{e}</button>
+                    ))}
+                  </div>
+                )}
+                {net.rematch === "received" && (
+                  <button type="button" onClick={() => net.offerRematch()} className="py-2 rounded-lg text-sm font-bold text-stone-900 bg-gradient-to-r from-emerald-300 to-emerald-400" style={{ animation: "chessCheck 1.2s ease-in-out infinite" }}>
+                    Opponent wants a rematch — Accept ⚔️
+                  </button>
+                )}
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button type="button" onClick={resignNow} disabled={!net.myColor || !!outcomeNow || !!resigned || !onlineReady}
+                    className={`flex items-center justify-center gap-1 py-2 rounded-lg text-[11px] font-semibold border transition-colors disabled:opacity-35 ${resignArmed ? "border-rose-400 text-rose-200 bg-rose-500/20" : "border-white/10 text-white/70 hover:text-rose-300"}`}>
+                    <Flag size={12} /> {resignArmed ? "Sure?" : "Resign"}
+                  </button>
+                  <button type="button" onClick={() => net.offerRematch()} disabled={!net.myColor || !(outcomeNow || resigned) || net.rematch === "sent"}
+                    className="flex items-center justify-center gap-1 py-2 rounded-lg text-[11px] font-semibold border border-white/10 text-white/70 hover:text-amber-200 disabled:opacity-35">
+                    <RotateCcw size={12} /> {net.rematch === "sent" ? "Offered" : "Rematch"}
+                  </button>
+                  <button type="button" onClick={leaveRoom} className="flex items-center justify-center gap-1 py-2 rounded-lg text-[11px] font-semibold border border-white/10 text-white/70 hover:text-white">
+                    <LogOut size={12} /> Leave
+                  </button>
+                </div>
+              </div>
+            )}
             {mode === "ai" && (
               <>
                 <Seg<Level> value={level} onChange={setLevel} options={[{ v: "easy", label: "Easy" }, { v: "medium", label: "Medium" }, { v: "hard", label: "Hard" }]} />
@@ -1490,14 +1775,14 @@ const ChessGame = () => {
               </>
             )}
 
-            <div className="grid grid-cols-5 gap-1.5">
+            <div className={`grid gap-1.5 ${mode === "online" ? "grid-cols-2" : "grid-cols-5"}`}>
               {[
-                { label: "New", icon: RotateCcw, run: () => newGame(), disabled: false },
-                { label: "Undo", icon: Undo2, run: undo, disabled: hist.length <= 1 || (mode === "ai" && thinking && hist.length <= 2) },
-                { label: "Flip", icon: ArrowUpDown, run: flip, disabled: !!cine && cine.phase < 7 },
-                { label: hintBusy ? "…" : "Hint", icon: Lightbulb, run: askHint, disabled: !canMove || hintBusy },
-                { label: soundOn ? "Sound" : "Muted", icon: soundOn ? Volume2 : VolumeX, run: () => setSoundOn(v => !v), disabled: false },
-              ].map(b => (
+                { label: "New", icon: RotateCcw, run: () => newGame(), disabled: false, offline: true },
+                { label: "Undo", icon: Undo2, run: undo, disabled: hist.length <= 1 || (mode === "ai" && thinking && hist.length <= 2), offline: true },
+                { label: "Flip", icon: ArrowUpDown, run: flip, disabled: !!cine && cine.phase < 7, offline: false },
+                { label: hintBusy ? "…" : "Hint", icon: Lightbulb, run: askHint, disabled: !canMove || hintBusy, offline: true },
+                { label: soundOn ? "Sound" : "Muted", icon: soundOn ? Volume2 : VolumeX, run: () => setSoundOn(v => !v), disabled: false, offline: false },
+              ].filter(b => mode !== "online" || !b.offline).map(b => (
                 <button
                   key={b.label}
                   type="button"
@@ -1507,6 +1792,25 @@ const ChessGame = () => {
                 >
                   <b.icon size={15} />
                   <span className="text-[10px]">{b.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-1 grid grid-cols-3 gap-1" role="radiogroup" aria-label="Piece style">
+              {PIECE_SETS.map(ps => (
+                <button
+                  key={ps.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={pieceSet === ps.id}
+                  onClick={() => { setPieceSet(ps.id); try { localStorage.setItem("yw-chess-pieces", ps.id); } catch { /* storage blocked */ } }}
+                  className={`flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-all duration-300 ${pieceSet === ps.id ? "bg-amber-300/15 shadow-[inset_0_0_0_1px_rgba(245,200,107,0.4)]" : "hover:bg-white/5"}`}
+                >
+                  <span className="flex -space-x-1.5">
+                    <PieceSvg set={ps.id} t="n" c="w" className="w-7 h-7" />
+                    <PieceSvg set={ps.id} t="q" c="b" className="w-7 h-7" />
+                  </span>
+                  <span className={`text-[10px] font-semibold ${pieceSet === ps.id ? "text-amber-200" : "text-white/50"}`}>{ps.label}</span>
                 </button>
               ))}
             </div>
@@ -1627,9 +1931,15 @@ const ChessGame = () => {
           55% { transform: translate(calc((var(--x0) + var(--x1)) / 2), calc((var(--y0) + var(--y1)) / 2 - 80px)) scale(1); opacity: 1; }
           100% { transform: translate(var(--x1), var(--y1)) scale(0.5); opacity: 0.2; }
         }
+        @keyframes chessRadar { 0% { transform: scale(0.3); opacity: 0.9; } 100% { transform: scale(1.35); opacity: 0; } }
+        @keyframes chessSweep { to { transform: rotate(360deg); } }
+        @keyframes chessEmoteUp { 0% { opacity: 0; transform: translateY(20px) scale(0.4) rotate(-10deg); } 15% { opacity: 1; transform: translateY(0) scale(1.25) rotate(6deg); } 30% { transform: translateY(-10px) scale(1) rotate(-4deg); } 100% { opacity: 0; transform: translateY(-160px) scale(1.1) rotate(8deg); } }
+        @keyframes chessEmoteDown { 0% { opacity: 0; transform: translateY(-20px) scale(0.4) rotate(10deg); } 15% { opacity: 1; transform: translateY(0) scale(1.25) rotate(-6deg); } 30% { transform: translateY(10px) scale(1) rotate(4deg); } 100% { opacity: 0; transform: translateY(160px) scale(1.1) rotate(-8deg); } }
+        @keyframes chessNotice { 0% { opacity: 0; transform: translate(-50%, -12px); } 10%, 85% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -8px); } }
         @keyframes chessFloat { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-30px) rotate(6deg); } }
       `}</style>
     </section>
+    </PieceSetContext.Provider>
   );
 };
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { START_FEN, attackersOf, findKing, legalMoves, makeMove, outcome, parseFEN, perft, positionKey, searchBestMove, sqName, toSAN } from "@/lib/chess";
+import { START_FEN, attackersOf, findKing, fromUci, toUci, legalMoves, makeMove, outcome, parseFEN, perft, positionKey, searchBestMove, sqName, toSAN } from "@/lib/chess";
 
 // Reference node counts from the standard perft suite.
 const CASES: [string, string, number[]][] = [
@@ -59,6 +59,16 @@ describe("game rules", () => {
   it("detects insufficient material", () => {
     const s = parseFEN("8/8/4k3/8/8/2N5/4K3/8 w - - 0 1");
     expect(outcome(s, [positionKey(s)])).toEqual({ kind: "insufficient" });
+  });
+});
+
+describe("network notation", () => {
+  it("round-trips every legal move, including promotions", () => {
+    for (const fen of [START_FEN, "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"]) {
+      const s = parseFEN(fen);
+      for (const m of legalMoves(s)) expect(fromUci(s, toUci(m))).toEqual(m);
+    }
+    expect(fromUci(parseFEN(START_FEN), "e2e5")).toBeNull();
   });
 });
 

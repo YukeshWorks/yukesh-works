@@ -6,7 +6,7 @@ import OfflinePage from "@/components/OfflinePage";
 import ParticleBackground from "@/components/ParticleBackground";
 import CursorLight from "@/components/CursorLight";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
-import { onNavigate, peekPending, clearPending, trackTab, unlock, type NavRequest } from "@/lib/siteEvents";
+import { navigate, onNavigate, peekPending, clearPending, trackTab, unlock, type NavRequest } from "@/lib/siteEvents";
 
 /*
  * Each deploy renames the code chunks. A browser (Instagram's in-app browser in particular)
@@ -278,6 +278,11 @@ const Index = () => {
     setIsTransitioning(true);
     setTimeout(() => { setShowWelcomePage(false); setTimeout(() => setIsTransitioning(false), 50); }, 200);
   };
+
+  // A shared online-chess link (?chess=ROOM) opens Chess Arena, which then joins the room.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("chess")) navigate({ kind: "game", game: "chess" });
+  }, []);
 
   // Achievements: tabs visited, late-night visit.
   useEffect(() => { if (!isLoading) trackTab(activeTab); }, [activeTab, isLoading]);

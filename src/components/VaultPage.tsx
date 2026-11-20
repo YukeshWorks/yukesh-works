@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Sparkles, Brain, TreePalm, ArrowLeft, Joystick, Worm, Footprints, Rocket, Crown } from "lucide-react";
+import { Sparkles, Brain, TreePalm, ArrowLeft, Joystick, Worm, Footprints, Rocket } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
@@ -7,18 +7,20 @@ import IslandCreator from "./IslandCreator";
 import DinoGame from "./DinoGame";
 import OrbitForgeGame from "./OrbitForgeGame";
 import ChessGame from "./ChessGame";
+import { KnightIcon } from "./chessPieces";
 import LampScene from "./LampScene";
 import { onNavigate, takePending, clearPending, trackGame, type GameId } from "@/lib/siteEvents";
 
 type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island" | "dino" | "orbit" | "chess";
 
-const VAULT_ITEMS: { id: VaultSection; icon: typeof Worm; title: string; subtitle: string; accent: string }[] = [
+type IconComp = React.ComponentType<{ size?: number | string; className?: string; style?: React.CSSProperties }>;
+const VAULT_ITEMS: { id: VaultSection; icon: IconComp; title: string; subtitle: string; accent: string }[] = [
   { id: "snake", icon: Worm, title: "Snake Glide", subtitle: "Eat, grow, don't crash", accent: "45, 212, 191" },
   { id: "scratch", icon: Sparkles, title: "Rainbow Scratch", subtitle: "Reveal hidden colors", accent: "232, 121, 249" },
   { id: "memory", icon: Brain, title: "Memory Match", subtitle: "Find all the pairs", accent: "167, 139, 250" },
   { id: "island", icon: TreePalm, title: "Island Creator", subtitle: "Build your paradise", accent: "56, 189, 248" },
   { id: "dino", icon: Footprints, title: "Chrome Dino", subtitle: "Jump the cactus", accent: "251, 191, 36" },
-  { id: "chess", icon: Crown, title: "Chess Arena", subtitle: "Outsmart the machine", accent: "245, 200, 107" },
+  { id: "chess", icon: KnightIcon, title: "Chess Arena", subtitle: "Play the computer or a friend online", accent: "245, 200, 107" },
   { id: "orbit", icon: Rocket, title: "Orbit Forge", subtitle: "Build rockets, fly the cosmos", accent: "255, 180, 84" },
 ];
 

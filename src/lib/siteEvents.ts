@@ -40,7 +40,7 @@ export const onNavigate = (fn: (r: NavRequest) => void) => {
 
 export type AchievementId =
   | "tourist" | "night-owl" | "forty-two" | "agent" | "snake-10" | "total-recall"
-  | "treasure" | "architect" | "explorer" | "power-user" | "shapeshifter" | "chess-win" | "grandmaster" | "completionist";
+  | "treasure" | "architect" | "explorer" | "power-user" | "shapeshifter" | "chess-win" | "grandmaster" | "netplay" | "completionist";
 
 export const ACHIEVEMENTS: { id: AchievementId; icon: string; title: string; hint: string }[] = [
   { id: "tourist", icon: "🧭", title: "Tourist", hint: "Visit Home, Vault and About" },
@@ -55,6 +55,7 @@ export const ACHIEVEMENTS: { id: AchievementId; icon: string; title: string; hin
   { id: "architect", icon: "🏝️", title: "Island Architect", hint: "Place 10 things on your island" },
   { id: "chess-win", icon: "♟️", title: "Checkmate", hint: "Beat the computer at chess" },
   { id: "grandmaster", icon: "👑", title: "Grandmaster", hint: "Beat the computer on Hard" },
+  { id: "netplay", icon: "🌐", title: "Long Distance", hint: "Play chess online with a friend" },
   { id: "night-owl", icon: "🦉", title: "Night Owl", hint: "Visit between midnight and 5 am" },
   { id: "completionist", icon: "🏆", title: "Completionist", hint: "Unlock everything else" },
 ];

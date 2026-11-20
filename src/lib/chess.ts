@@ -311,6 +311,10 @@ export function outcome(s: State, keys: string[]): Outcome | null {
   return null;
 }
 
+/** Compact move notation for the network ("e2e4", "e7e8q"). */
+export const toUci = (m: Move) => sqName(m.from) + sqName(m.to) + (m.promo ?? "");
+export const fromUci = (s: State, uci: string): Move | null => legalMoves(s).find(m => toUci(m) === uci) ?? null;
+
 export function toSAN(s: State, m: Move): string {
   let san: string;
   if (m.castle) san = m.castle === "k" ? "O-O" : "O-O-O";
