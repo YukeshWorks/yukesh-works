@@ -80,8 +80,10 @@ const LEVELS = [
   {id:'local',  name:'Local Group', c:[ANDRO.x * 0.45, ANDRO.y * 0.45], ext:2.0e6 * LY},
   {id:'lani',   name:'Laniakea', c:[GA.x, GA.y], ext:330e6 * LY},
   {id:'cosmos', name:'Observable universe', c:[0,0], ext:50e9 * LY},
+  {id:'multi', name:'Multiverse', hint:'Hypothetical, not observed', c:[0,0], ext:50e9 * LY * 16},
 ];
 function scaleName(ext){
+  if (ext > 120e9 * LY) return 'Multiverse (hypothetical)';
   if (ext < 0.02 * AU) return 'Planetary';
   if (ext < 6 * AU) return 'Inner Solar System';
   if (ext < 70 * AU) return 'Solar System';
@@ -217,4 +219,21 @@ function softSprite(key, inner, outer){
   const [c, x] = mkCanvas(64), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
   g.addColorStop(0, inner); g.addColorStop(.45, outer); g.addColorStop(1, 'rgba(0,0,0,0)');
   x.fillStyle = g; x.fillRect(0, 0, 64, 64); return IMG[key] = c;
+}
+
+/* hypothetical multiverse: other "bubble universes" from eternal inflation. Purely illustrative:
+   nothing beyond our observable universe has been observed, so positions and sizes are invented. */
+const BUBBLES = (() => { const r = rng(2026), out = [];
+  for (let i = 0; out.length < 26 && i < 400; i++){
+    const a = r() * TAU, d = (2.6 + r() * 11) * UNI_R, rad = (0.45 + r() * 1.6) * UNI_R, x = Math.cos(a) * d, y = Math.sin(a) * d;
+    if (out.some(o => Math.hypot(o.x - x, o.y - y) < (o.r + rad) * 0.92) || Math.hypot(x, y) < UNI_R + rad) continue;
+    out.push({x, y, r:rad, hue:r() * 360, seed:i});
+  }
+  out.push({x:out[0].x + out[0].r * 1.6, y:out[0].y, r:out[0].r * 0.8, hue:out[0].hue + 40, seed:99, collide:true});
+  return out; })();
+function bubbleImg(hue){
+  const key = 'bub' + Math.round(hue / 30); if (IMG[key]) return IMG[key];
+  const [c, x] = mkCanvas(256), src = universe();
+  x.filter = 'hue-rotate(' + Math.round(hue / 30) * 30 + 'deg) saturate(1.3)'; x.drawImage(src, 0, 0, 256, 256); x.filter = 'none';
+  return IMG[key] = c;
 }
