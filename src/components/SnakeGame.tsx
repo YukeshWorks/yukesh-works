@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { unlock } from "@/lib/siteEvents";
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Pause, Play, Trophy, Zap } from "lucide-react";
 
 /*
@@ -135,6 +136,8 @@ const SnakeGame = () => {
   // Keyboard
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Keys typed into the command palette (or any field) are not game input.
+      if (document.body.dataset.palette === "open" || (e.target instanceof HTMLElement && e.target.tagName === "INPUT")) return;
       const map: Record<string, Dir> = {
         ArrowUp: "up", KeyW: "up", ArrowDown: "down", KeyS: "down",
         ArrowLeft: "left", KeyA: "left", ArrowRight: "right", KeyD: "right",
@@ -150,6 +153,13 @@ const SnakeGame = () => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [turn, start, togglePause]);
+
+  // Pause when the command palette opens.
+  useEffect(() => {
+    const onPalette = () => { if (g.current.status === "playing") setStat("paused"); };
+    window.addEventListener("yw:palette-open", onPalette);
+    return () => window.removeEventListener("yw:palette-open", onPalette);
+  }, [setStat]);
 
   // Pause automatically when the tab is hidden.
   useEffect(() => {
@@ -236,6 +246,7 @@ const SnakeGame = () => {
         s.prev.push({ ...s.prev[s.prev.length - 1] });
         const pts = willBonus ? 5 : 1;
         s.score += pts;
+        if (s.score >= 10) unlock("snake-10");
         s.eatPulse = 1;
         setScore(s.score);
         const cx = (head.x + 0.5) * C, cy = (head.y + 0.5) * C;

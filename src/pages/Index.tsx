@@ -6,6 +6,7 @@ import OfflinePage from "@/components/OfflinePage";
 import ParticleBackground from "@/components/ParticleBackground";
 import CursorLight from "@/components/CursorLight";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
+import { navigate, onNavigate, peekPending, clearPending, trackTab, unlock, type NavRequest } from "@/lib/siteEvents";
 
 /*
  * Each deploy renames the code chunks. A browser (Instagram's in-app browser in particular)
@@ -98,6 +99,7 @@ const Index = () => {
   const [showPasswordLock, setShowPasswordLock] = useState(false);
   const [showWelcomePage, setShowWelcomePage] = useState(false);
   const [show42Video, setShow42Video] = useState(false);
+  const [sweep, setSweep] = useState(0);
   const [show42Warning, setShow42Warning] = useState(false);
   const tapped42Ref = useRef(false);
   const prevThemeRef = useRef<string | null>(null);
@@ -180,6 +182,7 @@ const Index = () => {
     } else {
       playVideoEntrySound();
       setShow42Video(true);
+      unlock("forty-two");
     }
   }, [playWarningSound, playVideoEntrySound]);
 
@@ -238,18 +241,22 @@ const Index = () => {
     setTransitionDirection(newIndex > currentIndex ? "next" : "prev");
     setShowPasswordLock(false);
     setShowWelcomePage(false);
+    setSweep(k => k + 1);
     setIsTransitioning(true);
     setTimeout(() => { setActiveTab(tab); setTimeout(() => setIsTransitioning(false), 50); }, 200);
   };
 
   const handleLockClick = () => {
     setTransitionDirection("next");
+    setSweep(k => k + 1);
     setIsTransitioning(true);
     setTimeout(() => { setShowPasswordLock(true); setTimeout(() => setIsTransitioning(false), 50); }, 200);
   };
 
   const handlePasswordUnlock = () => {
+    unlock("agent");
     setTransitionDirection("next");
+    setSweep(k => k + 1);
     setIsTransitioning(true);
     setTimeout(() => {
       setShowPasswordLock(false);
@@ -260,15 +267,45 @@ const Index = () => {
 
   const handlePasswordBack = () => {
     setTransitionDirection("prev");
+    setSweep(k => k + 1);
     setIsTransitioning(true);
     setTimeout(() => { setShowPasswordLock(false); setTimeout(() => setIsTransitioning(false), 50); }, 200);
   };
 
   const handleWelcomeBack = () => {
     setTransitionDirection("prev");
+    setSweep(k => k + 1);
     setIsTransitioning(true);
     setTimeout(() => { setShowWelcomePage(false); setTimeout(() => setIsTransitioning(false), 50); }, 200);
   };
+
+  // A shared online-chess link (?chess=ROOM) opens Chess Arena, which then joins the room.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("chess")) navigate({ kind: "game", game: "chess" });
+  }, []);
+
+  // Achievements: tabs visited, late-night visit.
+  useEffect(() => { if (!isLoading) trackTab(activeTab); }, [activeTab, isLoading]);
+  useEffect(() => {
+    const h = new Date().getHours();
+    if (h >= 0 && h < 5) unlock("night-owl");
+  }, []);
+
+  // Requests from the command palette.
+  const handleNav = (req: NavRequest) => {
+    if (req.kind === "tab") { clearPending(); handleTabChange(req.tab); return; }
+    if (req.kind === "lock") { clearPending(); handleLockClick(); return; }
+    // Games: switch to the Vault; VaultPage picks up the pending request when it mounts.
+    if (activeTab !== "puzzle" || showPasswordLock || showWelcomePage) handleTabChange("puzzle");
+  };
+  const navRef = useRef(handleNav);
+  navRef.current = handleNav;
+  useEffect(() => onNavigate(r => { if (!isLoading) navRef.current(r); }), [isLoading]);
+  useEffect(() => {
+    if (isLoading) return;
+    const p = peekPending();
+    if (p) window.setTimeout(() => navRef.current(p), 300);
+  }, [isLoading]);
 
   const renderPage = () => {
     if (showWelcomePage) {
@@ -297,9 +334,16 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen bg-background transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-      <ParticleBackground />
+      {/* Only Home lets the particles show through; elsewhere opaque pages cover them, so skip the work. */}
+      {activeTab === "home" && !showPasswordLock && !showWelcomePage && <ParticleBackground />}
       <CursorLight />
       <Navbar activeTab={activeTab} onTabChange={handleTabChange} onLockClick={handleLockClick} on42Click={handle42Click} />
+      {sweep > 0 && (
+        <div key={sweep} className={`tab-sweep ${transitionDirection === "prev" ? "tab-sweep-prev" : ""}`} aria-hidden="true">
+          <div className="tab-sweep-panel" />
+          <div className="tab-sweep-edge" />
+        </div>
+      )}
       <div className="page-container" style={{ perspective: '1500px' }}>
         <div className={getTransitionClasses()}>
           <Suspense fallback={<div className="min-h-screen" />}>

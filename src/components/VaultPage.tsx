@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Sparkles, Brain, TreePalm, ArrowLeft, Joystick, Worm, Footprints, Rocket } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
@@ -6,16 +6,21 @@ import MemoryGame from "./MemoryGame";
 import IslandCreator from "./IslandCreator";
 import DinoGame from "./DinoGame";
 import OrbitForgeGame from "./OrbitForgeGame";
+import ChessGame from "./ChessGame";
+import { KnightIcon } from "./chessPieces";
 import LampScene from "./LampScene";
+import { onNavigate, takePending, clearPending, trackGame, type GameId } from "@/lib/siteEvents";
 
-type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island" | "dino" | "orbit";
+type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island" | "dino" | "orbit" | "chess";
 
-const VAULT_ITEMS: { id: VaultSection; icon: typeof Worm; title: string; subtitle: string; accent: string }[] = [
+type IconComp = React.ComponentType<{ size?: number | string; className?: string; style?: React.CSSProperties }>;
+const VAULT_ITEMS: { id: VaultSection; icon: IconComp; title: string; subtitle: string; accent: string }[] = [
   { id: "snake", icon: Worm, title: "Snake Glide", subtitle: "Eat, grow, don't crash", accent: "45, 212, 191" },
   { id: "scratch", icon: Sparkles, title: "Rainbow Scratch", subtitle: "Reveal hidden colors", accent: "232, 121, 249" },
   { id: "memory", icon: Brain, title: "Memory Match", subtitle: "Find all the pairs", accent: "167, 139, 250" },
   { id: "island", icon: TreePalm, title: "Island Creator", subtitle: "Build your paradise", accent: "56, 189, 248" },
   { id: "dino", icon: Footprints, title: "Chrome Dino", subtitle: "Jump the cactus", accent: "251, 191, 36" },
+  { id: "chess", icon: KnightIcon, title: "Chess Arena", subtitle: "Play the computer or a friend online", accent: "245, 200, 107" },
   { id: "orbit", icon: Rocket, title: "Orbit Forge", subtitle: "Build rockets, fly the cosmos", accent: "255, 180, 84" },
 ];
 
@@ -64,12 +69,26 @@ const TiltCard = ({ item, index, onOpen }: { item: (typeof VAULT_ITEMS)[number];
 };
 
 const VaultPage = () => {
-  const [activeSection, setActiveSection] = useState<VaultSection>("main");
+  // A game picked in the command palette opens straight away.
+  const [activeSection, setActiveSection] = useState<VaultSection>(() => {
+    const p = takePending(["game", "games-menu"]);
+    return p?.kind === "game" ? p.game : p?.kind === "games-menu" ? "games-menu" : "main";
+  });
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [contentVisible, setContentVisible] = useState(false);
 
   // The Games button appears once the lamp has flickered on.
   const handleLampReady = useCallback(() => setContentVisible(true), []);
+
+  useEffect(() => {
+    if (activeSection !== "main" && activeSection !== "games-menu") trackGame(activeSection as GameId);
+  }, [activeSection]);
+
+  const navigateRef = useRef<(s: VaultSection) => void>(() => {});
+  useEffect(() => onNavigate(req => {
+    if (req.kind === "game") { clearPending(); navigateRef.current(req.game); }
+    if (req.kind === "games-menu") { clearPending(); navigateRef.current("games-menu"); }
+  }), []);
 
   const navigateTo = (section: VaultSection) => {
     setIsTransitioning(true);
@@ -78,6 +97,8 @@ const VaultPage = () => {
       setTimeout(() => setIsTransitioning(false), 50);
     }, 300);
   };
+
+  navigateRef.current = navigateTo;
 
   const transClass = isTransitioning
     ? "animate-[pageFadeOut_0.3s_ease-in_forwards]"
@@ -124,6 +145,9 @@ const VaultPage = () => {
   }
   if (activeSection === "island") {
     return <div className={transClass}>{backButton("games-menu")}<IslandCreator /></div>;
+  }
+  if (activeSection === "chess") {
+    return <div className={transClass}>{backButton("games-menu")}<ChessGame /></div>;
   }
   if (activeSection === "orbit") {
     return <div className={transClass}>{backButton("games-menu")}<OrbitForgeGame /></div>;

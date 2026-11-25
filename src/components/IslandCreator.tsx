@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { unlock } from "@/lib/siteEvents";
 import { Brush, Download, Eraser, Hand, Moon, RotateCcw, Sticker, Sun } from "lucide-react";
 
 /*
@@ -238,6 +239,7 @@ const IslandCreator = () => {
     const p = local(e);
     if (mode === "place") {
       const id = nextId.current++;
+      if (id >= 10) unlock("architect");
       setItems(prev => [...prev, { id, emoji: selected, x: p.x, y: p.y, size: 30 + Math.random() * 8, rotation: Math.random() * 14 - 7, delay: Math.random() * 2 }]);
       setRipples(prev => [...prev, { id, x: p.x, y: p.y }]);
       window.setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 700);

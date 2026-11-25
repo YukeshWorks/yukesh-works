@@ -531,3 +531,34 @@
 }
 @property --dino-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 @keyframes dinoSpin { to { --dino-angle: 360deg; } }
+
+
+/* Cinematic tab change: a dark panel wipes across behind a bright leading edge.
+   It fully covers the screen at ~45%, which is when the page content swaps. */
+.tab-sweep { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+.tab-sweep-prev { transform: scaleX(-1); }
+.tab-sweep-panel {
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px),
+    linear-gradient(90deg, hsl(var(--background)), hsl(var(--card)));
+  animation: tabSweepPanel 0.46s cubic-bezier(0.7, 0, 0.3, 1) both;
+}
+.tab-sweep-edge {
+  position: absolute; top: 0; bottom: 0; left: 0; width: 3px;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 18px 4px hsl(var(--primary) / 0.7), 0 0 60px 20px hsl(var(--primary) / 0.25);
+  animation: tabSweepEdge 0.46s cubic-bezier(0.7, 0, 0.3, 1) both;
+}
+@keyframes tabSweepPanel {
+  0% { clip-path: inset(0 100% 0 0); }
+  45% { clip-path: inset(0 0 0 0); }
+  55% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 0 0 100%); }
+}
+@keyframes tabSweepEdge {
+  0% { transform: translateX(0); opacity: 1; }
+  45% { transform: translateX(100vw); opacity: 1; }
+  55% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(100vw); opacity: 0.6; }
+}

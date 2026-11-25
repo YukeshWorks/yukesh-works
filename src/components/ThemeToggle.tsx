@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Flame, Snowflake, Moon } from "lucide-react";
+import { trackTheme } from "@/lib/siteEvents";
 
 type Theme = "blue" | "red" | "dark";
 
@@ -40,7 +41,7 @@ const ThemeToggle = ({ onThemeChange }: { onThemeChange?: (t: Theme) => void }) 
   const cycle = () => {
     setAnim(true);
     const next = themes[(themes.findIndex(t => t.id === current) + 1) % themes.length].id;
-    setTimeout(() => { setCurrent(next); localStorage.setItem("portfolio-theme", next); apply(next); setTimeout(() => setAnim(false), 400); }, 200);
+    setTimeout(() => { setCurrent(next); localStorage.setItem("portfolio-theme", next); apply(next); trackTheme(next); setTimeout(() => setAnim(false), 400); }, 200);
   };
 
   const data = themes.find(t => t.id === current)!;

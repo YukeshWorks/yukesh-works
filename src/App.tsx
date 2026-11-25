@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import NotFound from "./pages/NotFound";
+import CommandPalette from "./components/CommandPalette";
+import AchievementToasts from "./components/AchievementToasts";
 
 const queryClient = new QueryClient();
 
@@ -14,7 +16,9 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <AchievementToasts />
       <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <CommandPalette />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/services" element={<Services />} />
