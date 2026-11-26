@@ -137,7 +137,15 @@ function setMapMode(on){
   $('#levels').hidden = !on; $('#zoomBox').hidden = on && matchMedia('(pointer:coarse)').matches; if (!on) hideInfo();
   if (on){ openMap(); F.pred = null; }
 }
-function buildLevels(){ const box = $('#levels'); for (const lv of LEVELS){ const b = document.createElement('button'); b.className = 'chipbtn'; b.textContent = lv.name; b.onclick = () => goLevel(lv.id); box.appendChild(b); } }
+function buildLevels(){
+  const list = $('#scaleList'), btn = $('#scaleBtn');
+  const close = () => { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+  for (const lv of LEVELS){ const b = document.createElement('button'); b.dataset.id = lv.id; b.innerHTML = '<span></span><small></small>'; b.firstChild.textContent = lv.name; b.lastChild.textContent = lv.hint || '';
+    b.onclick = () => { goLevel(lv.id); close(); }; list.appendChild(b); }
+  btn.onclick = () => { list.hidden = !list.hidden; btn.setAttribute('aria-expanded', String(!list.hidden)); };
+  fgc.addEventListener('pointerdown', close);
+}
+function updateScaleBtn(name){ const el = $('#scaleName'); if (el.textContent !== name) el.textContent = name; }
 let hudTick = 0;
 function updateHud(){
   const b = F.p, alt = altNow();

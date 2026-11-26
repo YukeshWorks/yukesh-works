@@ -43,7 +43,7 @@ function goLevel(id){
   const focus = (lv.c[0] === 0 && lv.c[1] === 0) ? {k:'body', b:SUN} : {k:'pt', x:lv.c[0], y:lv.c[1]};
   animTo(focus, mapScaleFor(lv.ext));
 }
-function mapZoom(k){ const M = F.map; if (M.anim) return; M.s = clamp(M.s * k, 1e-26, 1e-2); }
+function mapZoom(k){ const M = F.map; if (M.anim) return; M.s = clamp(M.s * k, 1e-29, 1e-2); }
 
 function renderMap(dt){
   snapBodies(F.t);
@@ -133,6 +133,7 @@ function renderMap(dt){
   ctx.fillText(fDist(nice) + '  ·  light: ' + fTime(nice / C_LIGHT), W / 2, by + 15);
   ctx.font = '600 13px "Saira Semi Condensed", sans-serif'; ctx.fillStyle = '#ffb454';
   ctx.fillText(scaleName(ext).toUpperCase(), W / 2, by - 10);
+  if (typeof updateScaleBtn === 'function') updateScaleBtn(scaleName(ext));
 }
 function drawBelts(X, Y, s){
   const draw = (bt, a, col, size) => {
@@ -191,7 +192,15 @@ function drawCosmos(X, Y, s, ext){
   const lp = LANI_R * s;
   if (lp > 12 && lp < 2e4){ const a = smooth(12, 50, lp) * (1 - smooth(3000, 12000, lp)); drawSprite(laniakea(), X(GA.x), Y(GA.y), lp * 2, lp * 2, 0, a); }
   const up = UNI_R * s;
-  if (up > 20 && up < 4e4){ const a = smooth(20, 70, up) * (1 - smooth(6000, 25000, up)); const S = up * 2 * 512 / 470; bctx.save(); bctx.globalAlpha = a; bctx.drawImage(universe(), X(0) - S / 2, Y(0) - S / 2, S, S); bctx.restore(); }
+  if (up < 120){   // multiverse view
+    const fa = 1 - smooth(40, 120, up);
+    const g = bctx.createRadialGradient(X(0), Y(0), 0, X(0), Y(0), Math.max(W, H));
+    g.addColorStop(0, `rgba(70,40,120,${0.25 * fa})`); g.addColorStop(1, 'rgba(10,6,30,0)');
+    bctx.fillStyle = g; bctx.fillRect(0, 0, W, H);
+    for (const bb of BUBBLES){ const px = X(bb.x), py = Y(bb.y), rr = bb.r * s; if (px < -rr || py < -rr || px > W + rr || py > H + rr) continue;
+      const S = rr * 2 * 512 / 470; bctx.save(); bctx.globalAlpha = fa * 0.9; bctx.drawImage(bubbleImg(bb.hue), px - S / 2, py - S / 2, S, S); bctx.restore(); }
+  }
+  if (up > 3 && up < 4e4){ const a = smooth(3, 12, up) * (1 - smooth(6000, 25000, up)); const S = up * 2 * 512 / 470; bctx.save(); bctx.globalAlpha = a; bctx.drawImage(universe(), X(0) - S / 2, Y(0) - S / 2, S, S); bctx.restore(); }
 }
 function drawCosmosLabels(X, Y, s, ext, label){
   const list = COSMOS.slice().sort((a, b) => (a.rank || 0) - (b.rank || 0));
@@ -211,6 +220,15 @@ function drawCosmosLabels(X, Y, s, ext, label){
   if (mwPx > 30 && mwPx < 8000){ label('Milky Way', X(GC[0]), Y(GC[1]) - mwPx * 1.02, '#ffb454', 13, '105,700 ly across'); mapHits.push({x:X(GC[0]), y:Y(GC[1]), r:30, obj:{kind:'mw', name:'Milky Way', dist:26670 * LY}}); }
   if (mwPx > 2 && mwPx <= 30) label('Milky Way', X(GC[0]), Y(GC[1]) + 18, '#ffb454', 11);
   const lp = LANI_R * s; if (lp > 40 && lp < 8000) label('Laniakea Supercluster', X(GA.x), Y(GA.y) - lp * 1.02, '#7cc7ff', 13, 'about 520 million ly across');
+  { const up = UNI_R * s;
+    if (up < 120 && up > 3){
+      label('Our universe', X(0), Y(0) + up + 16, '#ffb454', 12, 'everything we can ever observe');
+      mapHits.push({x:X(0), y:Y(0), r:Math.max(16, up), obj:{kind:'uni', name:'Observable universe', dist:UNI_R}});
+      for (const bb of BUBBLES){ const px = X(bb.x), py = Y(bb.y), rr = bb.r * s; if (px < 0 || py < 0 || px > W || py > H) continue;
+        mapHits.push({x:px, y:py, r:Math.max(14, rr), obj:{kind:'bubble', name:bb.collide ? 'Colliding bubble universes' : 'Bubble universe', dist:Math.hypot(bb.x, bb.y)}}); }
+      label('Multiverse \u00b7 hypothetical', W / 2, H * 0.3, 'rgba(199,155,255,.95)', 13, 'illustration of eternal-inflation bubbles');
+    }
+  }
   const up = UNI_R * s; if (up > 40 && up < 2e4){ label('Edge of the observable universe', X(0), Y(0) - up * 1.08, '#ff9a6b', 13, '46.5 billion ly in every direction'); mapHits.push({x:X(0), y:Y(0) - up, r:30, obj:{kind:'uni', name:'Observable universe', dist:UNI_R}}); }
 }
 function drawPatches(patches, X, Y, s, label){
@@ -271,6 +289,8 @@ function showInfo(o){
     if (o.dist > 1e3 * AU) kv.push(['Light left it', fTime(o.dist / C_LIGHT) + ' ago']);
     if (o.size) kv.push(['Diameter', fDist(o.size)]);
     if (o.kind === 'mw'){ kv.push(['Diameter', '~105,700 ly'], ['Stars', '100–400 billion']); fact = 'Our home galaxy, a barred spiral. The Sun orbits its centre once every ~230 million years.'; }
+    if (o.kind === 'bubble'){ kv.length = 0; kv.push(['Status', 'Hypothetical'], ['Evidence', 'None observed yet']);
+      fact = o.name.startsWith('Colliding') ? 'Some theories predict that colliding bubble universes could leave circular marks in the cosmic microwave background. Searches so far have found none.' : 'In eternal inflation, space keeps inflating forever and separate \u201cbubble universes\u201d form inside it, each possibly with different physics. This picture is an untested hypothesis; positions and sizes here are illustrative.'; }
     if (o.kind === 'uni'){ kv.push(['Age', '13.8 billion years']); fact = 'The farthest light we can see, the cosmic microwave background, has travelled for 13.8 billion years. Expansion has since carried its source 46.5 billion ly away.'; }
   }
   $('#infoT').textContent = o.name;
