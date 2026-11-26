@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { KeyRound, Home, ShieldHalf, User, Download } from "lucide-react";
+import { KeyRound, Home, ShieldHalf, User, Lightbulb, Download } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import type { Tab } from "@/lib/siteEvents";
 
 interface NavbarProps {
-  activeTab: "home" | "puzzle" | "info" | "app";
-  onTabChange: (tab: "home" | "puzzle" | "info" | "app") => void;
+  activeTab: Tab;
+  onTabChange: (tab: Tab) => void;
   onLockClick?: () => void;
   on42Click?: () => void;
 }
@@ -12,6 +13,7 @@ interface NavbarProps {
 const tabs = [
   { id: "home" as const, label: "HOME", icon: Home },
   { id: "puzzle" as const, label: "VAULT", icon: ShieldHalf },
+  { id: "ideas" as const, label: "IDEAS", icon: Lightbulb },
   { id: "info" as const, label: "ABOUT", icon: User },
   { id: "app" as const, label: "BL1NK", icon: Download },
 ];
@@ -62,7 +64,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
     }, 800);
   };
 
-  const handleClick = useCallback((tab: "home" | "puzzle" | "info" | "app", i: number) => {
+  const handleClick = useCallback((tab: Tab, i: number) => {
     setPressedTab(tab);
     setTimeout(() => setPressedTab(null), 500);
     const el = tabRefs.current[i];
@@ -157,6 +159,8 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
                   key={tab.id}
                   ref={el => (tabRefs.current[i] = el)}
                   onClick={() => handleClick(tab.id, i)}
+                  aria-label={tab.label}
+                  aria-current={isActive ? "page" : undefined}
                   className="relative z-10 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-full"
                   style={{
                     transform: isPressed

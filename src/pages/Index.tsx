@@ -7,7 +7,7 @@ import OfflinePage from "@/components/OfflinePage";
 import ParticleBackground from "@/components/ParticleBackground";
 import CursorLight from "@/components/CursorLight";
 import ethernetVideo from "@/assets/ethernet-video.mp4";
-import { navigate, onNavigate, peekPending, clearPending, trackTab, unlock, type NavRequest } from "@/lib/siteEvents";
+import { navigate, onNavigate, peekPending, clearPending, trackTab, unlock, type NavRequest, type Tab } from "@/lib/siteEvents";
 
 /*
  * Each deploy renames the code chunks. A browser (Instagram's in-app browser in particular)
@@ -72,6 +72,7 @@ if (typeof window !== "undefined") {
 
 const VaultPage = lazyPage(() => import("@/components/VaultPage"));
 const InfoSection = lazyPage(() => import("@/components/InfoSection"));
+const IdeasPage = lazyPage(() => import("@/components/IdeasPage"));
 const PasswordLockPage = lazyPage(() => import("@/components/PasswordLockPage"));
 const WelcomePage = lazyPage(() => import("@/components/WelcomePage"));
 
@@ -80,6 +81,7 @@ const prefetchPages = () => {
   const ignore = () => {};
   import("@/components/VaultPage").catch(ignore);
   import("@/components/InfoSection").catch(ignore);
+  import("@/components/IdeasPage").catch(ignore);
   import("@/components/PasswordLockPage").catch(ignore);
   import("@/components/WelcomePage").catch(ignore);
 };
@@ -91,7 +93,7 @@ const getAudioContext = (): AudioContext | null => {
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"home" | "puzzle" | "info" | "app">("home");
+  const [activeTab, setActiveTab] = useState<Tab>("home");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<"next" | "prev">("next");
   const [isLoaded, setIsLoaded] = useState(false);
@@ -221,7 +223,7 @@ const Index = () => {
     return () => { window.removeEventListener('online', handleOnline); window.removeEventListener('offline', handleOffline); };
   }, []);
 
-  const tabOrder = ["home", "puzzle", "info", "app"] as const;
+  const tabOrder: Tab[] = ["home", "puzzle", "ideas", "info", "app"];
 
   useEffect(() => {
     if (isLoading) return;
@@ -235,7 +237,7 @@ const Index = () => {
     requestAnimationFrame(() => requestAnimationFrame(() => setIsLoaded(true)));
   }, []);
 
-  const handleTabChange = (tab: "home" | "puzzle" | "info" | "app") => {
+  const handleTabChange = (tab: Tab) => {
     if (tab === activeTab && !showPasswordLock && !showWelcomePage) return;
     const currentIndex = tabOrder.indexOf(activeTab);
     const newIndex = tabOrder.indexOf(tab);
@@ -318,6 +320,7 @@ const Index = () => {
     switch (activeTab) {
       case "home": return <HomePage />;
       case "puzzle": return <VaultPage />;
+      case "ideas": return <IdeasPage />;
       case "info": return <InfoSection />;
       case "app": return <BlinkAppPage />;
       default: return <HomePage />;
