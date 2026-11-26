@@ -2,8 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home, ShieldHalf, User, Briefcase, Joystick, Worm, Sparkles, Brain, TreePalm, Footprints, Rocket,
-  Palette, KeyRound, Crown, Mail, MessageCircle, Send, Instagram, Linkedin, Trophy, Search, Command, CornerDownLeft, Lock,
-} from "lucide-react";
+  Palette, KeyRound, Crown, Mail, MessageCircle, Send, Instagram, Linkedin, Trophy, Search, Command, CornerDownLeft, Lock, Lightbulb } from "lucide-react";
 import { ACHIEVEMENTS, getUnlocked, navigate, onUnlock, trackTheme, unlock, type GameId } from "@/lib/siteEvents";
 
 /*
@@ -46,6 +45,7 @@ const CommandPalette = () => {
     return [
       { id: "home", group: "Go to", label: "Home", icon: Home, run: go(() => { routerNavigate("/"); navigate({ kind: "tab", tab: "home" }); }) },
       { id: "vault", group: "Go to", label: "Vault", icon: ShieldHalf, keywords: "games lamp", run: go(() => { routerNavigate("/"); navigate({ kind: "tab", tab: "puzzle" }); }) },
+      { id: "ideas", group: "Go to", label: "Ideas", icon: Lightbulb, keywords: "projects instagram scheduler auto poster", run: go(() => { routerNavigate("/"); navigate({ kind: "tab", tab: "ideas" }); }) },
       { id: "about", group: "Go to", label: "About me", icon: User, keywords: "info profile", run: go(() => { routerNavigate("/"); navigate({ kind: "tab", tab: "info" }); }) },
       { id: "services", group: "Go to", label: "Digital Services", icon: Briefcase, keywords: "hire work pricing", run: go(() => routerNavigate("/services")) },
       { id: "games", group: "Go to", label: "Games menu", icon: Joystick, run: go(() => { routerNavigate("/"); navigate({ kind: "games-menu" }); }) },

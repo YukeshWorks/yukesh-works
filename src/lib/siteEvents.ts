@@ -5,7 +5,7 @@
  * Progress lives in localStorage (per browser) and fails quietly if storage is blocked.
  */
 
-export type Tab = "home" | "puzzle" | "info";
+export type Tab = "home" | "puzzle" | "ideas" | "info";
 export type GameId = "snake" | "scratch" | "memory" | "island" | "dino" | "orbit" | "chess";
 
 export type NavRequest =

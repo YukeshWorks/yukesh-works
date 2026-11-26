@@ -10,6 +10,7 @@ A personal portfolio and interactive playground for Yukesh Kumar.
 - Home: personal introduction, social links and cinematic visual treatment
 - Vault: Snake, Chrome Dino, Rainbow Scratch, Memory Match and Island Creator
 - Chrome Dino is self-hosted under `public/dino-game/`; its original MIT license and attribution are included beside the game.
+- Ideas: projects in progress, starting with the Instagram Auto-Poster (`src/components/IdeasPage.tsx`; add an idea by adding an entry to `IDEAS`)
 - About: personal profile and information
 - Secret terminal: visual Easter egg only; it is not a security boundary
 

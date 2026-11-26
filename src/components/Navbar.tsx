@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { KeyRound, Home, ShieldHalf, User } from "lucide-react";
+import { KeyRound, Home, ShieldHalf, User, Lightbulb } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import type { Tab } from "@/lib/siteEvents";
 
 interface NavbarProps {
-  activeTab: "home" | "puzzle" | "info";
-  onTabChange: (tab: "home" | "puzzle" | "info") => void;
+  activeTab: Tab;
+  onTabChange: (tab: Tab) => void;
   onLockClick?: () => void;
   on42Click?: () => void;
 }
@@ -12,6 +13,7 @@ interface NavbarProps {
 const tabs = [
   { id: "home" as const, label: "HOME", icon: Home },
   { id: "puzzle" as const, label: "VAULT", icon: ShieldHalf },
+  { id: "ideas" as const, label: "IDEAS", icon: Lightbulb },
   { id: "info" as const, label: "ABOUT", icon: User },
 ];
 
@@ -61,7 +63,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
     }, 800);
   };
 
-  const handleClick = useCallback((tab: "home" | "puzzle" | "info", i: number) => {
+  const handleClick = useCallback((tab: Tab, i: number) => {
     setPressedTab(tab);
     setTimeout(() => setPressedTab(null), 500);
     const el = tabRefs.current[i];
@@ -156,7 +158,9 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
                   key={tab.id}
                   ref={el => (tabRefs.current[i] = el)}
                   onClick={() => handleClick(tab.id, i)}
-                  className="relative z-10 flex items-center gap-1.5 px-3 py-2 rounded-full"
+                  aria-label={tab.label}
+                  aria-current={isActive ? "page" : undefined}
+                  className="relative z-10 flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-full"
                   style={{
                     transform: isPressed
                       ? "scale(0.85) translateY(1px)"
@@ -193,7 +197,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
 
                   {/* Label with stagger */}
                   <span
-                    className="text-[10px] font-display tracking-[0.2em] uppercase"
+                    className={`text-[10px] font-display tracking-[0.2em] uppercase ${isActive ? "" : "hidden sm:inline"}`}
                     style={{
                       color: isActive ? "hsl(var(--primary))" : "rgba(255,255,255,0.25)",
                       fontWeight: isActive ? 600 : 400,
