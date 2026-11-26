@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLINK Buddy</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(120% 80% at 50% 0%,#1d2a35,#0b1015 70%);font:13px Inter,system-ui,sans-serif;color:#e8eef2}
+canvas{display:block;touch-action:none}
+.dock{position:fixed;left:8px;right:8px;top:8px;display:grid;gap:6px;z-index:2}
+.row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.row b{flex:0 0 auto;align-self:center;font-size:11px;color:#8ea0ad;letter-spacing:.06em;text-transform:uppercase;width:56px}
+.row button{all:unset;flex:0 0 auto;cursor:pointer;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-weight:700;white-space:nowrap}
+.row button:active{background:rgba(255,255,255,.2)}
+.ev button{background:rgba(34,211,238,.14);border-color:rgba(34,211,238,.35)}
+#say{position:fixed;left:50%;top:30%;transform:translateX(-50%);background:#fff;color:#2a1d24;font-weight:800;padding:9px 14px;border-radius:14px;opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap}
+#say.on{opacity:1}
+#msg{position:fixed;bottom:8px;left:10px;color:#8ea0ad;font-size:12px}
+#editBtn{position:fixed;right:10px;bottom:10px;all:unset;position:fixed;cursor:pointer;padding:9px 14px;border-radius:12px;background:#22d3ee;color:#04161a;font-weight:800}
+#editor{position:fixed;right:10px;bottom:52px;width:min(300px,calc(100vw - 20px));padding:12px;border-radius:14px;background:rgba(15,20,26,.96);border:1px solid rgba(255,255,255,.12);display:none;gap:8px}
+#editor.on{display:grid}
+#editor label{display:grid;grid-template-columns:60px 1fr;align-items:center;gap:8px}
+#editor input[type=color]{width:100%;height:28px;border:0;background:none}
+#editor .exprs{display:flex;flex-wrap:wrap;gap:4px}
+#editor .exprs button{all:unset;cursor:pointer;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.08);font-size:12px}
+</style>
+<script type="importmap">{"imports":{
+ "three":"https://unpkg.com/three@0.169.0/build/three.module.js",
+ "three/addons/":"https://unpkg.com/three@0.169.0/examples/jsm/",
+ "@pixiv/three-vrm":"https://unpkg.com/@pixiv/three-vrm@3.1.0/lib/three-vrm.module.js",
+ "@pixiv/three-vrm-animation":"https://unpkg.com/@pixiv/three-vrm-animation@3.1.0/lib/three-vrm-animation.module.js"}}</script>
+</head><body>
+<div class="dock">
+  <div class="row ev"><b>Events</b><button data-a="gym">💪 Gym</button><button data-a="sleep">😴 Sleep</button><button data-a="food">🍦 Food</button><button data-a="water">💧 Water</button><button data-a="screen">📱 Screen time</button><button data-a="study">📚 Study</button><button data-a="wake">☀️ Wake up</button></div>
+  <div class="row"><b>Do</b><button data-a="hello">👋 Wave</button><button data-a="walk">🚶 Walk</button><button data-a="sit">🪑 Build chair & sit</button><button data-a="eat">🍦 Ice cream</button><button data-a="balloon">🎈 Balloon</button><button data-a="decorate">🎉 Decorate</button><button data-a="crawl">👶 Crawl</button><button data-a="snake">🐍 Snake</button><button data-a="sideways">↔️ Sideways</button><button data-a="peek">🙈 Peek</button><button data-a="dance">💃 Dance</button><button data-a="shy">😳 Shy</button><button data-a="sad">🥺 Sad</button><button data-a="sulk">😤 Sulk</button></div>
+</div>
+<div id="say"></div><div id="msg">Loading…</div>
+<button id="editBtn" onclick="document.getElementById('editor').classList.toggle('on')">✏️ Edit her</button>
+<div id="editor"></div>
+<script>window.BUDDY_MODEL = new URLSearchParams(location.search).get('m') || 'buddy.vrm';</script>
+<script type="module" src="buddy3d.js"></script>
+</body></html>

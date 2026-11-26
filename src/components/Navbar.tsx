@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { KeyRound, Home, ShieldHalf, User, Lightbulb } from "lucide-react";
+import { KeyRound, Home, ShieldHalf, User, Lightbulb, Download } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import type { Tab } from "@/lib/siteEvents";
 
@@ -15,6 +15,7 @@ const tabs = [
   { id: "puzzle" as const, label: "VAULT", icon: ShieldHalf },
   { id: "ideas" as const, label: "IDEAS", icon: Lightbulb },
   { id: "info" as const, label: "ABOUT", icon: User },
+  { id: "app" as const, label: "BL1NK", icon: Download },
 ];
 
 const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps) => {
@@ -160,7 +161,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
                   onClick={() => handleClick(tab.id, i)}
                   aria-label={tab.label}
                   aria-current={isActive ? "page" : undefined}
-                  className="relative z-10 flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-full"
+                  className="relative z-10 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-full"
                   style={{
                     transform: isPressed
                       ? "scale(0.85) translateY(1px)"

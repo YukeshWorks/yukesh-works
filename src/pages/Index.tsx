@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
+import BlinkAppPage from "@/components/BlinkAppPage";
 import HomePage from "@/components/HomePage";
 import LoadingScreen from "@/components/LoadingScreen";
 import OfflinePage from "@/components/OfflinePage";
@@ -222,7 +223,7 @@ const Index = () => {
     return () => { window.removeEventListener('online', handleOnline); window.removeEventListener('offline', handleOffline); };
   }, []);
 
-  const tabOrder: Tab[] = ["home", "puzzle", "ideas", "info"];
+  const tabOrder: Tab[] = ["home", "puzzle", "ideas", "info", "app"];
 
   useEffect(() => {
     if (isLoading) return;
@@ -321,6 +322,7 @@ const Index = () => {
       case "puzzle": return <VaultPage />;
       case "ideas": return <IdeasPage />;
       case "info": return <InfoSection />;
+      case "app": return <BlinkAppPage />;
       default: return <HomePage />;
     }
   };
