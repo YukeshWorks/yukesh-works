@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Sparkles, Brain, TreePalm, ArrowLeft, Joystick, Worm, Footprints, Rocket } from "lucide-react";
+import { Sparkles, Brain, TreePalm, ArrowLeft, Joystick, Worm, Footprints, Rocket, Ghost } from "lucide-react";
 import SnakeGame from "./SnakeGame";
 import RainbowScratch from "./RainbowScratch";
 import MemoryGame from "./MemoryGame";
@@ -7,11 +7,12 @@ import IslandCreator from "./IslandCreator";
 import DinoGame from "./DinoGame";
 import OrbitForgeGame from "./OrbitForgeGame";
 import ChessGame from "./ChessGame";
+import Nine17Game from "./Nine17Game";
 import { KnightIcon } from "./chessPieces";
 import LampScene from "./LampScene";
 import { onNavigate, takePending, clearPending, trackGame, type GameId } from "@/lib/siteEvents";
 
-type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island" | "dino" | "orbit" | "chess";
+type VaultSection = "main" | "games-menu" | "snake" | "scratch" | "memory" | "island" | "dino" | "orbit" | "chess" | "nine17";
 
 type IconComp = React.ComponentType<{ size?: number | string; className?: string; style?: React.CSSProperties }>;
 const VAULT_ITEMS: { id: VaultSection; icon: IconComp; title: string; subtitle: string; accent: string }[] = [
@@ -22,6 +23,7 @@ const VAULT_ITEMS: { id: VaultSection; icon: IconComp; title: string; subtitle: 
   { id: "dino", icon: Footprints, title: "Chrome Dino", subtitle: "Jump the cactus", accent: "251, 191, 36" },
   { id: "chess", icon: KnightIcon, title: "Chess Arena", subtitle: "Play the computer or a friend online", accent: "245, 200, 107" },
   { id: "orbit", icon: Rocket, title: "Orbit Forge", subtitle: "Build rockets, fly the cosmos", accent: "255, 180, 84" },
+  { id: "nine17", icon: Ghost, title: "The 9:17", subtitle: "A ghost story at a dead station", accent: "143, 196, 207" },
 ];
 
 // Card that tilts toward the cursor and carries a spotlight under it.
@@ -148,6 +150,9 @@ const VaultPage = () => {
   }
   if (activeSection === "chess") {
     return <div className={transClass}>{backButton("games-menu")}<ChessGame /></div>;
+  }
+  if (activeSection === "nine17") {
+    return <div className={transClass}>{backButton("games-menu")}<Nine17Game /></div>;
   }
   if (activeSection === "orbit") {
     return <div className={transClass}>{backButton("games-menu")}<OrbitForgeGame /></div>;
