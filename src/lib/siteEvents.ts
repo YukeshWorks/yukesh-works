@@ -6,7 +6,7 @@
  */
 
 export type Tab = "home" | "puzzle" | "info";
-export type GameId = "snake" | "scratch" | "memory" | "island" | "dino" | "orbit" | "chess";
+export type GameId = "snake" | "scratch" | "memory" | "island" | "dino" | "orbit" | "chess" | "nine17";
 
 export type NavRequest =
   | { kind: "tab"; tab: Tab }
@@ -98,5 +98,5 @@ const track = (bucket: string, item: string, all: string[], reward: AchievementI
 };
 
 export const trackTab = (tab: Tab) => track("tabs", tab, ["home", "puzzle", "info"], "tourist");
-export const trackGame = (game: GameId) => track("games", game, ["snake", "scratch", "memory", "island", "dino", "orbit", "chess"], "explorer");
+export const trackGame = (game: GameId) => track("games", game, ["snake", "scratch", "memory", "island", "dino", "orbit", "chess", "nine17"], "explorer");
 export const trackTheme = (theme: string) => track("themes", theme, ["blue", "red", "dark"], "shapeshifter");
