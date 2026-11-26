@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
+import BlinkAppPage from "@/components/BlinkAppPage";
 import HomePage from "@/components/HomePage";
 import LoadingScreen from "@/components/LoadingScreen";
 import OfflinePage from "@/components/OfflinePage";
@@ -90,7 +91,7 @@ const getAudioContext = (): AudioContext | null => {
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"home" | "puzzle" | "info">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "puzzle" | "info" | "app">("home");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<"next" | "prev">("next");
   const [isLoaded, setIsLoaded] = useState(false);
@@ -220,7 +221,7 @@ const Index = () => {
     return () => { window.removeEventListener('online', handleOnline); window.removeEventListener('offline', handleOffline); };
   }, []);
 
-  const tabOrder = ["home", "puzzle", "info"] as const;
+  const tabOrder = ["home", "puzzle", "info", "app"] as const;
 
   useEffect(() => {
     if (isLoading) return;
@@ -234,7 +235,7 @@ const Index = () => {
     requestAnimationFrame(() => requestAnimationFrame(() => setIsLoaded(true)));
   }, []);
 
-  const handleTabChange = (tab: "home" | "puzzle" | "info") => {
+  const handleTabChange = (tab: "home" | "puzzle" | "info" | "app") => {
     if (tab === activeTab && !showPasswordLock && !showWelcomePage) return;
     const currentIndex = tabOrder.indexOf(activeTab);
     const newIndex = tabOrder.indexOf(tab);
@@ -318,6 +319,7 @@ const Index = () => {
       case "home": return <HomePage />;
       case "puzzle": return <VaultPage />;
       case "info": return <InfoSection />;
+      case "app": return <BlinkAppPage />;
       default: return <HomePage />;
     }
   };

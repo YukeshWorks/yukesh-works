@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { KeyRound, Home, ShieldHalf, User } from "lucide-react";
+import { KeyRound, Home, ShieldHalf, User, Download } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
 interface NavbarProps {
-  activeTab: "home" | "puzzle" | "info";
-  onTabChange: (tab: "home" | "puzzle" | "info") => void;
+  activeTab: "home" | "puzzle" | "info" | "app";
+  onTabChange: (tab: "home" | "puzzle" | "info" | "app") => void;
   onLockClick?: () => void;
   on42Click?: () => void;
 }
@@ -13,6 +13,7 @@ const tabs = [
   { id: "home" as const, label: "HOME", icon: Home },
   { id: "puzzle" as const, label: "VAULT", icon: ShieldHalf },
   { id: "info" as const, label: "ABOUT", icon: User },
+  { id: "app" as const, label: "BL1NK", icon: Download },
 ];
 
 const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps) => {
@@ -61,7 +62,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
     }, 800);
   };
 
-  const handleClick = useCallback((tab: "home" | "puzzle" | "info", i: number) => {
+  const handleClick = useCallback((tab: "home" | "puzzle" | "info" | "app", i: number) => {
     setPressedTab(tab);
     setTimeout(() => setPressedTab(null), 500);
     const el = tabRefs.current[i];
@@ -156,7 +157,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
                   key={tab.id}
                   ref={el => (tabRefs.current[i] = el)}
                   onClick={() => handleClick(tab.id, i)}
-                  className="relative z-10 flex items-center gap-1.5 px-3 py-2 rounded-full"
+                  className="relative z-10 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-full"
                   style={{
                     transform: isPressed
                       ? "scale(0.85) translateY(1px)"
@@ -193,7 +194,7 @@ const Navbar = ({ activeTab, onTabChange, onLockClick, on42Click }: NavbarProps)
 
                   {/* Label with stagger */}
                   <span
-                    className="text-[10px] font-display tracking-[0.2em] uppercase"
+                    className={`text-[10px] font-display tracking-[0.2em] uppercase ${isActive ? "" : "hidden sm:inline"}`}
                     style={{
                       color: isActive ? "hsl(var(--primary))" : "rgba(255,255,255,0.25)",
                       fontWeight: isActive ? 600 : 400,
