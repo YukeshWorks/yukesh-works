@@ -5,12 +5,12 @@ import shotBuddy from "@/assets/blink/buddy.jpg";
 import shotGym from "@/assets/blink/gym.jpg";
 
 const APK_URL = `${import.meta.env.BASE_URL}downloads/BL1NK.apk`;
-const VERSION = "1.2";
-const SIZE = "24.1 MB";
+const VERSION = "1.3";
+const SIZE = "16.9 MB";
 
 const features = [
   { title: "Your day, in focus", text: "Schedule, college timetable, calendar and reminders that pop up over any app." },
-  { title: "3D buddy", text: "A living anime companion that walks, blinks, eats ice cream, blows balloons and reacts to your day." },
+  { title: "Anime buddy", text: "A 2D anime companion in two outfits who cheers your gym, water, meals, sleep and study reminders." },
   { title: "Gym, food, sleep", text: "Workout library, meals, water and sleep tracking with gentle nudges." },
   { title: "Screen-time buddy", text: "Pick apps to watch. Scroll past your limit and she pops up over Instagram, angry, telling you to swipe it away." },
 ];
@@ -28,7 +28,7 @@ const BlinkAppPage = () => (
             </div>
           </div>
           <p className="mt-5 text-lg text-foreground/80 max-w-xl">
-            Your day in one place, with a 3D buddy who lives in the app and keeps you on track.
+            Your day in one place, with an anime buddy who lives in the app and keeps you on track.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <a
