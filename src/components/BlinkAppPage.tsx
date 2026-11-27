@@ -5,7 +5,7 @@ import shotBuddy from "@/assets/blink/buddy.jpg";
 import shotGym from "@/assets/blink/gym.jpg";
 
 const APK_URL = `${import.meta.env.BASE_URL}downloads/BL1NK.apk`;
-const VERSION = "1.4";
+const VERSION = "1.5";
 const SIZE = "16.4 MB";
 
 const features = [
